@@ -34,13 +34,15 @@
     #bigspeed #bigval{font-size:140px;line-height:.9;letter-spacing:-3px}
     #bigspeed .u{font-size:30px;font-weight:700;opacity:.85}
 
-    /* warnings / violations block — shown only when something is active (top) */
+    /* warnings / violations block — shown only when something is active (top); blinks for attention */
     #warn{left:50%;top:54px;transform:translateX(-50%);text-align:center;font-weight:800;
       font-size:18px;background:rgba(20,25,37,.9);border:1px solid var(--line);border-radius:12px;
-      padding:8px 18px;max-width:70vw;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      padding:8px 18px;max-width:70vw;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+      animation:warnblink .7s ease-in-out infinite}
     #warn.warnY{color:var(--warn);border-color:var(--warn)}
     #warn.bad{color:var(--bad);border-color:var(--bad)}
     #warn.hidden{display:none}
+    @keyframes warnblink{0%,100%{opacity:1}50%{opacity:.28}}
 
     /* current-street block — its own translucent block UNDER the warnings, always visible so
        warnings/violations never cover the street name */
