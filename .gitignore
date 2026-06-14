@@ -15,6 +15,9 @@ data/**/photos/
 *.osm.pbf
 *.osm
 tools/_cache/
+# City-scale generated tiles (~100 MB; regenerate via tools/bake_prague.py from the dated pbf).
+# Shipped to prod via rsync, not git. The small Vinohrady dataset stays committed as a reference.
+data/cities/cz/praha/prague/
 
 # Local scratch
 data/_*.json

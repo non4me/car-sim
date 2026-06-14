@@ -95,14 +95,21 @@ def intro(request: Request):
 
 
 @app.get("/drive", response_class=HTMLResponse)
-def drive(request: Request, district: str = "vinohrady"):
+def drive(request: Request, district: str = "prague"):
     cc, city, _ = DEFAULT_CITY
     meta_path = CITIES / cc / city / district / "meta.json"
     if not meta_path.is_file():
         district = "vinohrady"
         meta_path = CITIES / cc / city / district / "meta.json"
+    snapshot = None
+    if meta_path.is_file():
+        try:
+            snapshot = json.loads(meta_path.read_text(encoding="utf-8")).get("snapshot")
+        except (ValueError, OSError):
+            pass
     return templates.TemplateResponse(request, "drive.html", {
         "country": cc, "city": city, "district": district,
         "data_base": f"/citydata/{cc}/{city}/{district}",
+        "snapshot": snapshot,
         "districts": _districts(),
     }, headers=HTML_HEADERS)

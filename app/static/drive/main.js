@@ -24,6 +24,7 @@ function pickSpawn(map) {
     const d = Math.hypot(mid[0] - cx, mid[1] - cy) - (e.width > 6 ? 50 : 0);
     if (d < bd) { bd = d; best = e; }
   }
+  if (!best) return { x: cx, y: cy, h: 0 };   // no resident road yet (streaming) — spawn at centre
   const g = best.geom, i = Math.max(1, Math.floor(g.length / 2));
   const a = g[i - 1], c = g[i];
   return { x: (a[0] + c[0]) / 2, y: (a[1] + c[1]) / 2, h: Math.atan2(c[1] - a[1], c[0] - a[0]) };
@@ -142,6 +143,8 @@ async function boot() {
     const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
     view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
+    // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
+    map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
     draw(ctx, view, map, car, rules);
     hud.update(rules);
     if (!miniCollapsed) minimap.draw(map, car, rules.street);

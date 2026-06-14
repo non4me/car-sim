@@ -112,7 +112,7 @@
       <a href="/">← car-sim</a>
       <button id="helpBtn" title="Ovládání">?</button>
     </div>
-    <div class="meta">Praha · {{ district }}</div>
+    <div class="meta">Praha{% if snapshot %} · data OSM {{ snapshot }}{% endif %}</div>
   </div>
 
   <div class="hud" id="minimap">

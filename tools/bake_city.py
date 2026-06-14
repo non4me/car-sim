@@ -134,18 +134,25 @@ def parse_maxspeed(val, context, profile):
 
 def bake(district: str, country: str, debug_only: bool):
     bbox = DISTRICTS[district]
-    profile = yaml.safe_load((ROOT / "countries" / f"{country}.yaml").read_text(encoding="utf-8"))
-    classes = profile["road_classes"]
-    to_xy, proj = make_proj(bbox)
-
     print(f"[{district}] fetching OSM…")
     osm = fetch_osm(bbox)
     nodes = {el["id"]: el for el in osm["elements"] if el["type"] == "node"}
     all_ways = [el for el in osm["elements"] if el["type"] == "way"]
+    out = ROOT / "data" / "cities" / country / "praha" / district
+    build_artifact(nodes, all_ways, bbox, country, district, out, debug_only)
+
+
+def build_artifact(nodes, all_ways, bbox, country, name, out,
+                   debug_only=False, snapshot=None, debug_png=True):
+    """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
+    junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`)."""
+    profile = yaml.safe_load((ROOT / "countries" / f"{country}.yaml").read_text(encoding="utf-8"))
+    classes = profile["road_classes"]
+    to_xy, proj = make_proj(bbox)
     ways = [w for w in all_ways if w.get("tags", {}).get("highway") in classes]
     areas = build_areas(all_ways, nodes, to_xy)
     akinds = Counter(a["kind"] for a in areas)
-    print(f"  drivable ways: {len(ways)}  nodes: {len(nodes)}  "
+    print(f"  [{name}] drivable ways: {len(ways)}  nodes: {len(nodes)}  "
           f"backdrop: {akinds.get('building',0)} buildings, {akinds.get('green',0)} green, {akinds.get('water',0)} water")
 
     # junction detection: nodes shared by >=2 drivable ways, plus way endpoints, plus tagged control
@@ -252,11 +259,11 @@ def bake(district: str, country: str, debug_only: bool):
     explicit = sum(1 for w in ways if w.get("tags", {}).get("maxspeed"))
     print(f"  maxspeed explicit on {explicit}/{len(ways)} ways (rest via cz defaults)")
 
-    out = ROOT / "data" / "cities" / country / "praha" / district
     out.mkdir(parents=True, exist_ok=True)
-    _debug_png(edges, areas, bounds, out / "debug.png")
+    if debug_png:
+        _debug_png(edges, areas, bounds, out / "debug.png")
     if debug_only:
-        print(f"[{district}] debug-only → {out/'debug.png'}")
+        print(f"  [{name}] debug-only → {out/'debug.png'}")
         return
 
     # tile by grid
@@ -282,15 +289,16 @@ def bake(district: str, country: str, debug_only: bool):
         (tdir / f"{k}.json").write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
 
     meta = {
-        "country": country, "city": "praha", "district": district,
+        "country": country, "city": "praha", "district": name,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
         "n_areas": len(areas), "n_signs": len(signs), "version": 2, "profile": country,
+        "snapshot": snapshot,   # OSM data date (pbf timestamp) — shown in-app
         "attribution": "© OpenStreetMap contributors (ODbL)",
     }
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
     sk = Counter(s["kind"] for s in signs)
-    print(f"[{district}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
+    print(f"[{name}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
           f"{len(junctions)} junctions, {len(areas)} areas, {len(signs)} signs {dict(sk)})")
 
 
