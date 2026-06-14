@@ -52,10 +52,54 @@ def get(url: str, data: bytes | None = None) -> dict:
 
 def fetch_osm(bbox) -> dict:
     s, w, n, e = bbox
-    q = (f"[out:json][timeout:120];"
-         f'(way["highway"]({s},{w},{n},{e}););'
-         f"out body; >; out skel qt;")
+    bb = f"({s},{w},{n},{e})"
+    # drivable highways + schematic backdrop (building footprints, greens, water) as ways.
+    # Ways only (skip multipolygon relations) — keeps geometry assembly simple for the MVP.
+    q = (f"[out:json][timeout:180];("
+         f'way["highway"]{bb};'
+         f'way["building"]{bb};'
+         f'way["leisure"~"^(park|garden|playground|pitch|recreation_ground|dog_park)$"]{bb};'
+         f'way["landuse"~"^(grass|forest|meadow|village_green|cemetery|recreation_ground)$"]{bb};'
+         f'way["natural"="water"]{bb};'
+         f");out body; >; out skel qt;")
     return get(OVERPASS, data=q.encode("utf-8"))
+
+
+def classify_area(tags: dict) -> str | None:
+    """Map an OSM closed way to a schematic backdrop kind, or None if not backdrop."""
+    if tags.get("building"):
+        return "building"
+    if tags.get("natural") == "water":
+        return "water"
+    if tags.get("leisure") in ("park", "garden", "playground", "pitch", "recreation_ground", "dog_park"):
+        return "green"
+    if tags.get("landuse") in ("grass", "forest", "meadow", "village_green", "cemetery", "recreation_ground"):
+        return "green"
+    return None
+
+
+def build_areas(osm_ways, nodes, to_xy) -> list[dict]:
+    """Closed backdrop ways → projected polygons {kind, poly}, lightly simplified."""
+    areas = []
+    for wy in osm_ways:
+        kind = classify_area(wy.get("tags", {}))
+        if not kind:
+            continue
+        nl = wy["nodes"]
+        if len(nl) < 4 or nl[0] != nl[-1]:   # need a closed ring
+            continue
+        pts = [to_xy(nodes[x]["lat"], nodes[x]["lon"]) for x in nl if x in nodes]
+        if len(pts) < 4:
+            continue
+        # drop vertices closer than ~1.2 m to the previous one (schematic; shrinks payload)
+        poly = [pts[0]]
+        for p in pts[1:]:
+            if math.hypot(p[0] - poly[-1][0], p[1] - poly[-1][1]) >= 1.2:
+                poly.append(p)
+        if len(poly) < 3:
+            continue
+        areas.append({"kind": kind, "poly": [[round(x, 1), round(y, 1)] for x, y in poly]})
+    return areas
 
 
 # --- projection: local equirectangular metres about bbox centre ---
@@ -95,8 +139,12 @@ def bake(district: str, country: str, debug_only: bool):
     print(f"[{district}] fetching OSM…")
     osm = fetch_osm(bbox)
     nodes = {el["id"]: el for el in osm["elements"] if el["type"] == "node"}
-    ways = [el for el in osm["elements"] if el["type"] == "way" and el.get("tags", {}).get("highway") in classes]
-    print(f"  drivable ways: {len(ways)}  nodes: {len(nodes)}")
+    all_ways = [el for el in osm["elements"] if el["type"] == "way"]
+    ways = [w for w in all_ways if w.get("tags", {}).get("highway") in classes]
+    areas = build_areas(all_ways, nodes, to_xy)
+    akinds = Counter(a["kind"] for a in areas)
+    print(f"  drivable ways: {len(ways)}  nodes: {len(nodes)}  "
+          f"backdrop: {akinds.get('building',0)} buildings, {akinds.get('green',0)} green, {akinds.get('water',0)} water")
 
     # junction detection: nodes shared by >=2 drivable ways, plus way endpoints, plus tagged control
     node_ways = Counter()
@@ -168,13 +216,13 @@ def bake(district: str, country: str, debug_only: bool):
 
     out = ROOT / "data" / "cities" / country / "praha" / district
     out.mkdir(parents=True, exist_ok=True)
-    _debug_png(edges, bounds, out / "debug.png")
+    _debug_png(edges, areas, bounds, out / "debug.png")
     if debug_only:
         print(f"[{district}] debug-only → {out/'debug.png'}")
         return
 
     # tile by grid
-    tiles = defaultdict(lambda: {"edges": [], "junctions": []})
+    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": []})
     for ed in edges:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ed["geom"]}
         for k in keys:
@@ -182,6 +230,10 @@ def bake(district: str, country: str, debug_only: bool):
     for jc in junctions:
         k = f"{int(jc['x']//TILE_M)}_{int(jc['y']//TILE_M)}"
         tiles[k]["junctions"].append(jc)
+    for ar in areas:
+        keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ar["poly"]}
+        for k in keys:
+            tiles[f"{k[0]}_{k[1]}"]["areas"].append(ar)
 
     tdir = out / "tiles"
     tdir.mkdir(exist_ok=True)
@@ -192,14 +244,18 @@ def bake(district: str, country: str, debug_only: bool):
         "country": country, "city": "praha", "district": district,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
-        "version": 1, "profile": country,
+        "n_areas": len(areas), "version": 2, "profile": country,
         "attribution": "© OpenStreetMap contributors (ODbL)",
     }
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"[{district}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, {len(junctions)} junctions)")
+    print(f"[{district}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
+          f"{len(junctions)} junctions, {len(areas)} areas)")
 
 
-def _debug_png(edges, bounds, path, scale=0.5):
+AREA_FILL = {"building": (40, 46, 58), "green": (32, 52, 40), "water": (30, 48, 70)}  # debug PNG
+
+
+def _debug_png(edges, areas, bounds, path, scale=0.5):
     if not bounds:
         print("  no geometry to draw"); return
     W = int((bounds["maxx"] - bounds["minx"]) * scale) + 40
@@ -208,6 +264,8 @@ def _debug_png(edges, bounds, path, scale=0.5):
     d = ImageDraw.Draw(img)
     def px(p):
         return (20 + (p[0] - bounds["minx"]) * scale, H - 20 - (p[1] - bounds["miny"]) * scale)  # flip y
+    for ar in areas:  # backdrop behind roads
+        d.polygon([px(p) for p in ar["poly"]], fill=AREA_FILL.get(ar["kind"], (40, 46, 58)))
     for ed in edges:
         col = CLASS_COLOR.get(ed["cls"], (120, 130, 145))
         wpx = max(1, int(ed["width"] * scale))

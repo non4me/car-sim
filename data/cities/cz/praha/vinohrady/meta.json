@@ -44,7 +44,8 @@
  ],
  "n_edges": 438,
  "n_junctions": 280,
- "version": 1,
+ "n_areas": 1810,
+ "version": 2,
  "profile": "cz",
  "attribution": "© OpenStreetMap contributors (ODbL)"
 }

@@ -8,6 +8,9 @@ const CLASS_TINT = {
   motorway: "#48525f", trunk: "#444e5c", primary: "#3e4654",
   secondary: "#39414e", tertiary: "#343c48",
 };
+// schematic backdrop fills (drawn behind the roads)
+const AREA_FILL = { building: "#222734", green: "#1d2c22", water: "#1b2c41" };
+const AREA_STROKE = { building: "#2c3242", green: "#243a2c", water: "#234057" };
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -35,6 +38,9 @@ export function draw(ctx, view, map, car) {
 
   const R = view.visR();
   const vis = map.edges.filter((e) => view.boxVisible(e.bb));
+
+  // 0) schematic backdrop — buildings, greens, water (behind the roads)
+  drawAreas(ctx, view, map);
 
   // 1) asphalt (casing then surface)
   ctx.lineCap = "round"; ctx.lineJoin = "round";
@@ -81,6 +87,29 @@ export function draw(ctx, view, map, car) {
 // Label each visible street at the point ON the road nearest the car, so the name
 // actually sits in view as you drive (segment-midpoint placement fell off-screen on
 // long blocks). One label per name, closest instance wins.
+function drawAreas(ctx, view, map) {
+  const areas = map.areas;
+  if (!areas || !areas.length) return;
+  // group by kind so we batch fills (water/green under buildings)
+  for (const kind of ["water", "green", "building"]) {
+    ctx.fillStyle = AREA_FILL[kind];
+    ctx.strokeStyle = AREA_STROKE[kind];
+    ctx.lineWidth = 1;
+    const stroke = kind === "building" && view.zoom > 6;
+    for (const a of areas) {
+      if (a.kind !== kind || !view.boxVisible(a.bb)) continue;
+      ctx.beginPath();
+      for (let i = 0; i < a.poly.length; i++) {
+        const [X, Y] = view.project(a.poly[i][0], a.poly[i][1]);
+        i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      if (stroke) ctx.stroke();   // crisp building outlines when zoomed in
+    }
+  }
+}
+
 function drawStreetLabels(ctx, view, vis) {
   const zoom = view.zoom;
   if (zoom < 8) return;                       // too zoomed out to be legible/useful
