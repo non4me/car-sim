@@ -43,16 +43,23 @@ each independently testable.
 - [ ] Browser-verify live; capture screenshots/clip.
 - [ ] **Demo to Vlad → get approval before expanding.**
 
-## Refinements from Vlad's first-iteration feedback (msg 2663 / 2664)
+## Refinements from Vlad's first-iteration feedback (msg 2663 / 2664 / 2666 / 2667 / 2668) — DONE, LIVE
 
-### Now — core driving UX (implementing)
-- [ ] **Controls (1):** ←/→ rotate the car IN PLACE (fixed turn rate, works stopped or moving);
-      ↑ accelerate smoothly-but-quickly; ↓ decelerate fast; **Space = sharp brake, minimal stopping distance**.
-- [ ] **Heading-up camera (4):** car always drawn nose-up at centre; arrows rotate the MAP around it.
-- [ ] **Dynamic zoom (2):** current road occupies 30–70 % of viewport width by its real width (much closer);
-      smooth transition between roads.
-- [ ] **Wheel zoom (2/2664):** mouse wheel adjusts zoom within clamped bounds, on top of the auto-fit.
-- [ ] **Street names ON roads (3):** label drawn along the road, subtle (low-contrast), rotates with the map.
+### Core driving UX — shipped 2026-06-14, browser-verified on car-sim.troyanenko.com
+- [x] **Controls (1/2666):** ←/→ rotate the car IN PLACE when stopped, steer while moving (turn applied to
+      heading every frame); ↑ accelerate **gently** (2.8 m/s², ~20 km/h after 2 s — fixes "too fast");
+      ↓ smooth brake then gentle reverse; **Space = sharp brake (30 m/s²), stops <1 m**.
+- [x] **No auto-decel (2668):** releasing ↑ holds speed (cruise) — only ↓/Space slow the car. Verified: 20 km/h
+      held through 2 s of no input.
+- [x] **Real-scale speed (2667):** 1 m = 1 m projection + gentle accel → no longer crosses a block in seconds.
+- [x] **Heading-up camera (4):** car always nose-up at the anchor (0.68 down); the MAP rotates (rot = π/2 − heading).
+- [x] **Dynamic zoom (2):** road occupies 30–70 % of viewport width by real width; smooth ease between roads.
+      Fixed bbox-based viewport culling (vertex-only cull dropped long edges mid-segment at close zoom).
+- [x] **Wheel zoom (2/2664):** mouse wheel biases zoom within clamped bounds (0.45–3.2×), on top of auto-fit.
+- [x] **Street names ON roads (3):** label placed at the point on the road nearest the car, offset past the
+      car's nose (scales with zoom), oriented along the road with a dark halo. Verified "Mánesova" on-road.
+- [x] **Deploy correctness (root-cause fix):** path-versioned static (`/s/<build>/`, immutable) + no-cache HTML;
+      replaces the 4 h `max-age` that served stale JS after every deploy. Deploys now live instantly, no CDN purge.
 
 ### Backlog — bigger features, each its own research → spec → plan → impl
 - [ ] **House numbers (3):** bake OSM `addr:housenumber` nodes; render subtly near buildings. (needs bake + backdrop)
@@ -82,3 +89,8 @@ each independently testable.
   - **Known rough edges to refine ("dovést do ума"):** road-following at speed needs steering (no lane
     assist yet); over-limit warning logic done but visual capture flaky under headless RAF throttling;
     no signs/signals/buildings backdrop yet; one district only; camera zoom fixed. Awaiting Vlad's feedback.
+- 2026-06-14: **control + camera rework SHIPPED & verified** (msgs 2663–2668) — see the DONE checklist above.
+  Notified Vlad (TG) with a live screenshot. Per-spec dynamic zoom + wheel zoom + heading-up + on-road labels +
+  cruise (no decay) + gentle accel + rotate-in-place. Also fixed the static-asset cache so deploys go live at once.
+  **Next (in original spec item 5, addresses the "feels abstract / not a real city" weakness): schematic backdrop —
+  bake OSM building footprints + parks/water and render them behind the roads so it reads as a real city.**
