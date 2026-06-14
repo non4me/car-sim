@@ -2,6 +2,7 @@
 # is a client-side canvas app that streams baked map tiles served as static JSON.
 # MVP: one Prague district (Vinohrady). No DB.
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -15,13 +16,37 @@ from starlette.responses import Response
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parent
 CITIES = Path(os.environ.get("CITIES_DIR", ROOT / "data" / "cities"))
+STATIC = BASE / "static"
+
+
+def _build_token(root: Path) -> str:
+    """Short hash of the static tree's newest mtime. Changes only when an asset
+    changes, so the versioned path /s/<token>/ stays stable across no-op restarts
+    and rolls forward on a real deploy."""
+    newest = 0.0
+    for p in root.rglob("*"):
+        if p.is_file():
+            newest = max(newest, p.stat().st_mtime)
+    return hashlib.sha1(str(newest).encode()).hexdigest()[:10]
+
+
+BUILD = _build_token(STATIC)
+
+
+class ImmutableStatic(StaticFiles):
+    """Versioned assets are content-addressed by the /s/<BUILD>/ path prefix, so they
+    can be cached forever — a new deploy serves new URLs for the whole nested
+    ES-module graph (a query string can't reach nested imports; a path prefix does)."""
+
+    def file_response(self, *args, **kwargs) -> Response:
+        resp = super().file_response(*args, **kwargs)
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return resp
 
 
 class RevalidatingStatic(StaticFiles):
-    """Serve assets with `Cache-Control: no-cache` so the browser/CDN must revalidate
-    via ETag on every request. Unchanged files return a cheap 304; a deploy of the
-    nested ES-module graph (which a query-string cache-bust can't reach) is live at
-    once instead of stale for the default max-age window."""
+    """`Cache-Control: no-cache` → browser/CDN revalidate via ETag (cheap 304 when
+    unchanged). Used for data tiles, which aren't path-versioned."""
 
     def file_response(self, *args, **kwargs) -> Response:
         resp = super().file_response(*args, **kwargs)
@@ -32,7 +57,9 @@ class RevalidatingStatic(StaticFiles):
 app = FastAPI(title="car-sim")
 templates = Jinja2Templates(directory=str(BASE / "templates"))
 templates.env.cache = None  # avoid a Jinja LRUCache key issue under Python 3.14 (prod uses 3.12)
-app.mount("/static", RevalidatingStatic(directory=str(BASE / "static")), name="static")
+templates.env.globals["asset_base"] = f"/s/{BUILD}"  # versioned static prefix for all templates
+app.mount(f"/s/{BUILD}", ImmutableStatic(directory=str(STATIC)), name="assets")
+app.mount("/static", RevalidatingStatic(directory=str(STATIC)), name="static")  # legacy/direct hits
 if CITIES.exists():
     app.mount("/citydata", RevalidatingStatic(directory=str(CITIES)), name="citydata")
 
@@ -57,11 +84,14 @@ def healthz():
     return {"ok": True, "districts": _districts()}
 
 
+HTML_HEADERS = {"Cache-Control": "no-cache"}  # never cache the HTML that names the asset build token
+
+
 @app.get("/", response_class=HTMLResponse)
 def intro(request: Request):
     return templates.TemplateResponse(request, "intro.html", {
         "districts": _districts(),
-    })
+    }, headers=HTML_HEADERS)
 
 
 @app.get("/drive", response_class=HTMLResponse)
@@ -75,4 +105,4 @@ def drive(request: Request, district: str = "vinohrady"):
         "country": cc, "city": city, "district": district,
         "data_base": f"/citydata/{cc}/{city}/{district}",
         "districts": _districts(),
-    })
+    }, headers=HTML_HEADERS)
