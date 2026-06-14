@@ -78,38 +78,46 @@ export function draw(ctx, view, map, car) {
   drawCar(ctx, view);
 }
 
+// Label each visible street at the point ON the road nearest the car, so the name
+// actually sits in view as you drive (segment-midpoint placement fell off-screen on
+// long blocks). One label per name, closest instance wins.
 function drawStreetLabels(ctx, view, vis) {
   const zoom = view.zoom;
   if (zoom < 8) return;                       // too zoomed out to be legible/useful
-  const [acx, acy] = view.anchor();
+  const cx = view.cx, cy = view.cy;           // camera centre = car, in world metres
   const byName = new Map();
   for (const e of vis) {
     if (!e.name) continue;
-    // longest segment of this edge
-    let bi = 1, bl = 0;
+    // nearest point on this edge's polyline to the car, plus that segment's direction
+    let bd = Infinity, bx = 0, by = 0, dirx = 1, diry = 0;
     for (let i = 1; i < e.geom.length; i++) {
-      const L = Math.hypot(e.geom[i][0] - e.geom[i - 1][0], e.geom[i][1] - e.geom[i - 1][1]);
-      if (L > bl) { bl = L; bi = i; }
+      const ax = e.geom[i - 1][0], ay = e.geom[i - 1][1];
+      const gx = e.geom[i][0], gy = e.geom[i][1];
+      const ex = gx - ax, ey = gy - ay, l2 = ex * ex + ey * ey || 1;
+      let t = ((cx - ax) * ex + (cy - ay) * ey) / l2;
+      t = Math.max(0, Math.min(1, t));
+      const px = ax + t * ex, py = ay + t * ey;
+      const d = (px - cx) ** 2 + (py - cy) ** 2;
+      if (d < bd) { bd = d; bx = px; by = py; dirx = ex; diry = ey; }
     }
-    if (bl * zoom < 70) continue;             // segment too short on screen to label
-    const a = e.geom[bi - 1], b = e.geom[bi];
-    const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-    const [sx, sy] = view.project(mid[0], mid[1]);
-    const d = (sx - acx) ** 2 + (sy - acy) ** 2;
     const prev = byName.get(e.name);
-    if (!prev || d < prev.d) byName.set(e.name, { a, b, sx, sy, d, name: e.name });
+    if (!prev || bd < prev.bd) byName.set(e.name, { bd, bx, by, dirx, diry, name: e.name });
   }
   ctx.font = "600 12px ui-sans-serif,system-ui,sans-serif";
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (const L of byName.values()) {
-    const [ax, ay] = view.project(L.a[0], L.a[1]);
-    const [bx, by] = view.project(L.b[0], L.b[1]);
-    let ang = Math.atan2(by - ay, bx - ax);
+    const [sx, sy] = view.project(L.bx, L.by);
+    // direction in screen space so text runs along the road. project() rotates by
+    // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
+    const a = view.rot, c = Math.cos(a), s = Math.sin(a);
+    let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
     ctx.save();
-    ctx.translate(L.sx, L.sy);
+    ctx.translate(sx, sy);
     ctx.rotate(ang);
-    ctx.fillStyle = "rgba(220,228,242,.5)";
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.7)";
+    ctx.strokeText(L.name, 0, 0);             // halo for legibility on asphalt
+    ctx.fillStyle = "rgba(228,234,246,.72)";
     ctx.fillText(L.name, 0, 0);
     ctx.restore();
   }
