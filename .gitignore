@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# OS / editor
+.DS_Store
+*.log
+
+# Large raw artifacts (kept out of git; produced by tools/)
+data/**/photos/
+*.osm.pbf
+*.osm
+tools/_cache/
+
+# Local scratch
+data/_*.json
