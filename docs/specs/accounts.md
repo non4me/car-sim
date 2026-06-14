@@ -1,21 +1,9 @@
-# Spec stub — user accounts, stats & progress (feedback item 5)
+# User accounts, stats & progress (feedback item 5)
 
-> Placeholder for separate elaboration (research → analysis → spec → plan → impl). Captures scope so
-> it isn't lost. Not started; the driving UX refinements come first.
+**Superseded by the consolidated layer spec → [accounts-and-trips.md](accounts-and-trips.md).**
 
-## Intent
-Registered users get persistent stats and progress tracking on the simulator:
-- **Violations** logged (over-limit, wrong-way, ran-red, off-road, …) per trip and aggregated.
-- **Time driven** (per trip, total) and distance.
-- **Progress / regress** over time (e.g., violations-per-km trend, a score) shown back to the user.
-
-## To research / decide
-- Auth: own email+password vs OAuth; session model; the app is currently DB-less.
-- Storage: introduce a DB (SQLite/Postgres) for users + trips + events; or a lightweight store.
-- Trip model: a trip = ordered samples {t, x, y, heading, speed, segment, events}. Sample rate / size budget
-  (also feeds the admin replay player, item 6 — shared data model).
-- Privacy/GDPR: what is stored, retention, export/delete.
-- Where stats render: a `/me` or profile section; guest play stays anonymous (no tracking).
-
-## Dependencies
-Shares the **trip-log data model** with [admin.md](admin.md) (replay player). Build the trip recorder once.
+Items 5 (accounts + stats/progress) and 6 (admin + trip-replay) share one foundation — a trip-log data
+model, a store, and an auth model — so they are designed together there. Item 5 is the user-facing half:
+registration/login, per-user trips + violation events, and a `/me` progress view (violations-per-km trend,
+time/distance, score). See the consolidated spec for the data model, auth/storage choices, GDPR, and the
+build plan. Open decisions (storage, auth, privacy, priority) are flagged there for Vlad.
