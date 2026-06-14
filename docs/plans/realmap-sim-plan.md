@@ -97,5 +97,16 @@ each independently testable.
 - 2026-06-14: **schematic city backdrop SHIPPED & verified** — bake fetches OSM buildings/greens/water as tiled
   area polygons; client draws them behind the roads with brightened building outlines. Browser-verified at the
   Mánesova × náměstí Jiřího z Poděbrad junction (recognisable square, courtyards, cross-street markings). Notified
-  Vlad (TG) with a screenshot. **Next candidates: house numbers on buildings; off-road building collision; then
-  accounts+stats (5) and admin+trip-replay (6) as their own modules. Hold all-Prague expansion until Vlad OKs this slice.**
+  Vlad (TG) with a screenshot.
+- 2026-06-14: **Vlad's priority = 1→3→4→2** (feel · signs/markings · backdrop detail · all-Prague LAST).
+  **Iteration 2 (all "feel/UX", priority 1) SHIPPED & browser-verified** (msgs 2676/2677/2678/2681):
+  - Zoom pulled ~2× further out (road 15–35% of width); wheel range ×0.6–4.0 (max-in ≈ 2× old default); speed-easing softened.
+  - Street names: current street → HUD info block (white); "Mimo vozovku" → yellow; on-road labels → only the
+    ADJOINING cross streets at intersections (not the current one).
+  - Car sprite restyled (body gradient + cabin/glass + 4 wheels + head/taillights).
+  - Controls hint → centered overlay at start + a "?" button top-left (no longer persistent).
+  - Minimap top-right (north-up, current street highlighted, car arrow, +/− zoom levels +1..+3).
+  - Big translucent centre speed readout, fades 3 s after speed stops changing.
+  - Live zoom readout bottom-centre ("zoom <px/m> · ×<mult> · <lo>–<hi>") so Vlad can direct zoom by number.
+  **Next: priority 3 = signs/markings (oneway arrows, stop/give-way/signal at junctions, oneway=-1 direction fix).
+  Then 4 (backdrop detail: house numbers, off-road building collision), then 2 (all-Prague). Awaiting Vlad's zoom numbers.**
