@@ -23,6 +23,12 @@
     #limit span{color:#111;font-size:26px;font-weight:800}
     #limit.none{opacity:.35}
 
+    /* big centre speed readout — fades out 3 s after speed stops changing */
+    #bigspeed{left:50%;top:44%;transform:translate(-50%,-50%);opacity:0;color:#fff;font-weight:800;
+      text-shadow:0 2px 24px rgba(0,0,0,.55);white-space:nowrap;display:flex;align-items:baseline;gap:10px}
+    #bigspeed #bigval{font-size:140px;line-height:.9;letter-spacing:-3px}
+    #bigspeed .u{font-size:30px;font-weight:700;opacity:.85}
+
     /* info block — current street name (white), or a coloured warning */
     #warn{left:50%;top:54px;transform:translateX(-50%);text-align:center;font-weight:800;
       font-size:18px;background:rgba(20,25,37,.9);border:1px solid var(--line);border-radius:12px;
@@ -87,6 +93,7 @@
     </div>
   </div>
 
+  <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>
   <div class="hud" id="warn">—</div>
   <div class="hud" id="speedo"><div class="v" id="speed">0</div><div class="u">km/h</div></div>
   <div class="hud none" id="limit"><span id="limitval">—</span></div>
