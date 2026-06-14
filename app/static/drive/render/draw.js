@@ -110,10 +110,17 @@ function drawStreetLabels(ctx, view, vis) {
     // direction in screen space so text runs along the road. project() rotates by
     // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
     const a = view.rot, c = Math.cos(a), s = Math.sin(a);
-    let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
+    let raw = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
+    // shift the label ~80px along the road so it clears the car sprite (which is drawn
+    // on top at the anchor); bias toward screen-up so it reads ahead of the car.
+    let ux = Math.cos(raw), uy = Math.sin(raw);
+    if (uy > 0) { ux = -ux; uy = -uy; }
+    const off = 82;
+    const lx = sx + ux * off, ly = sy + uy * off;
+    let ang = raw;
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
     ctx.save();
-    ctx.translate(sx, sy);
+    ctx.translate(lx, ly);
     ctx.rotate(ang);
     ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.7)";
     ctx.strokeText(L.name, 0, 0);             // halo for legibility on asphalt
