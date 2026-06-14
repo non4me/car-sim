@@ -9,7 +9,8 @@ import { makeHud } from "./hud/hud.js";
 import { makeMinimap } from "./hud/minimap.js";
 import { runLoop } from "./engine/loop.js";
 
-const ZMIN = 14, ZMAX = 150;   // absolute zoom bounds (px per metre)
+const ZMIN = 14, ZMAX = 150;        // absolute zoom bounds (px per metre)
+const UMUL_MIN = 0.6, UMUL_MAX = 4.0;  // mouse-wheel zoom multiplier range
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -64,7 +65,7 @@ async function boot() {
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
     view.userMul *= e.deltaY < 0 ? 1.12 : 1 / 1.12;
-    view.userMul = Math.max(0.6, Math.min(4.0, view.userMul));
+    view.userMul = Math.max(UMUL_MIN, Math.min(UMUL_MAX, view.userMul));
   }, { passive: false });
 
   function update(dt) {
@@ -76,6 +77,7 @@ async function boot() {
     else if (rules.offRoad) { car.v *= 0.90; car.blocked = true; }
   }
 
+  const zoomEl = document.getElementById("zoomind");
   function render() {
     const target = Math.max(ZMIN, Math.min(ZMAX, autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
@@ -83,6 +85,13 @@ async function boot() {
     draw(ctx, view, map, car, rules);
     hud.update(rules);
     minimap.draw(map, car, rules.street);
+    // live zoom readout so Vlad can orient/direct by the number (current · wheel × · range)
+    if (zoomEl) {
+      const base0 = autoZoom(view, rules.width, 0);   // at-rest framing for a stable range
+      const lo = Math.round(Math.max(ZMIN, base0 * UMUL_MIN));
+      const hi = Math.round(Math.min(ZMAX, base0 * UMUL_MAX));
+      zoomEl.textContent = `zoom ${Math.round(view.zoom)} px/m · ×${view.userMul.toFixed(2)} · ${lo}–${hi}`;
+    }
   }
 
   window.__drive = {

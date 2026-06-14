@@ -23,6 +23,11 @@
     #limit span{color:#111;font-size:26px;font-weight:800}
     #limit.none{opacity:.35}
 
+    /* live zoom readout (bottom centre) — so the current scale + range is always visible */
+    #zoomind{left:50%;bottom:16px;transform:translateX(-50%);font-size:11px;color:#9aa4b8;
+      background:rgba(20,25,37,.72);border:1px solid var(--line);border-radius:8px;padding:4px 11px;
+      letter-spacing:.02em;font-variant-numeric:tabular-nums}
+
     /* big centre speed readout — fades out 3 s after speed stops changing */
     #bigspeed{left:50%;top:44%;transform:translate(-50%,-50%);opacity:0;color:#fff;font-weight:800;
       text-shadow:0 2px 24px rgba(0,0,0,.55);white-space:nowrap;display:flex;align-items:baseline;gap:10px}
@@ -94,6 +99,7 @@
   </div>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>
+  <div class="hud" id="zoomind">zoom —</div>
   <div class="hud" id="warn">—</div>
   <div class="hud" id="speedo"><div class="v" id="speed">0</div><div class="u">km/h</div></div>
   <div class="hud none" id="limit"><span id="limitval">—</span></div>
