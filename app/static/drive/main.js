@@ -59,16 +59,38 @@ async function boot() {
   );
   let rules = evalRules(map, car);
   let dbg = null;
+  let paused = false;
+
+  // persisted main-view zoom (mouse-wheel bias) — restored across sessions
+  const savedMul = parseFloat(localStorage.getItem("carsim_usermul"));
+  if (savedMul) view.userMul = Math.max(UMUL_MIN, Math.min(UMUL_MAX, savedMul));
   view.zoom = autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul;
 
-  // mouse-wheel zoom (user bias within bounds)
+  // mouse-wheel zoom (user bias within bounds; persisted)
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
     view.userMul *= e.deltaY < 0 ? 1.12 : 1 / 1.12;
     view.userMul = Math.max(UMUL_MIN, Math.min(UMUL_MAX, view.userMul));
+    localStorage.setItem("carsim_usermul", view.userMul.toFixed(3));
   }, { passive: false });
 
+  // controls overlay (first visit only, then "?"), pause (Esc), any-key dismiss
+  const ov = document.getElementById("helpOverlay");
+  const pauseEl = document.getElementById("pauseOverlay");
+  const overlayOpen = () => !ov.classList.contains("hidden");
+  const closeHelp = () => { ov.classList.add("hidden"); localStorage.setItem("carsim_help_seen", "1"); };
+  const openHelp = () => ov.classList.remove("hidden");
+  const setPaused = (p) => { paused = p; pauseEl.classList.toggle("hidden", !paused); };
+  document.getElementById("helpBtn").addEventListener("click", (e) => { e.preventDefault(); openHelp(); });
+  document.getElementById("helpClose").addEventListener("click", (e) => { e.preventDefault(); closeHelp(); });
+  ov.addEventListener("click", (e) => { if (e.target === ov) closeHelp(); });
+  window.addEventListener("keydown", (e) => {
+    if (overlayOpen()) { closeHelp(); return; }      // any key dismisses the controls overlay
+    if (e.key === "Escape") { e.preventDefault(); setPaused(!paused); }   // Esc = pause/resume while driving
+  });
+
   function update(dt) {
+    if (paused) return;                               // Esc freezes the sim
     const px = car.x, py = car.y;
     car.blocked = false;
     car.update(dt, dbg || input.controls());

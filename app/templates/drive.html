@@ -74,6 +74,14 @@
     #helpCard button{margin-top:16px;cursor:pointer;background:var(--accent);border:none;color:#06203f;
       font-weight:800;font-size:15px;padding:9px 26px;border-radius:10px}
     kbd{background:#0b0e14;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:12px}
+
+    /* pause overlay */
+    #pauseOverlay{position:fixed;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;
+      background:rgba(8,11,16,.5);backdrop-filter:blur(2px)}
+    #pauseOverlay.hidden{display:none}
+    #pauseCard{text-align:center}
+    #pauseCard .ttl{font-size:30px;font-weight:800;letter-spacing:.04em}
+    #pauseCard .sub{margin-top:8px;color:#aab2c4;font-size:13px}
   </style>
 </head>
 <body>
@@ -109,24 +117,23 @@
       <h2>Ovládání</h2>
       <div class="krow"><kbd>↑</kbd> plyn (rychlost drží) · <kbd>↓</kbd> brzda / zpátečka</div>
       <div class="krow"><kbd>←</kbd> <kbd>→</kbd> otáčení na místě / řízení</div>
-      <div class="krow"><kbd>Space</kbd> prudké brzdění</div>
+      <div class="krow"><kbd>Space</kbd> prudké brzdění · <kbd>Esc</kbd> pauza</div>
       <div class="krow">kolečko myši = přiblížení mapy</div>
       <button id="helpClose">Jet →</button>
     </div>
   </div>
 
+  <div id="pauseOverlay" class="hidden">
+    <div id="pauseCard"><div class="ttl">Pauza</div><div class="sub"><kbd>Esc</kbd> pokračovat</div></div>
+  </div>
+
   <script>
     window.CARSIM = { dataBase: "{{ data_base }}", district: "{{ district }}" };
-    (function () {
-      const ov = document.getElementById("helpOverlay");
-      const close = () => ov.classList.add("hidden");
-      const open = () => ov.classList.remove("hidden");
-      document.getElementById("helpBtn").addEventListener("click", (e) => { e.preventDefault(); open(); });
-      document.getElementById("helpClose").addEventListener("click", (e) => { e.preventDefault(); close(); });
-      ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
-      window.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
-      // shown by default at start; user dismisses with "Jet"
-    })();
+    // returning visitors: don't flash the controls overlay (it's shown by default for first-timers).
+    // All overlay / pause / persistence behaviour is wired in main.js.
+    if (localStorage.getItem("carsim_help_seen")) {
+      document.getElementById("helpOverlay").classList.add("hidden");
+    }
   </script>
   <script type="module" src="{{ asset_base }}/drive/main.js"></script>
 </body>

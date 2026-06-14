@@ -12,8 +12,10 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl) {
   const setLevel = (l) => {
     level = Math.max(0, Math.min(RADII.length - 1, l));
     if (levelEl) levelEl.textContent = "+" + (level + 1);
+    localStorage.setItem("carsim_minilevel", String(level));   // persist across sessions
   };
-  setLevel(0);
+  const saved = parseInt(localStorage.getItem("carsim_minilevel"), 10);
+  setLevel(Number.isFinite(saved) ? saved : 0);
   plusBtn.addEventListener("click", (e) => { e.preventDefault(); setLevel(level + 1); });
   minusBtn.addEventListener("click", (e) => { e.preventDefault(); setLevel(level - 1); });
 
