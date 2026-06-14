@@ -1,0 +1,29 @@
+# Castle deploy — one public container behind Traefik + Cloudflare at
+# https://car-sim.troyanenko.com
+#
+#   rsync to /opt/car-sim, then:
+#   docker compose -f docker-compose.castle.yml up -d --build
+#
+# priority=100 so the all-letter wildcard catch-all router can't steal the host.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: car-sim
+    restart: unless-stopped
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.carsim.entrypoints=websecure"
+      - "traefik.http.routers.carsim.rule=Host(`car-sim.troyanenko.com`)"
+      - "traefik.http.routers.carsim.tls.certresolver=cloudflare"
+      - "traefik.http.routers.carsim.priority=100"
+      - "traefik.http.services.carsim.loadbalancer.server.port=8080"
+
+networks:
+  web:
+    external: true
