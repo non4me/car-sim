@@ -10,17 +10,31 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.responses import Response
 
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parent
 CITIES = Path(os.environ.get("CITIES_DIR", ROOT / "data" / "cities"))
 
+
+class RevalidatingStatic(StaticFiles):
+    """Serve assets with `Cache-Control: no-cache` so the browser/CDN must revalidate
+    via ETag on every request. Unchanged files return a cheap 304; a deploy of the
+    nested ES-module graph (which a query-string cache-bust can't reach) is live at
+    once instead of stale for the default max-age window."""
+
+    def file_response(self, *args, **kwargs) -> Response:
+        resp = super().file_response(*args, **kwargs)
+        resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
 app = FastAPI(title="car-sim")
 templates = Jinja2Templates(directory=str(BASE / "templates"))
 templates.env.cache = None  # avoid a Jinja LRUCache key issue under Python 3.14 (prod uses 3.12)
-app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
+app.mount("/static", RevalidatingStatic(directory=str(BASE / "static")), name="static")
 if CITIES.exists():
-    app.mount("/citydata", StaticFiles(directory=str(CITIES)), name="citydata")
+    app.mount("/citydata", RevalidatingStatic(directory=str(CITIES)), name="citydata")
 
 DEFAULT_CITY = ("cz", "praha", "vinohrady")
 
