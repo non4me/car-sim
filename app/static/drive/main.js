@@ -2,7 +2,6 @@
 import { makeView } from "./render/view.js";
 import { loadMap } from "./map/tiles.js";
 import { Car } from "./vehicle/car.js";
-import { makeRail } from "./vehicle/rail.js";
 import { makeInput } from "./vehicle/input.js";
 import { draw } from "./render/draw.js";
 import { evalRules } from "./rules/limits.js";
@@ -44,8 +43,6 @@ async function boot() {
   const map = await loadMap(window.CARSIM.dataBase);
   const sp = pickSpawn(map);
   const car = new Car(sp.x, sp.y, sp.h);
-  const rail = makeRail(map);     // on-rails graph navigation for overview mode
-  let railActive = false;
   // metres the car's centre is past the road edge (0 = on the drivable surface)
   const offroadPen = (x, y) => {
     const ne = map.nearestEdge(x, y);
@@ -112,18 +109,20 @@ async function boot() {
     if (overlayOpen()) { closeHelp(); return; }      // any key dismisses the controls overlay
     if (e.key === "Escape") { e.preventDefault(); setPaused(!paused); }   // Esc = pause/resume while driving
   });
+  // auto-pause when the window/tab loses focus, so keys that never reach the page can't be
+  // mistaken for "the car won't move/turn" (msg 2699). Returning focus resumes.
+  window.addEventListener("blur", () => { if (!overlayOpen()) setPaused(true); });
+  window.addEventListener("focus", () => setPaused(false));
+  pauseEl.addEventListener("click", () => setPaused(false));   // click the pause overlay to resume
 
   function update(dt) {
-    if (paused) return;                               // Esc freezes the sim
+    if (paused) return;                               // Esc / lost focus freezes the sim
     const controls = dbg || input.controls();
-    if (view.zoom < OVERVIEW_Z) {                     // overview: on-rails, can't leave the road
-      if (!railActive) { rail.attach(car); railActive = true; }
-      rail.update(dt, controls, car);
-      rules = evalRules(map, car);
-      car.blocked = false;
-      return;
-    }
-    railActive = false;                               // free driving
+    // ONE driving model everywhere (heading-up, rotate-in-place): the car always points up and
+    // turns the same way at every zoom. Overview (zoom < OVERVIEW_Z) only tightens the off-road
+    // wall so the car effectively can't leave the road network (msg 2691); at normal zoom the car
+    // may sink ~one body-length off-road before the wall blocks going deeper (msg 2694).
+    const wall = view.zoom < OVERVIEW_Z ? 0.2 : OFFROAD_WALL;
     const px = car.x, py = car.y;
     car.blocked = false;
     car.update(dt, controls);
@@ -131,10 +130,10 @@ async function boot() {
     if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
     else {
       // off-road (sidewalk/"black zone"): no speed penalty — drive in/along/out freely, but once
-      // the car has sunk ~one body-length in, block going DEEPER like a wall (msg 2694). Off-road is
-      // flagged as a violation by the rules (HUD "Mimo vozovku").
+      // the car has sunk past `wall` metres, block going DEEPER like a wall. Off-road is flagged as
+      // a violation by the rules (HUD "Mimo vozovku").
       const pen = offroadPen(car.x, car.y);
-      if (pen > OFFROAD_WALL && pen > offroadPen(px, py)) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
+      if (pen > wall && pen > offroadPen(px, py)) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
     }
   }
 
@@ -142,8 +141,7 @@ async function boot() {
   function render() {
     const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
-    if (view.zoom < OVERVIEW_Z) { view.cx = car.x; view.cy = car.y; view.rot = 0; }  // north-up overview
-    else view.setCamera(car.x, car.y, car.h);    // heading-up
+    view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
     draw(ctx, view, map, car, rules);
     hud.update(rules);
     if (!miniCollapsed) minimap.draw(map, car, rules.street);

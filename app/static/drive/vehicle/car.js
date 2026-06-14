@@ -9,7 +9,7 @@ export class Car {
     this.blocked = false;
   }
 
-  // longitudinal speed model only (reused by free driving and the rail/overview mode)
+  // longitudinal speed model, split out from update() for clarity/testability
   longitudinal(dt, c) {
     if (c.hard) {                                   // sharp brake (Space)
       const s = Math.sign(this.v);
