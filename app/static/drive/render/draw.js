@@ -79,6 +79,10 @@ export function draw(ctx, view, map, car, rules) {
     }
   }
 
+  // 2c) stop lines — a white transverse bar across each approach to a controlled junction
+  //     (a road marking, so it's drawn on the asphalt and rotates with the road).
+  if (zoom >= 9) drawStopLines(ctx, view, vis, map.junctions, zoom);
+
   // 3) junction control — a faint dot when zoomed out, a proper billboarded sign glyph when
   //    zoomed in (STOP octagon, give-way inverted triangle, traffic-signal lights).
   for (const j of map.junctions) {
@@ -158,6 +162,35 @@ function drawChevron(ctx, view, wx, wy, dirx, diry, half) {
   ctx.lineTo(vx, vy);
   ctx.lineTo(vx - ux * half - px * half * 0.8, vy - uy * half - py * half * 0.8);
   ctx.stroke();
+}
+
+// Stop lines: a white bar across the road on each approach to a controlled junction. For every
+// controlled junction we find the visible edges that touch it and lay a transverse bar a few
+// metres in from that end (projected from world space, so it sits on the asphalt and turns with it).
+function drawStopLines(ctx, view, vis, junctions, zoom) {
+  const R = view.visR();
+  ctx.save();
+  ctx.strokeStyle = "rgba(236,239,246,.72)";
+  ctx.lineCap = "butt";
+  ctx.lineWidth = Math.max(2, zoom * 0.55);          // ~0.55 m thick
+  for (const j of junctions) {
+    if (j.ctrl === "priority" || !view.near(j.x, j.y, R)) continue;
+    for (const e of vis) {
+      const g = e.geom, last = g.length - 1;
+      const atStart = Math.hypot(g[0][0] - j.x, g[0][1] - j.y) < 3.5;
+      const atEnd = !atStart && Math.hypot(g[last][0] - j.x, g[last][1] - j.y) < 3.5;
+      if (!atStart && !atEnd) continue;
+      let L = 0;
+      for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
+      const wp = walkAlong(g, atStart, Math.min(4, L * 0.4));   // a few m in from the junction
+      const px = -wp.diry, py = wp.dirx;               // world-space perpendicular (unit)
+      const half = Math.max(1.5, e.width / 2);
+      const [ax, ay] = view.project(wp.x + px * half, wp.y + py * half);
+      const [bx, by] = view.project(wp.x - px * half, wp.y - py * half);
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
+  }
+  ctx.restore();
 }
 
 // Junction control signs, drawn BILLBOARDED (axis-aligned in screen space, so they stay upright
