@@ -69,6 +69,16 @@ export function draw(ctx, view, map, car, rules) {
   }
   ctx.setLineDash([]);
 
+  // 2b) one-way arrows along the flow direction (geometry order = direction of travel)
+  if (zoom >= 7) {
+    ctx.strokeStyle = "rgba(150,188,250,.55)";
+    ctx.lineWidth = Math.max(1.5, zoom * 0.12);
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    for (const e of vis) {
+      if (e.oneway) drawOnewayArrows(ctx, view, e.geom, zoom);
+    }
+  }
+
   // 3) junction control dots
   for (const j of map.junctions) {
     if (j.ctrl === "priority" || !view.near(j.x, j.y, R)) continue;
@@ -110,6 +120,39 @@ function drawAreas(ctx, view, map) {
       if (stroke) ctx.stroke();   // crisp building outlines when zoomed in
     }
   }
+}
+
+// One-way arrows: chevrons every ~STEP metres along the flow (geometry order = travel direction).
+function drawOnewayArrows(ctx, view, geom, zoom) {
+  const STEP = 20;                                       // metres between chevrons
+  const half = Math.min(11, Math.max(3.5, zoom * 0.5));  // chevron arm length in px
+  let nextAt = STEP * 0.5, dist = 0;
+  for (let i = 1; i < geom.length; i++) {
+    const ax = geom[i - 1][0], ay = geom[i - 1][1];
+    const bx = geom[i][0], by = geom[i][1];
+    const seg = Math.hypot(bx - ax, by - ay);
+    if (seg < 1e-6) continue;
+    const dx = (bx - ax) / seg, dy = (by - ay) / seg;
+    while (nextAt <= dist + seg) {
+      const t = (nextAt - dist) / seg;
+      drawChevron(ctx, view, ax + (bx - ax) * t, ay + (by - ay) * t, dx, dy, half);
+      nextAt += STEP;
+    }
+    dist += seg;
+  }
+}
+
+function drawChevron(ctx, view, wx, wy, dirx, diry, half) {
+  const [sx, sy] = view.project(wx, wy);
+  const c = Math.cos(view.rot), s = Math.sin(view.rot);
+  const ux = dirx * c - diry * s, uy = -(dirx * s + diry * c);  // world dir → screen dir (unit)
+  const px = -uy, py = ux;                                       // perpendicular
+  const vx = sx + ux * half * 0.6, vy = sy + uy * half * 0.6;    // chevron vertex (points forward)
+  ctx.beginPath();
+  ctx.moveTo(vx - ux * half + px * half * 0.8, vy - uy * half + py * half * 0.8);
+  ctx.lineTo(vx, vy);
+  ctx.lineTo(vx - ux * half - px * half * 0.8, vy - uy * half - py * half * 0.8);
+  ctx.stroke();
 }
 
 // Labels for the ADJOINING streets — placed AT THE START of each cross street (a short way

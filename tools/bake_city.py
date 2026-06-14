@@ -163,9 +163,12 @@ def bake(district: str, country: str, debug_only: bool):
         cls = t["highway"]
         cdef = classes[cls]
         lanes = int(t["lanes"]) if str(t.get("lanes", "")).isdigit() else cdef["lanes"]
-        oneway = str(t.get("oneway", "")).lower() in ("yes", "true", "1") or cdef.get("oneway_implied", False)
+        ow_raw = str(t.get("oneway", "")).lower()
+        oneway = ow_raw in ("yes", "true", "1", "-1") or cdef.get("oneway_implied", False)
         maxspeed = parse_maxspeed(t.get("maxspeed"), cdef["context"], profile)
         nlist = wy["nodes"]
+        if ow_raw == "-1":
+            nlist = list(reversed(nlist))   # oneway=-1: reverse so geom order = traffic-flow direction
         seg = [nlist[0]]
         for nid in nlist[1:]:
             seg.append(nid)
