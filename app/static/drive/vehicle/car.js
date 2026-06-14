@@ -9,8 +9,8 @@ export class Car {
     this.blocked = false;
   }
 
-  update(dt, c) {
-    // --- longitudinal ---
+  // longitudinal speed model only (reused by free driving and the rail/overview mode)
+  longitudinal(dt, c) {
     if (c.hard) {                                   // sharp brake (Space)
       const s = Math.sign(this.v);
       this.v -= s * P.hardBrake * dt;
@@ -23,12 +23,12 @@ export class Car {
     }
     // else: maintain speed (no auto-decel) — only ↓ / Space slow the car (msg 2668)
     this.v = Math.max(-P.maxReverse, Math.min(P.maxSpeed, this.v));
+  }
 
-    // --- rotate in place (independent of speed) ---
-    if (c.turn) this.h += c.turn * P.turnRate * dt;
-
-    // --- move along heading ---
-    this.x += this.v * Math.cos(this.h) * dt;
+  update(dt, c) {
+    this.longitudinal(dt, c);
+    if (c.turn) this.h += c.turn * P.turnRate * dt;   // rotate in place (independent of speed)
+    this.x += this.v * Math.cos(this.h) * dt;          // move along heading
     this.y += this.v * Math.sin(this.h) * dt;
   }
 

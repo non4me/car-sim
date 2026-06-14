@@ -92,8 +92,8 @@ export function draw(ctx, view, map, car, rules) {
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
   drawStreetLabels(ctx, view, vis, rules && rules.street);
 
-  // 5) the car — always nose-up at the anchor
-  drawCar(ctx, view);
+  // 5) the car — sprite (heading-up) or a heading-pointing arrow (north-up overview)
+  drawCar(ctx, view, car);
 }
 
 // Label each visible street at the point ON the road nearest the car, so the name
@@ -219,9 +219,16 @@ function walkAlong(geom, fromStart, dist) {
 
 // Stylized top-down car (nose-up: forward = −y). Below ~5 px/m it becomes a fixed-size
 // arrow for the bird's-eye overview mode (otherwise the real-scale car is a sub-pixel dot).
-function drawCar(ctx, view) {
+function drawCar(ctx, view, car) {
   const [X, Y] = view.anchor();
-  if (view.zoom < 5) { drawCarArrow(ctx, X, Y); return; }
+  if (view.zoom < 5) {
+    // arrow pointing along the heading in the current camera frame (north-up in overview)
+    const c = Math.cos(view.rot), s = Math.sin(view.rot);
+    const ux = Math.cos(car.h) * c - Math.sin(car.h) * s;
+    const uy = -(Math.cos(car.h) * s + Math.sin(car.h) * c);
+    drawCarArrow(ctx, X, Y, ux, uy);
+    return;
+  }
   const L = P.length * view.zoom, W = P.width * view.zoom;
   const r = (x, y, w, h, rad) => roundRect(ctx, x, y, w, h, rad);
   ctx.save();
@@ -266,17 +273,18 @@ function drawCar(ctx, view) {
   ctx.restore();
 }
 
-// fixed-size nose-up arrow for overview mode (forward = screen up)
-function drawCarArrow(ctx, X, Y) {
+// fixed-size arrow for overview mode, pointing along the screen unit vector (ux,uy)
+function drawCarArrow(ctx, X, Y, ux, uy) {
   const r = 13;
+  const px = -uy, py = ux;                 // perpendicular
   ctx.save();
   ctx.translate(X, Y);
   ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 5;
   ctx.beginPath();
-  ctx.moveTo(0, -r);                 // tip (forward)
-  ctx.lineTo(r * 0.72, r * 0.8);
-  ctx.lineTo(0, r * 0.4);
-  ctx.lineTo(-r * 0.72, r * 0.8);
+  ctx.moveTo(ux * r, uy * r);                                  // tip (forward)
+  ctx.lineTo(-ux * r * 0.8 + px * r * 0.72, -uy * r * 0.8 + py * r * 0.72);
+  ctx.lineTo(-ux * r * 0.4, -uy * r * 0.4);                    // tail notch
+  ctx.lineTo(-ux * r * 0.8 - px * r * 0.72, -uy * r * 0.8 - py * r * 0.72);
   ctx.closePath();
   ctx.fillStyle = "#5b9cff"; ctx.fill();
   ctx.shadowBlur = 0;

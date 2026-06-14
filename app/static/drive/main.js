@@ -2,6 +2,7 @@
 import { makeView } from "./render/view.js";
 import { loadMap } from "./map/tiles.js";
 import { Car } from "./vehicle/car.js";
+import { makeRail } from "./vehicle/rail.js";
 import { makeInput } from "./vehicle/input.js";
 import { draw } from "./render/draw.js";
 import { evalRules } from "./rules/limits.js";
@@ -42,6 +43,8 @@ async function boot() {
   const map = await loadMap(window.CARSIM.dataBase);
   const sp = pickSpawn(map);
   const car = new Car(sp.x, sp.y, sp.h);
+  const rail = makeRail(map);     // on-rails graph navigation for overview mode
+  let railActive = false;
   const input = makeInput();
   const hud = makeHud();
   const minimap = makeMinimap(
@@ -106,9 +109,18 @@ async function boot() {
 
   function update(dt) {
     if (paused) return;                               // Esc freezes the sim
+    const controls = dbg || input.controls();
+    if (view.zoom < OVERVIEW_Z) {                     // overview: on-rails, can't leave the road
+      if (!railActive) { rail.attach(car); railActive = true; }
+      rail.update(dt, controls, car);
+      rules = evalRules(map, car);
+      car.blocked = false;
+      return;
+    }
+    railActive = false;                               // free driving
     const px = car.x, py = car.y;
     car.blocked = false;
-    car.update(dt, dbg || input.controls());
+    car.update(dt, controls);
     rules = evalRules(map, car);
     if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
     else if (rules.offRoad) { car.v *= 0.90; car.blocked = true; }
@@ -118,7 +130,8 @@ async function boot() {
   function render() {
     const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
-    view.setCamera(car.x, car.y, car.h);         // heading-up
+    if (view.zoom < OVERVIEW_Z) { view.cx = car.x; view.cy = car.y; view.rot = 0; }  // north-up overview
+    else view.setCamera(car.x, car.y, car.h);    // heading-up
     draw(ctx, view, map, car, rules);
     hud.update(rules);
     if (!miniCollapsed) minimap.draw(map, car, rules.street);
