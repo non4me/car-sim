@@ -13,6 +13,7 @@ import { runLoop } from "./engine/loop.js";
 const ZMIN = 2, ZMAX = 25;      // absolute zoom bounds in px/metre (Vlad msg 2691: min 2 = overview)
 const ZOOM_DEFAULT = 16;        // starting zoom (px/m), wheel-adjustable, persisted
 const OVERVIEW_Z = 5;           // below this px/m → bird's-eye overview (car drawn as an arrow)
+const OFFROAD_WALL = 4.3;       // metres the car may sink off-road before a wall blocks going deeper
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -45,6 +46,11 @@ async function boot() {
   const car = new Car(sp.x, sp.y, sp.h);
   const rail = makeRail(map);     // on-rails graph navigation for overview mode
   let railActive = false;
+  // metres the car's centre is past the road edge (0 = on the drivable surface)
+  const offroadPen = (x, y) => {
+    const ne = map.nearestEdge(x, y);
+    return ne.edge ? Math.max(0, ne.dist - (ne.edge.width / 2 + 1.0)) : 0;
+  };
   const input = makeInput();
   const hud = makeHud();
   const minimap = makeMinimap(
@@ -123,7 +129,13 @@ async function boot() {
     car.update(dt, controls);
     rules = evalRules(map, car);
     if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
-    else if (rules.offRoad) { car.v *= 0.90; car.blocked = true; }
+    else {
+      // off-road (sidewalk/"black zone"): no speed penalty — drive in/along/out freely, but once
+      // the car has sunk ~one body-length in, block going DEEPER like a wall (msg 2694). Off-road is
+      // flagged as a violation by the rules (HUD "Mimo vozovku").
+      const pen = offroadPen(car.x, car.y);
+      if (pen > OFFROAD_WALL && pen > offroadPen(px, py)) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
+    }
   }
 
   const zoomEl = document.getElementById("zoomind");
