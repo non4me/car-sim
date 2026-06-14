@@ -5,7 +5,12 @@ export function makeInput() {
     ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
     KeyW: "up", KeyS: "down", KeyA: "left", KeyD: "right", Space: "hand",
   };
+  const typing = () => {
+    const el = document.activeElement;
+    return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+  };
   const on = (e, down) => {
+    if (typing()) return;             // don't drive the car while typing in the search box
     const k = map[e.code];
     if (!k) return;
     keys[k] = down;

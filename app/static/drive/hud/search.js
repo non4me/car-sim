@@ -1,0 +1,63 @@
+// Street + district search with autocomplete. The index is a separate baked file (search.json)
+// because map tiles STREAM — not all street names are resident in memory. On pick, the caller
+// teleports the map (streaming the destination tiles, then snapping onto the nearest road).
+
+export async function loadSearchIndex(base) {
+  try {
+    const idx = await (await fetch(base + "/search.json")).json();
+    const items = [];
+    for (const p of idx.places || []) items.push({ name: p.name, x: p.x, y: p.y, kind: "district" });
+    for (const s of idx.streets || []) items.push({ name: s.name, x: s.x, y: s.y, kind: "street" });
+    for (const it of items) it.q = it.name.toLowerCase();
+    return items;
+  } catch {
+    return [];
+  }
+}
+
+// rank matches: prefix hits first, then substring; districts before streets; shorter names first.
+function rank(items, text, limit) {
+  const q = text.trim().toLowerCase();
+  if (q.length < 2) return [];
+  const pref = [], sub = [];
+  for (const it of items) {
+    const i = it.q.indexOf(q);
+    if (i === 0) pref.push(it);
+    else if (i > 0) sub.push(it);
+  }
+  const r = (a) => (a.kind === "district" ? 0 : 1);
+  const cmp = (a, b) => r(a) - r(b) || a.name.length - b.name.length;
+  pref.sort(cmp); sub.sort(cmp);
+  return [...pref, ...sub].slice(0, limit);
+}
+
+export function makeSearchBox(input, results, items, onPick) {
+  let cur = [], hi = -1;
+  const close = () => { results.classList.add("hidden"); results.innerHTML = ""; cur = []; hi = -1; };
+  const render = () => {
+    results.innerHTML = "";
+    cur.forEach((it, i) => {
+      const el = document.createElement("div");
+      el.className = "sr-item" + (i === hi ? " hi" : "");
+      const nm = document.createElement("span"); nm.className = "sr-name"; nm.textContent = it.name;
+      const kd = document.createElement("span"); kd.className = "sr-kind";
+      kd.textContent = it.kind === "district" ? "čtvrť" : "ulice";
+      el.append(nm, kd);
+      el.addEventListener("mousedown", (e) => { e.preventDefault(); pick(it); });
+      results.appendChild(el);
+    });
+    results.classList.toggle("hidden", cur.length === 0);
+  };
+  const pick = (it) => { input.value = it.name; close(); input.blur(); onPick(it.x, it.y); };
+  const refresh = () => { cur = rank(items, input.value, 8); hi = -1; render(); };
+
+  input.addEventListener("input", refresh);
+  input.addEventListener("focus", () => { if (input.value.trim().length >= 2) refresh(); });
+  input.addEventListener("blur", () => setTimeout(close, 120));   // delay so a click registers
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" && cur.length) { e.preventDefault(); hi = (hi + 1) % cur.length; render(); }
+    else if (e.key === "ArrowUp" && cur.length) { e.preventDefault(); hi = (hi - 1 + cur.length) % cur.length; render(); }
+    else if (e.key === "Enter" && cur.length) { e.preventDefault(); pick(cur[hi >= 0 ? hi : 0]); }
+    else if (e.key === "Escape") { close(); input.blur(); }
+  });
+}

@@ -143,7 +143,7 @@ def bake(district: str, country: str, debug_only: bool):
 
 
 def build_artifact(nodes, all_ways, bbox, country, name, out,
-                   debug_only=False, snapshot=None, debug_png=True):
+                   debug_only=False, snapshot=None, debug_png=True, place_nodes=None):
     """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
     junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`)."""
     profile = yaml.safe_load((ROOT / "countries" / f"{country}.yaml").read_text(encoding="utf-8"))
@@ -297,6 +297,29 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         "attribution": "© OpenStreetMap contributors (ODbL)",
     }
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    # search index (separate file — tiles stream, so street names aren't all in memory): one
+    # representative point per unique street name (the longest edge wins) + district/quarter places.
+    streets = {}
+    for ed in edges:
+        nm = ed.get("name")
+        if not nm:
+            continue
+        g = ed["geom"]
+        L = sum(math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]) for i in range(1, len(g)))
+        if nm not in streets or L > streets[nm][0]:
+            mid = g[len(g) // 2]
+            streets[nm] = (L, mid[0], mid[1])
+    street_list = [{"name": nm, "x": round(x, 1), "y": round(y, 1)} for nm, (_, x, y) in sorted(streets.items())]
+    places = []
+    for p in (place_nodes or []):
+        x, y = to_xy(p["lat"], p["lon"])
+        places.append({"name": p["name"], "x": round(x, 1), "y": round(y, 1), "kind": p["kind"]})
+    places.sort(key=lambda p: p["name"])
+    (out / "search.json").write_text(
+        json.dumps({"streets": street_list, "places": places}, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8")
+    print(f"  [{name}] search index: {len(street_list)} streets, {len(places)} places")
     sk = Counter(s["kind"] for s in signs)
     print(f"[{name}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
           f"{len(junctions)} junctions, {len(areas)} areas, {len(signs)} signs {dict(sk)})")

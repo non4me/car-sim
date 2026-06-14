@@ -27,6 +27,7 @@ DRIVABLE = {"motorway", "motorway_link", "trunk", "trunk_link", "primary", "prim
             "secondary", "secondary_link", "tertiary", "tertiary_link", "unclassified",
             "residential", "living_street", "service"}
 CONTROL = ("traffic_signals", "stop", "give_way")
+PLACE_KINDS = ("city", "borough", "suburb", "quarter", "neighbourhood", "town", "village")
 
 
 def _want_way(tags) -> bool:
@@ -47,15 +48,22 @@ def read_pbf(path: str):
     """pbf → (nodes, all_ways) matching the Overpass element shapes build_artifact expects."""
     nodes: dict = {}      # id -> {"lat","lon","tags"}
     all_ways: list = []   # {"id","nodes":[ids],"tags":{}}
+    places: list = []     # {"name","lat","lon","kind"} — districts/quarters for search
+    s, w, n, e = PRAGUE_BBOX
     # with_locations() caches every node's coord in C++; EmptyTagFilter means Python only sees
     # TAGGED objects (all our ways + the control nodes) — untagged nodes are still cached for geometry.
     fp = osmium.FileProcessor(path).with_locations().with_filter(osmium.filter.EmptyTagFilter())
     n_ways = 0
     for o in fp:
         if o.is_node():
+            if not o.location.valid():
+                continue
             hw = o.tags.get("highway")
-            if hw in CONTROL and o.location.valid():
+            if hw in CONTROL:
                 nodes[o.id] = {"lat": o.location.lat, "lon": o.location.lon, "tags": {"highway": hw}}
+            place, nm = o.tags.get("place"), o.tags.get("name")
+            if place in PLACE_KINDS and nm and s <= o.location.lat <= n and w <= o.location.lon <= e:
+                places.append({"name": nm, "lat": o.location.lat, "lon": o.location.lon, "kind": place})
         elif o.is_way():
             tags = {t.k: t.v for t in o.tags}
             if not _want_way(tags):
@@ -73,7 +81,7 @@ def read_pbf(path: str):
                 n_ways += 1
                 if n_ways % 50000 == 0:
                     print(f"  …{n_ways} ways, {len(nodes)} nodes")
-    return nodes, all_ways
+    return nodes, all_ways, places
 
 
 def _snapshot_from_header(path: str):
@@ -94,11 +102,11 @@ def main():
 
     snapshot = args.snapshot or _snapshot_from_header(args.pbf)
     print(f"[{args.name}] reading {args.pbf} (snapshot {snapshot})…")
-    nodes, all_ways = read_pbf(args.pbf)
-    print(f"[{args.name}] parsed {len(all_ways)} ways, {len(nodes)} nodes → processing…")
+    nodes, all_ways, places = read_pbf(args.pbf)
+    print(f"[{args.name}] parsed {len(all_ways)} ways, {len(nodes)} nodes, {len(places)} places → processing…")
     out = ROOT / "data" / "cities" / args.country / "praha" / args.name
     build_artifact(nodes, all_ways, PRAGUE_BBOX, args.country, args.name, out,
-                   snapshot=snapshot, debug_png=False)
+                   snapshot=snapshot, debug_png=False, place_nodes=places)
 
 
 if __name__ == "__main__":

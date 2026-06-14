@@ -7,6 +7,7 @@ import { draw } from "./render/draw.js";
 import { evalRules } from "./rules/limits.js";
 import { makeHud } from "./hud/hud.js";
 import { makeMinimap } from "./hud/minimap.js";
+import { loadSearchIndex, makeSearchBox } from "./hud/search.js";
 import { runLoop } from "./engine/loop.js";
 
 const ZMIN = 2, ZMAX = 25;      // absolute zoom bounds in px/metre (Vlad msg 2691: min 2 = overview)
@@ -106,7 +107,12 @@ async function boot() {
   document.getElementById("helpBtn").addEventListener("click", (e) => { e.preventDefault(); openHelp(); });
   document.getElementById("helpClose").addEventListener("click", (e) => { e.preventDefault(); closeHelp(); });
   ov.addEventListener("click", (e) => { if (e.target === ov) closeHelp(); });
+  const typingInBox = () => {
+    const el = document.activeElement;
+    return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA");
+  };
   window.addEventListener("keydown", (e) => {
+    if (typingInBox()) return;                        // let the search box keep its own keys (Esc/Enter/arrows)
     if (overlayOpen()) { closeHelp(); return; }      // any key dismisses the controls overlay
     if (e.key === "Escape") { e.preventDefault(); setPaused(!paused); }   // Esc = pause/resume while driving
   });
@@ -115,6 +121,20 @@ async function boot() {
   window.addEventListener("blur", () => { if (!overlayOpen()) setPaused(true); });
   window.addEventListener("focus", () => setPaused(false));
   pauseEl.addEventListener("click", () => setPaused(false));   // click the pause overlay to resume
+
+  // street / district search → teleport: jump to the target, stream its tiles, snap onto the road
+  async function goTo(x, y) {
+    setPaused(false);
+    car.x = x; car.y = y; car.v = 0;                  // jump there; render() now streams around it
+    for (let i = 0; i < 30; i++) {
+      const ne = map.nearestEdge(x, y);
+      if (ne.edge && ne.dist < 60) { car.x = ne.px; car.y = ne.py; car.h = Math.atan2(ne.ty, ne.tx); car.v = 0; return; }
+      await new Promise((r) => setTimeout(r, 80));    // wait for the destination tiles to stream in
+    }
+  }
+  loadSearchIndex(window.CARSIM.dataBase).then((items) => {
+    makeSearchBox(document.getElementById("searchInput"), document.getElementById("searchResults"), items, goTo);
+  });
 
   function update(dt) {
     if (paused) return;                               // Esc / lost focus freezes the sim

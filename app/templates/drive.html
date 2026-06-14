@@ -61,6 +61,23 @@
       font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
     #helpBtn:hover{color:#fff;border-color:var(--accent)}
 
+    /* street / district search */
+    #searchWrap{position:relative;pointer-events:auto}
+    #searchInput{width:210px;max-width:44vw;background:rgba(20,25,37,.92);border:1px solid var(--line);
+      border-radius:9px;color:#e6e9f0;font:inherit;font-size:13px;padding:6px 11px;outline:none}
+    #searchInput:focus{border-color:var(--accent)}
+    #searchInput::placeholder{color:#7c8699}
+    #searchResults{position:absolute;top:36px;left:0;width:270px;max-width:74vw;max-height:48vh;overflow-y:auto;
+      background:rgba(16,20,30,.97);border:1px solid var(--line);border-radius:10px;
+      box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:40}
+    #searchResults.hidden{display:none}
+    .sr-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 11px;
+      cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04)}
+    .sr-item:last-child{border-bottom:none}
+    .sr-item:hover,.sr-item.hi{background:rgba(91,156,255,.16)}
+    .sr-name{font-size:13px;color:#e6e9f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sr-kind{font-size:10px;color:#8a93a6;text-transform:uppercase;letter-spacing:.05em;flex:none}
+
     /* minimap — top right, under the location label (2× size, msg 2691) */
     #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
       border:1px solid var(--line);border-radius:12px;padding:6px}
@@ -111,6 +128,10 @@
     <div class="tb-left">
       <a href="/">← car-sim</a>
       <button id="helpBtn" title="Ovládání">?</button>
+      <div id="searchWrap">
+        <input id="searchInput" type="text" placeholder="Hledat ulici / čtvrť…" autocomplete="off" spellcheck="false">
+        <div id="searchResults" class="hidden"></div>
+      </div>
     </div>
     <div class="meta">Praha{% if snapshot %} · data OSM {{ snapshot }}{% endif %}</div>
   </div>
