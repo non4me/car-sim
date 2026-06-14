@@ -67,7 +67,9 @@ each independently testable.
       progress/regress over time; shown to the user. → needs an auth + storage layer (see docs/specs/accounts.md).
 - [ ] **Admin panel (6):** overall stats, user management, and a **trip-replay player** (variable speed) over
       recorded trip logs. → needs trip logging + admin UI (see docs/specs/admin.md).
-- [ ] **Schematic backdrop:** buildings + parks/water from OSM (also enables off-road building collision + house numbers).
+- [x] **Schematic backdrop:** buildings + parks/water from OSM — DONE & LIVE (Vinohrady: 1621 buildings,
+      185 green, 4 water). Baked as tiled area polygons, rendered behind roads with building outlines.
+      (Still TODO from here: off-road building collision + house numbers.)
 
 ## Phase 6+ — Expansion (post-approval)
 - [ ] All-Prague bake via Geofabrik `.osm.pbf` + the same pipeline; tile-stream the whole city.
@@ -92,5 +94,8 @@ each independently testable.
 - 2026-06-14: **control + camera rework SHIPPED & verified** (msgs 2663–2668) — see the DONE checklist above.
   Notified Vlad (TG) with a live screenshot. Per-spec dynamic zoom + wheel zoom + heading-up + on-road labels +
   cruise (no decay) + gentle accel + rotate-in-place. Also fixed the static-asset cache so deploys go live at once.
-  **Next (in original spec item 5, addresses the "feels abstract / not a real city" weakness): schematic backdrop —
-  bake OSM building footprints + parks/water and render them behind the roads so it reads as a real city.**
+- 2026-06-14: **schematic city backdrop SHIPPED & verified** — bake fetches OSM buildings/greens/water as tiled
+  area polygons; client draws them behind the roads with brightened building outlines. Browser-verified at the
+  Mánesova × náměstí Jiřího z Poděbrad junction (recognisable square, courtyards, cross-street markings). Notified
+  Vlad (TG) with a screenshot. **Next candidates: house numbers on buildings; off-road building collision; then
+  accounts+stats (5) and admin+trip-replay (6) as their own modules. Hold all-Prague expansion until Vlad OKs this slice.**
