@@ -34,12 +34,20 @@
     #bigspeed #bigval{font-size:140px;line-height:.9;letter-spacing:-3px}
     #bigspeed .u{font-size:30px;font-weight:700;opacity:.85}
 
-    /* info block — current street name (white), or a coloured warning */
+    /* warnings / violations block — shown only when something is active (top) */
     #warn{left:50%;top:54px;transform:translateX(-50%);text-align:center;font-weight:800;
       font-size:18px;background:rgba(20,25,37,.9);border:1px solid var(--line);border-radius:12px;
       padding:8px 18px;max-width:70vw;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #warn.warnY{color:var(--warn);border-color:var(--warn)}
     #warn.bad{color:var(--bad);border-color:var(--bad)}
+    #warn.hidden{display:none}
+
+    /* current-street block — its own translucent block UNDER the warnings, always visible so
+       warnings/violations never cover the street name */
+    #street{left:50%;top:98px;transform:translateX(-50%);text-align:center;font-weight:700;
+      font-size:15px;background:rgba(20,25,37,.5);border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;padding:5px 16px;max-width:70vw;color:rgba(255,255,255,.78);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(2px)}
 
     #topbar{left:0;top:0;right:0;display:flex;justify-content:space-between;align-items:center;
       padding:12px 16px;pointer-events:auto}
@@ -125,7 +133,8 @@
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>
   <div class="hud" id="zoomind">zoom —</div>
-  <div class="hud" id="warn">—</div>
+  <div class="hud hidden" id="warn">—</div>
+  <div class="hud" id="street">—</div>
   <div class="hud" id="speedo"><div class="v" id="speed">0</div><div class="u">km/h</div></div>
   <div class="hud none" id="limit"><span id="limitval">—</span></div>
 

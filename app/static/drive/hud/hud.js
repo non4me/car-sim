@@ -10,7 +10,8 @@ export function makeHud() {
   const $ = (id) => document.getElementById(id);
   const speedo = $("speedo"), speed = $("speed");
   const limitBox = $("limit"), limitVal = $("limitval");
-  const info = $("warn");   // info block: current street name, or a warning
+  const warn = $("warn");     // warnings/violations block (top) — shown only when active
+  const streetEl = $("street"); // current-street block (below) — always visible, translucent
   const big = $("bigspeed"), bigVal = $("bigval");   // centre fading speed readout
   const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
   let lastKmh = null, changedAt = 0;
@@ -35,17 +36,22 @@ export function makeHud() {
         limitVal.textContent = "—";
       }
 
-      // info block — priority: boundary > off-road > over-limit > current street name.
-      // current street = white, "Mimo vozovku" = yellow, violations/boundary = red.
-      let text, cls;
-      if (r.boundary) { text = STR.boundary; cls = "bad"; }
-      else if (r.offRoad) { text = STR.offroad; cls = "warnY"; }
-      else if (r.oncoming) { text = STR.oncoming; cls = "bad"; }
-      else if (r.over) { text = `${STR.over} — ${r.limit} km/h`; cls = "bad"; }
-      else { text = r.street || "—"; cls = "street"; }
-      info.textContent = text;
-      info.classList.remove("bad", "warnY", "street");
-      info.classList.add(cls);
+      // current street — its own always-on translucent block (never hidden by warnings)
+      streetEl.textContent = r.street || "—";
+
+      // warnings/violations block (above the street) — shown only when something is active, so
+      // it never covers the street name. Priority: boundary > off-road > oncoming > over-limit.
+      let wtext = null, wcls = "bad";
+      if (r.boundary) wtext = STR.boundary;
+      else if (r.offRoad) { wtext = STR.offroad; wcls = "warnY"; }
+      else if (r.oncoming) wtext = STR.oncoming;
+      else if (r.over) wtext = `${STR.over} — ${r.limit} km/h`;
+      warn.classList.toggle("hidden", !wtext);
+      if (wtext) {
+        warn.textContent = wtext;
+        warn.classList.remove("bad", "warnY");
+        warn.classList.add(wcls);
+      }
     },
   };
 }
