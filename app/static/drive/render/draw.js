@@ -79,13 +79,18 @@ export function draw(ctx, view, map, car, rules) {
     }
   }
 
-  // 3) junction control dots
+  // 3) junction control — a faint dot when zoomed out, a proper billboarded sign glyph when
+  //    zoomed in (STOP octagon, give-way inverted triangle, traffic-signal lights).
   for (const j of map.junctions) {
     if (j.ctrl === "priority" || !view.near(j.x, j.y, R)) continue;
     const [X, Y] = view.project(j.x, j.y);
-    ctx.beginPath(); ctx.arc(X, Y, Math.max(2.5, zoom * 0.5), 0, 7);
-    ctx.fillStyle = j.ctrl === "signals" ? "#f6c453" : j.ctrl === "stop" ? "#e5484d" : "#5b9cff";
-    ctx.fill();
+    if (zoom >= 6) {
+      drawSign(ctx, X, Y, j.ctrl, Math.max(9, Math.min(26, zoom * 1.15)));
+    } else {
+      ctx.beginPath(); ctx.arc(X, Y, Math.max(2, zoom * 0.5), 0, 7);
+      ctx.fillStyle = j.ctrl === "signals" ? "#f6c453" : j.ctrl === "stop" ? "#e5484d" : "#5b9cff";
+      ctx.fill();
+    }
   }
 
   // 4) street-name labels ON the connecting roads at intersections (NOT the current
@@ -153,6 +158,59 @@ function drawChevron(ctx, view, wx, wy, dirx, diry, half) {
   ctx.lineTo(vx, vy);
   ctx.lineTo(vx - ux * half - px * half * 0.8, vy - uy * half - py * half * 0.8);
   ctx.stroke();
+}
+
+// Junction control signs, drawn BILLBOARDED (axis-aligned in screen space, so they stay upright
+// and readable no matter how the heading-up camera is rotated). `s` is the glyph half-size in px.
+function drawSign(ctx, X, Y, ctrl, s) {
+  ctx.save();
+  ctx.lineJoin = "round";
+  if (ctrl === "stop") drawStopSign(ctx, X, Y, s);
+  else if (ctrl === "give_way") drawYieldSign(ctx, X, Y, s);
+  else if (ctrl === "signals") drawSignal(ctx, X, Y, s);
+  ctx.restore();
+}
+
+function drawStopSign(ctx, X, Y, s) {
+  ctx.beginPath();                                   // red octagon (flat top + bottom)
+  for (let i = 0; i < 8; i++) {
+    const a = Math.PI / 8 + i * Math.PI / 4;
+    const px = X + s * Math.cos(a), py = Y + s * Math.sin(a);
+    i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "#d2231f"; ctx.fill();
+  ctx.lineWidth = Math.max(1, s * 0.12); ctx.strokeStyle = "#fff"; ctx.stroke();
+  if (s >= 18) {                                     // only legible once zoomed in close
+    ctx.fillStyle = "#fff";
+    ctx.font = `800 ${Math.round(s * 0.5)}px ui-sans-serif,system-ui,sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("STOP", X, Y + s * 0.05);
+  }
+}
+
+function drawYieldSign(ctx, X, Y, s) {
+  const r = s * 1.15;                                // downward equilateral triangle, white + red rim
+  ctx.beginPath();
+  ctx.moveTo(X, Y + r);                              // bottom point
+  ctx.lineTo(X - r * 0.866, Y - r * 0.5);            // top-left
+  ctx.lineTo(X + r * 0.866, Y - r * 0.5);            // top-right
+  ctx.closePath();
+  ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.lineWidth = Math.max(1.2, s * 0.22); ctx.strokeStyle = "#d2231f"; ctx.stroke();
+}
+
+function drawSignal(ctx, X, Y, s) {
+  const w = s * 0.95, h = s * 2.1;                   // dark housing + three lights (red/amber/green)
+  roundRect(ctx, X - w / 2, Y - h / 2, w, h, w * 0.32);
+  ctx.fillStyle = "#15181f"; ctx.fill();
+  ctx.lineWidth = Math.max(1, s * 0.1); ctx.strokeStyle = "#39404e"; ctx.stroke();
+  const rr = w * 0.3, cols = ["#e5484d", "#f6c453", "#34d399"];
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.arc(X, Y - h * 0.30 + i * h * 0.30, rr, 0, 7);
+    ctx.fillStyle = cols[i]; ctx.fill();
+  }
 }
 
 // Labels for the ADJOINING streets — placed AT THE START of each cross street (a short way

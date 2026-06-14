@@ -61,7 +61,9 @@ def fetch_osm(bbox) -> dict:
          f'way["leisure"~"^(park|garden|playground|pitch|recreation_ground|dog_park)$"]{bb};'
          f'way["landuse"~"^(grass|forest|meadow|village_green|cemetery|recreation_ground)$"]{bb};'
          f'way["natural"="water"]{bb};'
-         f");out body; >; out skel qt;")
+         # `out body` on the recursed nodes (not `skel`) so node TAGS come through —
+         # we need highway=traffic_signals/stop/give_way to derive junction control.
+         f");out body; >; out body qt;")
     return get(OVERPASS, data=q.encode("utf-8"))
 
 
@@ -152,8 +154,7 @@ def bake(district: str, country: str, debug_only: bool):
         for nid in set(wy["nodes"]):
             node_ways[nid] += 1
     control_nodes = {nid for nid, nd in nodes.items()
-                     if nd.get("tags", {}).get("highway") in ("traffic_signals", "stop", "give_way")
-                     or nd.get("tags", {}).get("crossing")}
+                     if nd.get("tags", {}).get("highway") in ("traffic_signals", "stop", "give_way")}
     inter = {nid for nid, c in node_ways.items() if c >= 2} | control_nodes
 
     # split ways into edges at intersection nodes
