@@ -3,6 +3,7 @@ const STR = {
   over: "Překročení rychlosti",
   boundary: "Dál cesta nevede — otočte se",
   offroad: "Mimo vozovku",
+  oncoming: "V protisměru!",
 };
 
 export function makeHud() {
@@ -39,6 +40,7 @@ export function makeHud() {
       let text, cls;
       if (r.boundary) { text = STR.boundary; cls = "bad"; }
       else if (r.offRoad) { text = STR.offroad; cls = "warnY"; }
+      else if (r.oncoming) { text = STR.oncoming; cls = "bad"; }
       else if (r.over) { text = `${STR.over} — ${r.limit} km/h`; cls = "bad"; }
       else { text = r.street || "—"; cls = "street"; }
       info.textContent = text;

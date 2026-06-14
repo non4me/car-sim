@@ -20,6 +20,22 @@ function edgeDist(e, x, y) {
   return best;
 }
 
+// nearest point on an edge + the local unit tangent (in geom/flow direction) — used for
+// the oncoming-lane / wrong-way check, which needs which side of the centreline the car is on.
+function nearestOnEdge(e, x, y) {
+  let best = Infinity, px = x, py = y, tx = 1, ty = 0;
+  const g = e.geom;
+  for (let i = 1; i < g.length; i++) {
+    const ax = g[i - 1][0], ay = g[i - 1][1], dx = g[i][0] - ax, dy = g[i][1] - ay;
+    const l2 = dx * dx + dy * dy;
+    let t = l2 ? ((x - ax) * dx + (y - ay) * dy) / l2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    const cx = ax + t * dx, cy = ay + t * dy, d = Math.hypot(x - cx, y - cy);
+    if (d < best) { best = d; px = cx; py = cy; const L = Math.hypot(dx, dy) || 1; tx = dx / L; ty = dy / L; }
+  }
+  return { d: best, px, py, tx, ty };
+}
+
 const CELL = 60; // metres
 const ckey = (x, y) => `${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`;
 
@@ -89,12 +105,13 @@ export async function loadMap(base) {
   }
 
   function nearestEdge(x, y) {
-    let best = null, bd = Infinity;
+    let best = null, bd = Infinity, info = null;
     for (const i of candidates(x, y)) {
-      const d = edgeDist(edges[i], x, y);
-      if (d < bd) { bd = d; best = edges[i]; }
+      const r = nearestOnEdge(edges[i], x, y);
+      if (r.d < bd) { bd = r.d; best = edges[i]; info = r; }
     }
-    return { edge: best, dist: bd };
+    return info ? { edge: best, dist: bd, px: info.px, py: info.py, tx: info.tx, ty: info.ty }
+                : { edge: null, dist: Infinity };
   }
 
   // on the drivable surface if within (road half-width + small margin) of an edge
