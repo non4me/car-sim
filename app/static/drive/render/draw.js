@@ -111,11 +111,11 @@ function drawStreetLabels(ctx, view, vis) {
     // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
     const a = view.rot, c = Math.cos(a), s = Math.sin(a);
     let raw = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
-    // shift the label ~80px along the road so it clears the car sprite (which is drawn
-    // on top at the anchor); bias toward screen-up so it reads ahead of the car.
+    // shift the label past the car's nose (sprite is drawn on top at the anchor); the
+    // car is P.length·zoom tall, so clear its half-length + margin. Bias toward screen-up.
     let ux = Math.cos(raw), uy = Math.sin(raw);
     if (uy > 0) { ux = -ux; uy = -uy; }
-    const off = 82;
+    const off = (P.length * view.zoom) / 2 + 22;
     const lx = sx + ux * off, ly = sy + uy * off;
     let ang = raw;
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
