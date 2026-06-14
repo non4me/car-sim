@@ -124,7 +124,7 @@ function drawAreas(ctx, view, map) {
 
 // One-way arrows: chevrons every ~STEP metres along the flow (geometry order = travel direction).
 function drawOnewayArrows(ctx, view, geom, zoom) {
-  const STEP = 20;                                       // metres between chevrons
+  const STEP = 14;                                       // metres between chevrons
   const half = Math.min(11, Math.max(3.5, zoom * 0.5));  // chevron arm length in px
   let nextAt = STEP * 0.5, dist = 0;
   for (let i = 1; i < geom.length; i++) {
@@ -217,9 +217,11 @@ function walkAlong(geom, fromStart, dist) {
   return { x: b[0], y: b[1], dirx: ex / L, diry: ey / L };
 }
 
-// Stylized top-down car (nose-up: forward = −y). Body + cabin/glass + wheels + lights.
+// Stylized top-down car (nose-up: forward = −y). Below ~5 px/m it becomes a fixed-size
+// arrow for the bird's-eye overview mode (otherwise the real-scale car is a sub-pixel dot).
 function drawCar(ctx, view) {
   const [X, Y] = view.anchor();
+  if (view.zoom < 5) { drawCarArrow(ctx, X, Y); return; }
   const L = P.length * view.zoom, W = P.width * view.zoom;
   const r = (x, y, w, h, rad) => roundRect(ctx, x, y, w, h, rad);
   ctx.save();
@@ -261,5 +263,23 @@ function drawCar(ctx, view) {
   r(-W * 0.40, L / 2 - L * 0.05, W * 0.18, L * 0.035, 1.5); ctx.fill();
   r(W * 0.22, L / 2 - L * 0.05, W * 0.18, L * 0.035, 1.5); ctx.fill();
 
+  ctx.restore();
+}
+
+// fixed-size nose-up arrow for overview mode (forward = screen up)
+function drawCarArrow(ctx, X, Y) {
+  const r = 13;
+  ctx.save();
+  ctx.translate(X, Y);
+  ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 5;
+  ctx.beginPath();
+  ctx.moveTo(0, -r);                 // tip (forward)
+  ctx.lineTo(r * 0.72, r * 0.8);
+  ctx.lineTo(0, r * 0.4);
+  ctx.lineTo(-r * 0.72, r * 0.8);
+  ctx.closePath();
+  ctx.fillStyle = "#5b9cff"; ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(10,14,22,.6)"; ctx.stroke();
   ctx.restore();
 }

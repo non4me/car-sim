@@ -9,8 +9,9 @@ import { makeHud } from "./hud/hud.js";
 import { makeMinimap } from "./hud/minimap.js";
 import { runLoop } from "./engine/loop.js";
 
-const ZMIN = 10, ZMAX = 25;     // absolute zoom bounds in px/metre (Vlad msg 2688)
+const ZMIN = 2, ZMAX = 25;      // absolute zoom bounds in px/metre (Vlad msg 2691: min 2 = overview)
 const ZOOM_DEFAULT = 16;        // starting zoom (px/m), wheel-adjustable, persisted
+const OVERVIEW_Z = 5;           // below this px/m → bird's-eye overview (car drawn as an arrow)
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
