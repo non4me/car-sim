@@ -8,9 +8,10 @@ const CLASS_TINT = {
   motorway: "#48525f", trunk: "#444e5c", primary: "#3e4654",
   secondary: "#39414e", tertiary: "#343c48",
 };
-// schematic backdrop fills (drawn behind the roads)
-const AREA_FILL = { building: "#222734", green: "#1d2c22", water: "#1b2c41" };
-const AREA_STROKE = { building: "#2c3242", green: "#243a2c", water: "#234057" };
+// schematic backdrop fills (drawn behind the roads). Buildings get a brighter edge so
+// the block structure reads like a city map; roads stay the lightest (drivable) layer.
+const AREA_FILL = { building: "#232a3a", green: "#1f3327", water: "#173757" };
+const AREA_STROKE = { building: "#46526b", green: "#335039", water: "#2c577a" };
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
