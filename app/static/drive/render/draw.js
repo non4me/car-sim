@@ -83,14 +83,20 @@ export function draw(ctx, view, map, car, rules) {
   //     (a road marking, so it's drawn on the asphalt and rotates with the road).
   if (zoom >= 9) drawStopLines(ctx, view, vis, map.junctions, zoom);
 
-  // 3) junction control — a faint dot when zoomed out, a proper billboarded sign glyph when
-  //    zoomed in (STOP octagon, give-way inverted triangle, traffic-signal lights).
-  for (const j of map.junctions) {
-    if (j.ctrl === "priority" || !view.near(j.x, j.y, R)) continue;
-    const [X, Y] = view.project(j.x, j.y);
-    if (zoom >= 6) {
-      drawSign(ctx, X, Y, j.ctrl, Math.max(9, Math.min(26, zoom * 1.15)));
-    } else {
+  // 3) signs — billboarded glyphs (STOP / give-way / signal / priority-road), placed per
+  //    approach (explicit OSM tags + derived from road-class priority). Zoomed out, the few
+  //    explicitly-controlled junctions still get a faint dot so they read on the overview.
+  if (zoom >= 6) {
+    const ss = Math.max(9, Math.min(26, zoom * 1.15));
+    for (const s of map.signs) {
+      if (!view.near(s.x, s.y, R)) continue;
+      const [X, Y] = view.project(s.x, s.y);
+      drawSign(ctx, X, Y, s.kind, ss);
+    }
+  } else {
+    for (const j of map.junctions) {
+      if (j.ctrl === "priority" || !view.near(j.x, j.y, R)) continue;
+      const [X, Y] = view.project(j.x, j.y);
       ctx.beginPath(); ctx.arc(X, Y, Math.max(2, zoom * 0.5), 0, 7);
       ctx.fillStyle = j.ctrl === "signals" ? "#f6c453" : j.ctrl === "stop" ? "#e5484d" : "#5b9cff";
       ctx.fill();
@@ -195,13 +201,24 @@ function drawStopLines(ctx, view, vis, junctions, zoom) {
 
 // Junction control signs, drawn BILLBOARDED (axis-aligned in screen space, so they stay upright
 // and readable no matter how the heading-up camera is rotated). `s` is the glyph half-size in px.
-function drawSign(ctx, X, Y, ctrl, s) {
+function drawSign(ctx, X, Y, kind, s) {
   ctx.save();
   ctx.lineJoin = "round";
-  if (ctrl === "stop") drawStopSign(ctx, X, Y, s);
-  else if (ctrl === "give_way") drawYieldSign(ctx, X, Y, s);
-  else if (ctrl === "signals") drawSignal(ctx, X, Y, s);
+  if (kind === "stop") drawStopSign(ctx, X, Y, s);
+  else if (kind === "give_way") drawYieldSign(ctx, X, Y, s);
+  else if (kind === "signal" || kind === "signals") drawSignal(ctx, X, Y, s);
+  else if (kind === "priority_road") drawPriorityRoad(ctx, X, Y, s);
   ctx.restore();
+}
+
+// "Hlavní pozemní komunikace" (priority road) — yellow diamond with a white border.
+function drawPriorityRoad(ctx, X, Y, s) {
+  const r = s * 1.02;
+  ctx.beginPath();
+  ctx.moveTo(X, Y - r); ctx.lineTo(X + r, Y); ctx.lineTo(X, Y + r); ctx.lineTo(X - r, Y);
+  ctx.closePath();
+  ctx.fillStyle = "#f4c20d"; ctx.fill();
+  ctx.lineWidth = Math.max(1, s * 0.16); ctx.strokeStyle = "#fff"; ctx.stroke();
 }
 
 function drawStopSign(ctx, X, Y, s) {

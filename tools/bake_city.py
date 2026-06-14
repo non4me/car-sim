@@ -193,9 +193,18 @@ def bake(district: str, country: str, debug_only: bool):
     for ei, ed in enumerate(edges):
         edge_by_node[ed["a"]].append(ei)
         edge_by_node[ed["b"]].append(ei)
-    junctions = []
+    def tangent_into(ed, node):
+        """Unit tangent of edge `ed` pointing INTO the edge, away from junction `node`."""
+        g = ed["geom"]
+        (ax, ay), (bx, by) = (g[0], g[1]) if ed["a"] == node else (g[-1], g[-2])
+        dx, dy = bx - ax, by - ay
+        L = math.hypot(dx, dy) or 1.0
+        return dx / L, dy / L
+
+    junctions, signs = [], []
     for nid in inter:
-        deg = len(edge_by_node.get(nid, []))
+        inc = edge_by_node.get(nid, [])
+        deg = len(inc)
         if deg < 2 and nid not in control_nodes:
             continue
         nd = nodes.get(nid)
@@ -205,9 +214,34 @@ def bake(district: str, country: str, debug_only: bool):
         ctrl = ("signals" if ntags.get("highway") == "traffic_signals"
                 else "stop" if ntags.get("highway") == "stop"
                 else "give_way" if ntags.get("highway") == "give_way"
-                else "priority")   # derived (class/right) — resolved at runtime
-        x, y = to_xy(nd["lat"], nd["lon"])
-        junctions.append({"x": round(x, 1), "y": round(y, 1), "ctrl": ctrl, "deg": deg})
+                else "priority")   # derived (class/right) — resolved below
+        nx, ny = to_xy(nd["lat"], nd["lon"])
+        junctions.append({"x": round(nx, 1), "y": round(ny, 1), "ctrl": ctrl, "deg": deg})
+
+        # Signs (vyhláška 294/2015): explicit OSM control, else DERIVE from road-class priority.
+        # At a neravnoznačná (mixed-class) junction the minor approaches yield ("dej přednost" 🔻)
+        # and the main road is "hlavní" 🟡; equal-rank junctions are přednost zprava → unsigned.
+        def place(ei, kind):
+            ed = edges[ei]
+            tx, ty = tangent_into(ed, nid)
+            sb, off = ed["width"] / 2 + 4.0, ed["width"] / 2 + 1.5   # out along approach, to the right
+            px, py = nx + tx * sb + (-ty) * off, ny + ty * sb + tx * off
+            signs.append({"x": round(px, 1), "y": round(py, 1), "kind": kind})
+
+        ranks = [(ei, hierarchy.get(edges[ei]["cls"], 99)) for ei in inc]
+        min_rank = min((r for _, r in ranks), default=99)
+        mains = [ei for ei, r in ranks if r == min_rank]
+        minors = [ei for ei, r in ranks if r > min_rank]
+        if ctrl == "signals":
+            signs.append({"x": round(nx, 1), "y": round(ny, 1), "kind": "signal"})
+        elif ctrl in ("stop", "give_way"):
+            for ei in (minors or inc):
+                place(ei, ctrl)
+        elif minors and mains:                       # derived: mixed classes
+            for ei in minors:
+                place(ei, "give_way")
+            for ei in mains:
+                place(ei, "priority_road")
 
     # bounds (metres)
     xs = [p[0] for ed in edges for p in ed["geom"]]
@@ -226,7 +260,7 @@ def bake(district: str, country: str, debug_only: bool):
         return
 
     # tile by grid
-    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": []})
+    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": [], "signs": []})
     for ed in edges:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ed["geom"]}
         for k in keys:
@@ -234,6 +268,9 @@ def bake(district: str, country: str, debug_only: bool):
     for jc in junctions:
         k = f"{int(jc['x']//TILE_M)}_{int(jc['y']//TILE_M)}"
         tiles[k]["junctions"].append(jc)
+    for sg in signs:
+        k = f"{int(sg['x']//TILE_M)}_{int(sg['y']//TILE_M)}"
+        tiles[k]["signs"].append(sg)
     for ar in areas:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ar["poly"]}
         for k in keys:
@@ -248,12 +285,13 @@ def bake(district: str, country: str, debug_only: bool):
         "country": country, "city": "praha", "district": district,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
-        "n_areas": len(areas), "version": 2, "profile": country,
+        "n_areas": len(areas), "n_signs": len(signs), "version": 2, "profile": country,
         "attribution": "© OpenStreetMap contributors (ODbL)",
     }
     (out / "meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+    sk = Counter(s["kind"] for s in signs)
     print(f"[{district}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
-          f"{len(junctions)} junctions, {len(areas)} areas)")
+          f"{len(junctions)} junctions, {len(areas)} areas, {len(signs)} signs {dict(sk)})")
 
 
 AREA_FILL = {"building": (40, 46, 58), "green": (32, 52, 40), "water": (30, 48, 70)}  # debug PNG

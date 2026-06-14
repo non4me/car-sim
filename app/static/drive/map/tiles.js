@@ -54,7 +54,7 @@ export async function loadMap(base) {
   };
 
   const seen = new Set(), seenA = new Set();
-  const edges = [], junctions = [], areas = [];
+  const edges = [], junctions = [], areas = [], signs = [];
   for (const t of tiles) {
     for (const e of t.edges) {
       const sig = `${e.a}_${e.b}_${e.cls}_${e.geom.length}`;
@@ -64,6 +64,7 @@ export async function loadMap(base) {
       edges.push(e);
     }
     for (const j of t.junctions) junctions.push(j);
+    for (const s of t.signs || []) signs.push(s);
     for (const a of t.areas || []) {     // schematic backdrop polygons (span tiles → dedupe)
       const sig = `${a.kind}_${a.poly.length}_${a.poly[0][0]}_${a.poly[0][1]}`;
       if (seenA.has(sig)) continue;
@@ -123,5 +124,5 @@ export async function loadMap(base) {
     return false;
   }
 
-  return { meta, edges, junctions, areas, nearestEdge, onSurface };
+  return { meta, edges, junctions, areas, signs, nearestEdge, onSurface };
 }
