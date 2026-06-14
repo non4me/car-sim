@@ -5,50 +5,115 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>car-sim — drive · {{ district }}</title>
   <style>
-    :root{ --panel:#141925; --line:#222a3a; --accent:#5b9cff; --bad:#f87171; --good:#34d399; }
+    :root{ --panel:#141925; --line:#222a3a; --accent:#5b9cff; --bad:#f87171; --warn:#f6c453; --good:#34d399; }
     html,body{margin:0;height:100%;background:#0b0e14;color:#e6e9f0;
       font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
     #game{display:block;width:100vw;height:100vh;touch-action:none}
     .hud{position:fixed;pointer-events:none;z-index:10}
+    button{font-family:inherit}
+
     #speedo{left:18px;bottom:18px;background:rgba(20,25,37,.82);border:1px solid var(--line);
       border-radius:14px;padding:10px 16px;min-width:104px;text-align:center;backdrop-filter:blur(4px)}
     #speedo .v{font-size:34px;font-weight:800;line-height:1}
     #speedo.over .v{color:var(--bad)}
     #speedo .u{font-size:11px;color:#8a93a6;letter-spacing:.08em}
+
     #limit{right:18px;bottom:18px;width:74px;height:74px;border-radius:50%;background:#fff;
       border:7px solid var(--bad);display:flex;align-items:center;justify-content:center}
     #limit span{color:#111;font-size:26px;font-weight:800}
     #limit.none{opacity:.35}
+
+    /* info block — current street name (white), or a coloured warning */
     #warn{left:50%;top:54px;transform:translateX(-50%);text-align:center;font-weight:800;
       font-size:18px;background:rgba(20,25,37,.9);border:1px solid var(--line);border-radius:12px;
-      padding:10px 18px;display:none;max-width:80vw}
-    #warn.show{display:block}
+      padding:8px 18px;max-width:70vw;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #warn.warnY{color:var(--warn);border-color:var(--warn)}
     #warn.bad{color:var(--bad);border-color:var(--bad)}
+
     #topbar{left:0;top:0;right:0;display:flex;justify-content:space-between;align-items:center;
       padding:12px 16px;pointer-events:auto}
+    #topbar .tb-left{display:flex;align-items:center;gap:10px}
     #topbar a{color:var(--accent);text-decoration:none;font-weight:700}
     #topbar .meta{font-size:12px;color:#8a93a6}
-    #help{right:18px;top:54px;background:rgba(20,25,37,.82);border:1px solid var(--line);
-      border-radius:12px;padding:10px 14px;font-size:12px;color:#aab2c4;line-height:1.6}
-    kbd{background:#0b0e14;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11px}
+    #helpBtn{pointer-events:auto;cursor:pointer;width:24px;height:24px;border-radius:50%;
+      background:rgba(20,25,37,.85);border:1px solid var(--line);color:#aab2c4;font-weight:800;
+      font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
+    #helpBtn:hover{color:#fff;border-color:var(--accent)}
+
+    /* minimap — top right, under the location label */
+    #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
+      border:1px solid var(--line);border-radius:12px;padding:6px}
+    #minimap canvas{display:block;width:138px;height:138px;border-radius:8px;background:#0a0d13}
+    .mini-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+    .mini-bar .lvl{font-size:11px;color:#8a93a6;font-weight:700;padding-left:4px}
+    .mini-z{display:flex;gap:6px}
+    .mini-z button{cursor:pointer;width:24px;height:24px;border-radius:7px;background:rgba(28,34,48,.95);
+      border:1px solid var(--line);color:#cdd5e6;font-size:15px;font-weight:800;line-height:1;
+      display:flex;align-items:center;justify-content:center}
+    .mini-z button:hover{color:#fff;border-color:var(--accent)}
+
+    /* controls overlay — shown at start and on '?' */
+    #helpOverlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+      background:rgba(8,11,16,.55);backdrop-filter:blur(2px)}
+    #helpOverlay.hidden{display:none}
+    #helpCard{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+      padding:22px 26px;max-width:430px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+    #helpCard h2{margin:0 0 14px;font-size:18px}
+    #helpCard .krow{margin:8px 0;color:#c4ccdc;font-size:14px}
+    #helpCard button{margin-top:16px;cursor:pointer;background:var(--accent);border:none;color:#06203f;
+      font-weight:800;font-size:15px;padding:9px 26px;border-radius:10px}
+    kbd{background:#0b0e14;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:12px}
   </style>
 </head>
 <body>
   <canvas id="game"></canvas>
 
   <div class="hud" id="topbar">
-    <a href="/">← car-sim</a>
-    <div class="meta">Praha · {{ district }} · <span id="street">—</span></div>
+    <div class="tb-left">
+      <a href="/">← car-sim</a>
+      <button id="helpBtn" title="Ovládání">?</button>
+    </div>
+    <div class="meta">Praha · {{ district }}</div>
   </div>
-  <div class="hud" id="help">
-    <div><kbd>↑</kbd>/<kbd>↓</kbd> plyn / zpátečka · <kbd>←</kbd>/<kbd>→</kbd> řízení · <kbd>Space</kbd> brzda</div>
+
+  <div class="hud" id="minimap">
+    <canvas id="mini" width="138" height="138"></canvas>
+    <div class="mini-bar">
+      <span class="lvl" id="miniLevel">+1</span>
+      <span class="mini-z">
+        <button id="miniMinus" title="Oddálit">−</button>
+        <button id="miniPlus" title="Přiblížit">+</button>
+      </span>
+    </div>
   </div>
-  <div class="hud" id="warn"></div>
+
+  <div class="hud" id="warn">—</div>
   <div class="hud" id="speedo"><div class="v" id="speed">0</div><div class="u">km/h</div></div>
   <div class="hud none" id="limit"><span id="limitval">—</span></div>
 
+  <div id="helpOverlay">
+    <div id="helpCard">
+      <h2>Ovládání</h2>
+      <div class="krow"><kbd>↑</kbd> plyn (rychlost drží) · <kbd>↓</kbd> brzda / zpátečka</div>
+      <div class="krow"><kbd>←</kbd> <kbd>→</kbd> otáčení na místě / řízení</div>
+      <div class="krow"><kbd>Space</kbd> prudké brzdění</div>
+      <div class="krow">kolečko myši = přiblížení mapy</div>
+      <button id="helpClose">Jet →</button>
+    </div>
+  </div>
+
   <script>
     window.CARSIM = { dataBase: "{{ data_base }}", district: "{{ district }}" };
+    (function () {
+      const ov = document.getElementById("helpOverlay");
+      const close = () => ov.classList.add("hidden");
+      const open = () => ov.classList.remove("hidden");
+      document.getElementById("helpBtn").addEventListener("click", (e) => { e.preventDefault(); open(); });
+      document.getElementById("helpClose").addEventListener("click", (e) => { e.preventDefault(); close(); });
+      ov.addEventListener("click", (e) => { if (e.target === ov) close(); });
+      window.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+      // shown by default at start; user dismisses with "Jet"
+    })();
   </script>
   <script type="module" src="{{ asset_base }}/drive/main.js"></script>
 </body>

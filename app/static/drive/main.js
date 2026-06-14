@@ -6,6 +6,7 @@ import { makeInput } from "./vehicle/input.js";
 import { draw } from "./render/draw.js";
 import { evalRules } from "./rules/limits.js";
 import { makeHud } from "./hud/hud.js";
+import { makeMinimap } from "./hud/minimap.js";
 import { runLoop } from "./engine/loop.js";
 
 const ZMIN = 14, ZMAX = 150;   // absolute zoom bounds (px per metre)
@@ -25,14 +26,15 @@ function pickSpawn(map) {
   return { x: (a[0] + c[0]) / 2, y: (a[1] + c[1]) / 2, h: Math.atan2(c[1] - a[1], c[0] - a[0]) };
 }
 
-// target zoom so the current road occupies 30–70% of viewport width by its real width.
-// At speed, ease the zoom OUT for look-ahead (the 30–70% framing holds at rest); without
-// this, the close framing leaves almost no road visible ahead at 50 km/h.
+// Default framing pulled ~2× further out than the first cut (Vlad: "зум слишком близкий"):
+// the road occupies ~15–35% of viewport width by its real width. The wheel (userMul 0.6–4.0)
+// then reaches ~2× the old default at the close end. At speed the zoom eases out a touch more
+// for look-ahead.
 function autoZoom(view, roadWidth, speed = 0) {
   const t = Math.min(1, Math.max(0, (roadWidth - 3.5) / (14 - 3.5)));
-  const pct = 0.30 + t * 0.40;               // 30%..70% of viewport width by road width
+  const pct = 0.15 + t * 0.20;               // 15%..35% of viewport width by road width
   const base = (pct * view.w) / roadWidth;
-  const sf = 1 - 0.45 * Math.min(1, speed / 16);  // 1.0 at rest → 0.55 at ~58 km/h
+  const sf = 1 - 0.25 * Math.min(1, speed / 16);  // 1.0 at rest → 0.75 at ~58 km/h
   return base * sf;
 }
 
@@ -48,6 +50,12 @@ async function boot() {
   const car = new Car(sp.x, sp.y, sp.h);
   const input = makeInput();
   const hud = makeHud();
+  const minimap = makeMinimap(
+    document.getElementById("mini"),
+    document.getElementById("miniPlus"),
+    document.getElementById("miniMinus"),
+    document.getElementById("miniLevel"),
+  );
   let rules = evalRules(map, car);
   let dbg = null;
   view.zoom = autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul;
@@ -56,7 +64,7 @@ async function boot() {
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
     view.userMul *= e.deltaY < 0 ? 1.12 : 1 / 1.12;
-    view.userMul = Math.max(0.45, Math.min(3.2, view.userMul));
+    view.userMul = Math.max(0.6, Math.min(4.0, view.userMul));
   }, { passive: false });
 
   function update(dt) {
@@ -72,8 +80,9 @@ async function boot() {
     const target = Math.max(ZMIN, Math.min(ZMAX, autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
     view.setCamera(car.x, car.y, car.h);         // heading-up
-    draw(ctx, view, map, car);
+    draw(ctx, view, map, car, rules);
     hud.update(rules);
+    minimap.draw(map, car, rules.street);
   }
 
   window.__drive = {

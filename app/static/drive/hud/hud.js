@@ -9,8 +9,7 @@ export function makeHud() {
   const $ = (id) => document.getElementById(id);
   const speedo = $("speedo"), speed = $("speed");
   const limitBox = $("limit"), limitVal = $("limitval");
-  const warn = $("warn"), street = $("street");
-  let warnUntil = 0;
+  const info = $("warn");   // info block: current street name, or a warning
 
   return {
     update(r) {
@@ -25,19 +24,16 @@ export function makeHud() {
         limitVal.textContent = "—";
       }
 
-      street.textContent = r.street || "—";
-
-      let msg = "", bad = false;
-      if (r.boundary) { msg = STR.boundary; bad = true; }
-      else if (r.over) { msg = `${STR.over} — ${r.limit} km/h`; bad = true; }
-      else if (r.offRoad) { msg = STR.offroad; bad = false; }
-      if (msg) {
-        warn.textContent = msg;
-        warn.classList.toggle("bad", bad);
-        warn.classList.add("show");
-      } else {
-        warn.classList.remove("show");
-      }
+      // info block — priority: boundary > off-road > over-limit > current street name.
+      // current street = white, "Mimo vozovku" = yellow, violations/boundary = red.
+      let text, cls;
+      if (r.boundary) { text = STR.boundary; cls = "bad"; }
+      else if (r.offRoad) { text = STR.offroad; cls = "warnY"; }
+      else if (r.over) { text = `${STR.over} — ${r.limit} km/h`; cls = "bad"; }
+      else { text = r.street || "—"; cls = "street"; }
+      info.textContent = text;
+      info.classList.remove("bad", "warnY", "street");
+      info.classList.add(cls);
     },
   };
 }

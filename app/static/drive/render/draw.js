@@ -31,7 +31,7 @@ function path(ctx, view, geom) {
   }
 }
 
-export function draw(ctx, view, map, car) {
+export function draw(ctx, view, map, car, rules) {
   const { w, h, dpr, zoom } = view;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = BG;
@@ -78,8 +78,9 @@ export function draw(ctx, view, map, car) {
     ctx.fill();
   }
 
-  // 4) street-name labels ON the roads (subtle), one per name nearest the car
-  drawStreetLabels(ctx, view, vis);
+  // 4) street-name labels ON the connecting roads at intersections (NOT the current
+  //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
+  drawStreetLabels(ctx, view, vis, rules && rules.street);
 
   // 5) the car — always nose-up at the anchor
   drawCar(ctx, view);
@@ -111,13 +112,17 @@ function drawAreas(ctx, view, map) {
   }
 }
 
-function drawStreetLabels(ctx, view, vis) {
+// Labels for the ADJOINING streets at intersections — every visible named street EXCEPT
+// the one the car is on (that name is shown in the HUD info block). One per name, nearest
+// instance, only within range so it reads as "the cross street here is X".
+function drawStreetLabels(ctx, view, vis, currentStreet) {
   const zoom = view.zoom;
   if (zoom < 8) return;                       // too zoomed out to be legible/useful
   const cx = view.cx, cy = view.cy;           // camera centre = car, in world metres
+  const MAXD = 90 * 90;                        // only label cross streets within ~90 m
   const byName = new Map();
   for (const e of vis) {
-    if (!e.name) continue;
+    if (!e.name || e.name === currentStreet) continue;   // skip the current street
     // nearest point on this edge's polyline to the car, plus that segment's direction
     let bd = Infinity, bx = 0, by = 0, dirx = 1, diry = 0;
     for (let i = 1; i < e.geom.length; i++) {
@@ -130,6 +135,7 @@ function drawStreetLabels(ctx, view, vis) {
       const d = (px - cx) ** 2 + (py - cy) ** 2;
       if (d < bd) { bd = d; bx = px; by = py; dirx = ex; diry = ey; }
     }
+    if (bd > MAXD) continue;
     const prev = byName.get(e.name);
     if (!prev || bd < prev.bd) byName.set(e.name, { bd, bx, by, dirx, diry, name: e.name });
   }
@@ -137,42 +143,65 @@ function drawStreetLabels(ctx, view, vis) {
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (const L of byName.values()) {
     const [sx, sy] = view.project(L.bx, L.by);
-    // direction in screen space so text runs along the road. project() rotates by
+    // direction in screen space so text runs along the cross street. project() rotates by
     // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
     const a = view.rot, c = Math.cos(a), s = Math.sin(a);
-    let raw = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
-    // shift the label past the car's nose (sprite is drawn on top at the anchor); the
-    // car is P.length·zoom tall, so clear its half-length + margin. Bias toward screen-up.
-    let ux = Math.cos(raw), uy = Math.sin(raw);
-    if (uy > 0) { ux = -ux; uy = -uy; }
-    const off = (P.length * view.zoom) / 2 + 22;
-    const lx = sx + ux * off, ly = sy + uy * off;
-    let ang = raw;
+    let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
     ctx.save();
-    ctx.translate(lx, ly);
+    ctx.translate(sx, sy);
     ctx.rotate(ang);
-    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.7)";
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.75)";
     ctx.strokeText(L.name, 0, 0);             // halo for legibility on asphalt
-    ctx.fillStyle = "rgba(228,234,246,.72)";
+    ctx.fillStyle = "rgba(210,220,236,.78)";
     ctx.fillText(L.name, 0, 0);
     ctx.restore();
   }
 }
 
+// Stylized top-down car (nose-up: forward = −y). Body + cabin/glass + wheels + lights.
 function drawCar(ctx, view) {
   const [X, Y] = view.anchor();
   const L = P.length * view.zoom, W = P.width * view.zoom;
+  const r = (x, y, w, h, rad) => roundRect(ctx, x, y, w, h, rad);
   ctx.save();
-  ctx.translate(X, Y);                        // nose-up: forward = -y (screen up)
+  ctx.translate(X, Y);
+
+  // wheels (drawn under the body, poking out at the sides)
+  const wl = L * 0.20, ww = W * 0.16, wx = W * 0.5 - ww * 0.35;
+  ctx.fillStyle = "#15181f";
+  for (const sy of [-L * 0.30, L * 0.30]) {      // front & rear axles
+    for (const sx of [-wx, wx - ww]) {           // left & right
+      r(sx, sy - wl / 2, ww, wl, ww * 0.35);
+      ctx.fill();
+    }
+  }
+
+  // body
   ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = 6; ctx.shadowOffsetY = 1;
-  roundRect(ctx, -W / 2, -L / 2, W, L, Math.min(L, W) * 0.28);
-  ctx.fillStyle = "#5b9cff";
-  ctx.fill();
+  const grad = ctx.createLinearGradient(0, -L / 2, 0, L / 2);
+  grad.addColorStop(0, "#6fa8ff"); grad.addColorStop(1, "#4a86e6");
+  r(-W / 2, -L / 2, W, L, Math.min(L, W) * 0.30);
+  ctx.fillStyle = grad; ctx.fill();
   ctx.shadowBlur = 0;
-  // windshield toward the front (top)
-  roundRect(ctx, -W * 0.34, -L / 2 + L * 0.08, W * 0.68, L * 0.22, 2);
-  ctx.fillStyle = "rgba(12,16,24,.85)";
-  ctx.fill();
+  // subtle body outline
+  ctx.lineWidth = Math.max(1, W * 0.04); ctx.strokeStyle = "rgba(10,14,22,.5)"; ctx.stroke();
+
+  // cabin (roof) — darker, toward the middle
+  r(-W * 0.34, -L * 0.10, W * 0.68, L * 0.42, W * 0.16);
+  ctx.fillStyle = "#39557f"; ctx.fill();
+  // windshield (front of cabin) + rear window — glass
+  ctx.fillStyle = "rgba(12,16,24,.88)";
+  r(-W * 0.30, -L * 0.10 - L * 0.085, W * 0.60, L * 0.10, 2); ctx.fill();  // windshield
+  r(-W * 0.27, L * 0.30, W * 0.54, L * 0.075, 2); ctx.fill();              // rear window
+
+  // headlights (front) & taillights (rear)
+  ctx.fillStyle = "#fff3c4";
+  r(-W * 0.42, -L / 2 + L * 0.015, W * 0.20, L * 0.05, 1.5); ctx.fill();
+  r(W * 0.22, -L / 2 + L * 0.015, W * 0.20, L * 0.05, 1.5); ctx.fill();
+  ctx.fillStyle = "#e5484d";
+  r(-W * 0.40, L / 2 - L * 0.05, W * 0.18, L * 0.035, 1.5); ctx.fill();
+  r(W * 0.22, L / 2 - L * 0.05, W * 0.18, L * 0.035, 1.5); ctx.fill();
+
   ctx.restore();
 }
