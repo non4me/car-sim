@@ -9,8 +9,8 @@ import { makeHud } from "./hud/hud.js";
 import { makeMinimap } from "./hud/minimap.js";
 import { runLoop } from "./engine/loop.js";
 
-const ZMIN = 14, ZMAX = 150;        // absolute zoom bounds (px per metre)
-const UMUL_MIN = 0.6, UMUL_MAX = 4.0;  // mouse-wheel zoom multiplier range
+const ZMIN = 10, ZMAX = 25;     // absolute zoom bounds in px/metre (Vlad msg 2688)
+const ZOOM_DEFAULT = 16;        // starting zoom (px/m), wheel-adjustable, persisted
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -27,17 +27,9 @@ function pickSpawn(map) {
   return { x: (a[0] + c[0]) / 2, y: (a[1] + c[1]) / 2, h: Math.atan2(c[1] - a[1], c[0] - a[0]) };
 }
 
-// Default framing pulled ~2× further out than the first cut (Vlad: "зум слишком близкий"):
-// the road occupies ~15–35% of viewport width by its real width. The wheel (userMul 0.6–4.0)
-// then reaches ~2× the old default at the close end. At speed the zoom eases out a touch more
-// for look-ahead.
-function autoZoom(view, roadWidth, speed = 0) {
-  const t = Math.min(1, Math.max(0, (roadWidth - 3.5) / (14 - 3.5)));
-  const pct = 0.15 + t * 0.20;               // 15%..35% of viewport width by road width
-  const base = (pct * view.w) / roadWidth;
-  const sf = 1 - 0.25 * Math.min(1, speed / 16);  // 1.0 at rest → 0.75 at ~58 km/h
-  return base * sf;
-}
+// Zoom is now an absolute px/metre the user controls with the wheel (Vlad directs by the
+// on-screen number). At speed it eases out a touch for look-ahead, never below ZMIN.
+const speedEase = (speed) => 1 - 0.2 * Math.min(1, speed / 16);   // 1.0 at rest → 0.8 at ~58 km/h
 
 async function boot() {
   const canvas = document.getElementById("game");
@@ -61,17 +53,16 @@ async function boot() {
   let dbg = null;
   let paused = false;
 
-  // persisted main-view zoom (mouse-wheel bias) — restored across sessions
-  const savedMul = parseFloat(localStorage.getItem("carsim_usermul"));
-  if (savedMul) view.userMul = Math.max(UMUL_MIN, Math.min(UMUL_MAX, savedMul));
-  view.zoom = autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul;
+  // persisted absolute zoom (px/m), restored across sessions
+  const clampZoom = (z) => Math.max(ZMIN, Math.min(ZMAX, z));
+  let zTarget = clampZoom(parseFloat(localStorage.getItem("carsim_zoom")) || ZOOM_DEFAULT);
+  view.zoom = zTarget;
 
-  // mouse-wheel zoom (user bias within bounds; persisted)
+  // mouse-wheel zoom (absolute px/m within bounds; persisted)
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
-    view.userMul *= e.deltaY < 0 ? 1.12 : 1 / 1.12;
-    view.userMul = Math.max(UMUL_MIN, Math.min(UMUL_MAX, view.userMul));
-    localStorage.setItem("carsim_usermul", view.userMul.toFixed(3));
+    zTarget = clampZoom(zTarget * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+    localStorage.setItem("carsim_zoom", zTarget.toFixed(2));
   }, { passive: false });
 
   // controls overlay (first visit only, then "?"), pause (Esc), any-key dismiss
@@ -101,19 +92,14 @@ async function boot() {
 
   const zoomEl = document.getElementById("zoomind");
   function render() {
-    const target = Math.max(ZMIN, Math.min(ZMAX, autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul));
+    const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
     view.setCamera(car.x, car.y, car.h);         // heading-up
     draw(ctx, view, map, car, rules);
     hud.update(rules);
     minimap.draw(map, car, rules.street);
-    // live zoom readout so Vlad can orient/direct by the number (current · wheel × · range)
-    if (zoomEl) {
-      const base0 = autoZoom(view, rules.width, 0);   // at-rest framing for a stable range
-      const lo = Math.round(Math.max(ZMIN, base0 * UMUL_MIN));
-      const hi = Math.round(Math.min(ZMAX, base0 * UMUL_MAX));
-      zoomEl.textContent = `zoom ${Math.round(view.zoom)} px/m · ×${view.userMul.toFixed(2)} · ${lo}–${hi}`;
-    }
+    // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
+    if (zoomEl) zoomEl.textContent = `zoom ${Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
   }
 
   window.__drive = {
