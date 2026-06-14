@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — learn to drive a real city</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+    h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:.2em 0}
+    .accent{color:var(--accent)}
+    .sub{color:#8a93a6;margin-top:6px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+    .pick{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px}
+    .pick label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385}
+    .pick b{font-weight:700}
+    .cards{display:grid;gap:14px;margin-top:18px}
+    .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+      padding:18px;text-decoration:none;color:inherit;transition:border-color .15s}
+    .card:hover{border-color:rgba(91,156,255,.6)}
+    .card .t{font-weight:800;font-size:18px}
+    .card .d{color:#8a93a6;font-size:13px;margin-top:4px}
+    .card.soon{opacity:.55}
+    .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385;border:1px solid var(--line);
+      border-radius:999px;padding:2px 8px;margin-left:8px}
+    .dist a{color:var(--accent);text-decoration:none;margin-right:12px;font-size:13px}
+    footer{color:#5b6477;font-size:12px;margin-top:32px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1><span class="accent">car</span>-sim</h1>
+    <div class="sub">Learn to drive a real city — on its actual streets, with real signs and limits.</div>
+
+    <div class="row">
+      <div class="pick"><label>Country</label><b>🇨🇿 Česko</b></div>
+      <div class="pick"><label>City</label><b>Praha</b></div>
+      <div class="pick"><label>Language</label><b>English</b></div>
+    </div>
+
+    <div class="cards">
+      <a class="card" href="/drive">
+        <div class="t">🚗 Drive <span class="tag">primary</span></div>
+        <div class="d">Free-roam the real streets of Prague. Arrows to drive, space to brake.</div>
+        <div class="dist" style="margin-top:10px">
+          {% for d in districts %}<a href="/drive?district={{ d.district }}">{{ d.district }} ({{ d.n_edges }})</a>{% endfor %}
+        </div>
+      </a>
+      <div class="card soon"><div class="t">🧠 Quizzes <span class="tag">soon</span></div>
+        <div class="d">Photo quiz · situation simulator · sign trainer · rules flashcards.</div></div>
+      <div class="card soon"><div class="t">📖 Official documents <span class="tag">soon</span></div>
+        <div class="d">Laws & rules of the road, searchable, kept current.</div></div>
+    </div>
+
+    <footer>Map data © OpenStreetMap contributors (ODbL). Educational project.</footer>
+  </div>
+</body>
+</html>
