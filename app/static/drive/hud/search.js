@@ -4,7 +4,8 @@
 
 export async function loadSearchIndex(base) {
   try {
-    const idx = await (await fetch(base + "/search.json")).json();
+    // ?b dodges a stale CF-cached 404 from before the file existed; no-cache keeps it fresh via ETag
+    const idx = await (await fetch(base + "/search.json?b=1")).json();
     const items = [];
     for (const p of idx.places || []) items.push({ name: p.name, x: p.x, y: p.y, kind: "district" });
     for (const s of idx.streets || []) items.push({ name: s.name, x: s.x, y: s.y, kind: "street" });
