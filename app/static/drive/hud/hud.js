@@ -19,11 +19,11 @@ export function makeHud() {
       speed.textContent = r.kmh;
       speedo.classList.toggle("over", r.over);
 
-      // big centre readout: visible while speed changes, then fades over 3 s
+      // big centre readout: visible while speed changes, then fades over 1 s
       if (big) {
         if (r.kmh !== lastKmh) { lastKmh = r.kmh; changedAt = now(); bigVal.textContent = r.kmh; }
-        const fade = Math.max(0, 1 - (now() - changedAt) / 3000);  // 1 → 0 over 3 s after last change
-        big.style.opacity = (0.55 * fade).toFixed(3);
+        const fade = Math.max(0, 1 - (now() - changedAt) / 1000);  // 1 → 0 over 1 s after last change
+        big.style.opacity = (0.30 * fade).toFixed(3);              // peak 30% opacity
       }
 
       if (r.limit != null) {
