@@ -1,0 +1,55 @@
+# Country rules profile — Czech Republic (Česko)
+# Consumed by tools/bake_city.py and the runtime to resolve speed limits, default
+# geometry, and right-of-way where OSM lacks explicit tags. Sources: zákon č.
+# 361/2000 Sb. (pravidla provozu) + vyhláška č. 294/2015 Sb. (dopravní značky).
+
+country: cz
+name_native: Česko
+name_en: Czechia
+driving_side: right          # RHT — keep right, give way per right-hand rule
+units: metric
+
+# Statutory default speed limits (km/h) by context, used when a way has no explicit
+# `maxspeed`. The runtime resolver picks the most specific that applies.
+default_limits:
+  urban: 50                  # v obci (built-up area) — the default for a city district
+  rural: 90                  # mimo obec
+  expressway: 110            # silnice pro motorová vozidla
+  motorway: 130              # dálnice
+  living_street: 20          # obytná / pěší zóna (obytná zóna)
+  zone_30: 30                # zóna s omezením rychlosti 30
+  pedestrian_zone: 20        # pěší zóna (vehicles only where permitted)
+
+# Drivable OSM highway classes → {default lanes, context for limit fallback}.
+# In an urban district, untagged classes fall back to the `urban` limit (50).
+road_classes:
+  motorway:      { lanes: 2, context: motorway,   oneway_implied: true }
+  motorway_link: { lanes: 1, context: motorway,   oneway_implied: true }
+  trunk:         { lanes: 2, context: urban }      # in-city trunk usually 50 unless tagged
+  trunk_link:    { lanes: 1, context: urban }
+  primary:       { lanes: 2, context: urban }
+  primary_link:  { lanes: 1, context: urban }
+  secondary:     { lanes: 2, context: urban }
+  secondary_link: { lanes: 1, context: urban }
+  tertiary:      { lanes: 2, context: urban }
+  tertiary_link: { lanes: 1, context: urban }
+  unclassified:  { lanes: 2, context: urban }
+  residential:   { lanes: 2, context: urban }
+  living_street: { lanes: 1, context: living_street }
+  service:       { lanes: 1, context: urban }
+
+lane_width_m: 3.5
+
+# Right-of-way model when a junction has no explicit signal/sign in OSM.
+priority:
+  model: class_then_right     # higher road class has priority; equal class ⇒ give way to the right
+  hierarchy: [motorway, trunk, primary, secondary, tertiary, unclassified, residential, living_street, service]
+  default_rule: prednost_zprava   # §22 — equal-rank unsignalised junction
+
+sign_catalogue: cz_2015        # vyhláška 294/2015 Sb. sign set (used by the signs trainer + render)
+
+legal_sources:
+  - title: "Zákon č. 361/2000 Sb. (o provozu na pozemních komunikacích)"
+    url: "https://www.zakonyprolidi.cz/cs/2000-361"
+  - title: "Vyhláška č. 294/2015 Sb. (dopravní značky)"
+    url: "https://www.zakonyprolidi.cz/cs/2015-294"
