@@ -35,6 +35,13 @@ export async function loadMap(base) {
       const sig = `${e.a}_${e.b}_${e.cls}_${e.geom.length}`;
       if (seen.has(sig)) continue;
       seen.add(sig);
+      // bounding box [minx,miny,maxx,maxy] for viewport culling (long sparse-vertex edges)
+      let mnx = Infinity, mny = Infinity, mxx = -Infinity, mxy = -Infinity;
+      for (const p of e.geom) {
+        if (p[0] < mnx) mnx = p[0]; if (p[0] > mxx) mxx = p[0];
+        if (p[1] < mny) mny = p[1]; if (p[1] > mxy) mxy = p[1];
+      }
+      e.bb = [mnx, mny, mxx, mxy];
       edges.push(e);
     }
     for (const j of t.junctions) junctions.push(j);

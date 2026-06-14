@@ -43,6 +43,25 @@ each independently testable.
 - [ ] Browser-verify live; capture screenshots/clip.
 - [ ] **Demo to Vlad → get approval before expanding.**
 
+## Refinements from Vlad's first-iteration feedback (msg 2663 / 2664)
+
+### Now — core driving UX (implementing)
+- [ ] **Controls (1):** ←/→ rotate the car IN PLACE (fixed turn rate, works stopped or moving);
+      ↑ accelerate smoothly-but-quickly; ↓ decelerate fast; **Space = sharp brake, minimal stopping distance**.
+- [ ] **Heading-up camera (4):** car always drawn nose-up at centre; arrows rotate the MAP around it.
+- [ ] **Dynamic zoom (2):** current road occupies 30–70 % of viewport width by its real width (much closer);
+      smooth transition between roads.
+- [ ] **Wheel zoom (2/2664):** mouse wheel adjusts zoom within clamped bounds, on top of the auto-fit.
+- [ ] **Street names ON roads (3):** label drawn along the road, subtle (low-contrast), rotates with the map.
+
+### Backlog — bigger features, each its own research → spec → plan → impl
+- [ ] **House numbers (3):** bake OSM `addr:housenumber` nodes; render subtly near buildings. (needs bake + backdrop)
+- [ ] **User accounts + progress (5):** registration/login; per-user stats — violations, time driven,
+      progress/regress over time; shown to the user. → needs an auth + storage layer (see docs/specs/accounts.md).
+- [ ] **Admin panel (6):** overall stats, user management, and a **trip-replay player** (variable speed) over
+      recorded trip logs. → needs trip logging + admin UI (see docs/specs/admin.md).
+- [ ] **Schematic backdrop:** buildings + parks/water from OSM (also enables off-road building collision + house numbers).
+
 ## Phase 6+ — Expansion (post-approval)
 - [ ] All-Prague bake via Geofabrik `.osm.pbf` + the same pipeline; tile-stream the whole city.
 - [ ] Signals (cycling state) + sign rendering + oneway arrows (rules phase 2).

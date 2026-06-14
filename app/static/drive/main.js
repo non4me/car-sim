@@ -1,4 +1,4 @@
-// car-sim /drive — wire-up: load baked district, spawn on a road, drive it.
+// car-sim /drive — heading-up free-roam: load district, spawn on a road, drive.
 import { makeView } from "./render/view.js";
 import { loadMap } from "./map/tiles.js";
 import { Car } from "./vehicle/car.js";
@@ -7,6 +7,8 @@ import { draw } from "./render/draw.js";
 import { evalRules } from "./rules/limits.js";
 import { makeHud } from "./hud/hud.js";
 import { runLoop } from "./engine/loop.js";
+
+const ZMIN = 14, ZMAX = 150;   // absolute zoom bounds (px per metre)
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -20,10 +22,14 @@ function pickSpawn(map) {
   }
   const g = best.geom, i = Math.max(1, Math.floor(g.length / 2));
   const a = g[i - 1], c = g[i];
-  return {
-    x: (a[0] + c[0]) / 2, y: (a[1] + c[1]) / 2,
-    h: Math.atan2(c[1] - a[1], c[0] - a[0]),
-  };
+  return { x: (a[0] + c[0]) / 2, y: (a[1] + c[1]) / 2, h: Math.atan2(c[1] - a[1], c[0] - a[0]) };
+}
+
+// target zoom so the current road occupies 30–70% of viewport width by its real width
+function autoZoom(view, roadWidth) {
+  const t = Math.min(1, Math.max(0, (roadWidth - 3.5) / (14 - 3.5)));
+  const pct = 0.30 + t * 0.40;               // 30%..70%
+  return (pct * view.w) / roadWidth;
 }
 
 async function boot() {
@@ -39,33 +45,38 @@ async function boot() {
   const input = makeInput();
   const hud = makeHud();
   let rules = evalRules(map, car);
-  let dbg = null; // optional debug control override
+  let dbg = null;
+  view.zoom = autoZoom(view, rules.width) * view.userMul;
+
+  // mouse-wheel zoom (user bias within bounds)
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    view.userMul *= e.deltaY < 0 ? 1.12 : 1 / 1.12;
+    view.userMul = Math.max(0.45, Math.min(3.2, view.userMul));
+  }, { passive: false });
 
   function update(dt) {
     const px = car.x, py = car.y;
     car.blocked = false;
     car.update(dt, dbg || input.controls());
     rules = evalRules(map, car);
-    if (rules.boundary) {                 // map edge: hard stop, can't leave the city
-      car.x = px; car.y = py; car.v = 0; car.blocked = true;
-    } else if (rules.offRoad) {           // off the road surface: heavy drag ("grass"), not stuck
-      car.v *= 0.90;
-      car.blocked = true;
-    }
+    if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
+    else if (rules.offRoad) { car.v *= 0.90; car.blocked = true; }
   }
 
   function render() {
-    // camera follows the car, with a little look-ahead by speed
-    view.follow(car.x + Math.cos(car.h) * car.v * 0.35,
-                car.y + Math.sin(car.h) * car.v * 0.35);
+    const target = Math.max(ZMIN, Math.min(ZMAX, autoZoom(view, rules.width) * view.userMul));
+    view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
+    view.setCamera(car.x, car.y, car.h);         // heading-up
     draw(ctx, view, map, car);
     hud.update(rules);
   }
 
-  // expose for headless/debug
   window.__drive = {
     car, map, view, rules: () => rules,
     set: (o) => { dbg = o; }, clear: () => { dbg = null; },
+    // manual deterministic advance (for headless verification when RAF is throttled)
+    tick: (n = 1) => { for (let i = 0; i < n; i++) update(1 / 60); render(); return { x: car.x, y: car.y, h: car.h, kmh: car.speedKmh, street: rules.street, zoom: +view.zoom.toFixed(1) }; },
   };
   runLoop(update, render);
 }

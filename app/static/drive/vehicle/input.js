@@ -1,9 +1,9 @@
-// Keyboard → control state. Arrows (and WASD) + Space hard brake.
+// Keyboard → control state. ↑ throttle, ↓ brake, ←/→ rotate in place, Space sharp brake.
 export function makeInput() {
   const keys = {};
   const map = {
     ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right",
-    KeyW: "up", KeyS: "down", KeyA: "left", KeyD: "right", Space: "brake",
+    KeyW: "up", KeyS: "down", KeyA: "left", KeyD: "right", Space: "hand",
   };
   const on = (e, down) => {
     const k = map[e.code];
@@ -18,10 +18,11 @@ export function makeInput() {
   return {
     controls() {
       return {
-        throttle: (keys.up ? 1 : 0) - (keys.down ? 1 : 0),
-        // left turns the car to its left: heading increases (north = up on screen)
-        steer: (keys.left ? 1 : 0) - (keys.right ? 1 : 0),
-        brake: !!keys.brake,
+        throttle: keys.up ? 1 : 0,
+        brake: keys.down ? 1 : 0,
+        hard: !!keys.hand,
+        // left rotates the car to its left (heading increases)
+        turn: (keys.left ? 1 : 0) - (keys.right ? 1 : 0),
       };
     },
   };

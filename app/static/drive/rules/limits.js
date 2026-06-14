@@ -15,6 +15,7 @@ export function evalRules(map, car) {
     boundary: !inBounds,
     offRoad: inBounds && !onSurface,
     street: edge ? (edge.name || "") : "",
+    width: edge ? edge.width : 7,
     kmh,
   };
 }
