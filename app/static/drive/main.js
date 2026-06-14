@@ -25,11 +25,15 @@ function pickSpawn(map) {
   return { x: (a[0] + c[0]) / 2, y: (a[1] + c[1]) / 2, h: Math.atan2(c[1] - a[1], c[0] - a[0]) };
 }
 
-// target zoom so the current road occupies 30–70% of viewport width by its real width
-function autoZoom(view, roadWidth) {
+// target zoom so the current road occupies 30–70% of viewport width by its real width.
+// At speed, ease the zoom OUT for look-ahead (the 30–70% framing holds at rest); without
+// this, the close framing leaves almost no road visible ahead at 50 km/h.
+function autoZoom(view, roadWidth, speed = 0) {
   const t = Math.min(1, Math.max(0, (roadWidth - 3.5) / (14 - 3.5)));
-  const pct = 0.30 + t * 0.40;               // 30%..70%
-  return (pct * view.w) / roadWidth;
+  const pct = 0.30 + t * 0.40;               // 30%..70% of viewport width by road width
+  const base = (pct * view.w) / roadWidth;
+  const sf = 1 - 0.45 * Math.min(1, speed / 16);  // 1.0 at rest → 0.55 at ~58 km/h
+  return base * sf;
 }
 
 async function boot() {
@@ -46,7 +50,7 @@ async function boot() {
   const hud = makeHud();
   let rules = evalRules(map, car);
   let dbg = null;
-  view.zoom = autoZoom(view, rules.width) * view.userMul;
+  view.zoom = autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul;
 
   // mouse-wheel zoom (user bias within bounds)
   canvas.addEventListener("wheel", (e) => {
@@ -65,7 +69,7 @@ async function boot() {
   }
 
   function render() {
-    const target = Math.max(ZMIN, Math.min(ZMAX, autoZoom(view, rules.width) * view.userMul));
+    const target = Math.max(ZMIN, Math.min(ZMAX, autoZoom(view, rules.width, Math.abs(car.v)) * view.userMul));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
     view.setCamera(car.x, car.y, car.h);         // heading-up
     draw(ctx, view, map, car);
