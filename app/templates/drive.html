@@ -51,17 +51,27 @@
       font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
     #helpBtn:hover{color:#fff;border-color:var(--accent)}
 
-    /* minimap — top right, under the location label */
+    /* minimap — top right, under the location label (2× size, msg 2691) */
     #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
       border:1px solid var(--line);border-radius:12px;padding:6px}
-    #minimap canvas{display:block;width:138px;height:138px;border-radius:8px;background:#0a0d13}
-    .mini-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
-    .mini-bar .lvl{font-size:11px;color:#8a93a6;font-weight:700;padding-left:4px}
+    #minimap.hidden{display:none}
+    #minimap canvas{display:block;width:276px;height:276px;border-radius:8px;background:#0a0d13}
+    .mini-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+    .mini-top .lvl{font-size:11px;color:#8a93a6;font-weight:700;padding-left:4px}
+    .mini-tools{display:flex;align-items:center;gap:8px}
+    #miniOpacity{width:78px;accent-color:var(--accent);cursor:pointer}
+    .mini-bar{display:flex;align-items:center;justify-content:flex-end;margin-top:6px}
     .mini-z{display:flex;gap:6px}
-    .mini-z button{cursor:pointer;width:24px;height:24px;border-radius:7px;background:rgba(28,34,48,.95);
-      border:1px solid var(--line);color:#cdd5e6;font-size:15px;font-weight:800;line-height:1;
+    .mini-z button,#miniCollapse{cursor:pointer;width:24px;height:24px;border-radius:7px;
+      background:rgba(28,34,48,.95);border:1px solid var(--line);color:#cdd5e6;font-weight:800;line-height:1;
       display:flex;align-items:center;justify-content:center}
-    .mini-z button:hover{color:#fff;border-color:var(--accent)}
+    .mini-z button{font-size:15px}
+    #miniCollapse{font-size:11px}
+    .mini-z button:hover,#miniCollapse:hover{color:#fff;border-color:var(--accent)}
+    #miniRestore{right:14px;top:44px;pointer-events:auto;cursor:pointer;width:40px;height:40px;border-radius:10px;
+      background:rgba(12,16,24,.9);border:1px solid var(--line);font-size:18px;
+      display:flex;align-items:center;justify-content:center}
+    #miniRestore.hidden{display:none}
 
     /* controls overlay — shown at start and on '?' */
     #helpOverlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
@@ -96,15 +106,22 @@
   </div>
 
   <div class="hud" id="minimap">
-    <canvas id="mini" width="138" height="138"></canvas>
-    <div class="mini-bar">
+    <div class="mini-top">
       <span class="lvl" id="miniLevel">+1</span>
+      <span class="mini-tools">
+        <input type="range" id="miniOpacity" min="10" max="100" value="100" title="Průhlednost">
+        <button id="miniCollapse" title="Sbalit mapu">▁</button>
+      </span>
+    </div>
+    <canvas id="mini" width="276" height="276"></canvas>
+    <div class="mini-bar">
       <span class="mini-z">
         <button id="miniMinus" title="Oddálit">−</button>
         <button id="miniPlus" title="Přiblížit">+</button>
       </span>
     </div>
   </div>
+  <button id="miniRestore" class="hud hidden" title="Zobrazit mapu">🗺</button>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>
   <div class="hud" id="zoomind">zoom —</div>

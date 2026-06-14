@@ -53,6 +53,29 @@ async function boot() {
   let rules = evalRules(map, car);
   let dbg = null;
   let paused = false;
+  let miniCollapsed = false;
+
+  // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
+  const miniEl = document.getElementById("minimap");
+  const miniRestore = document.getElementById("miniRestore");
+  const miniOpacity = document.getElementById("miniOpacity");
+  const applyOpacity = (v) => { miniEl.style.opacity = (v / 100).toFixed(2); };
+  const savedOp = parseInt(localStorage.getItem("carsim_mini_opacity"), 10);
+  miniOpacity.value = Number.isFinite(savedOp) ? savedOp : 100;
+  applyOpacity(miniOpacity.value);
+  miniOpacity.addEventListener("input", () => {
+    applyOpacity(miniOpacity.value);
+    localStorage.setItem("carsim_mini_opacity", miniOpacity.value);
+  });
+  const setCollapsed = (c) => {
+    miniCollapsed = c;
+    miniEl.classList.toggle("hidden", c);
+    miniRestore.classList.toggle("hidden", !c);
+    localStorage.setItem("carsim_mini_collapsed", c ? "1" : "0");
+  };
+  document.getElementById("miniCollapse").addEventListener("click", (e) => { e.preventDefault(); setCollapsed(true); });
+  miniRestore.addEventListener("click", (e) => { e.preventDefault(); setCollapsed(false); });
+  setCollapsed(localStorage.getItem("carsim_mini_collapsed") === "1");
 
   // persisted absolute zoom (px/m), restored across sessions
   const clampZoom = (z) => Math.max(ZMIN, Math.min(ZMAX, z));
@@ -98,7 +121,7 @@ async function boot() {
     view.setCamera(car.x, car.y, car.h);         // heading-up
     draw(ctx, view, map, car, rules);
     hud.update(rules);
-    minimap.draw(map, car, rules.street);
+    if (!miniCollapsed) minimap.draw(map, car, rules.street);
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
     if (zoomEl) zoomEl.textContent = `zoom ${Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
   }
