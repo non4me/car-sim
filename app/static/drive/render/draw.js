@@ -112,37 +112,30 @@ function drawAreas(ctx, view, map) {
   }
 }
 
-// Labels for the ADJOINING streets at intersections — every visible named street EXCEPT
-// the one the car is on (that name is shown in the HUD info block). One per name, nearest
-// instance, only within range so it reads as "the cross street here is X".
+// Labels for the ADJOINING streets — placed AT THE START of each cross street (a short way
+// into the street itself, running along it), not across the current road. The current street's
+// name lives in the HUD info block. One label per name, nearest junction wins.
 function drawStreetLabels(ctx, view, vis, currentStreet) {
-  const zoom = view.zoom;
-  if (zoom < 8) return;                       // too zoomed out to be legible/useful
+  if (view.zoom < 8) return;                  // too zoomed out to be legible/useful
   const cx = view.cx, cy = view.cy;           // camera centre = car, in world metres
-  const MAXD = 90 * 90;                        // only label cross streets within ~90 m
+  const NEAR = 55 * 55;                        // the cross street's junction with us must be within ~55 m
+  const INSET = 20;                            // place the label ~20 m into the adjoining street
   const byName = new Map();
   for (const e of vis) {
-    if (!e.name || e.name === currentStreet) continue;   // skip the current street
-    // nearest point on this edge's polyline to the car, plus that segment's direction
-    let bd = Infinity, bx = 0, by = 0, dirx = 1, diry = 0;
-    for (let i = 1; i < e.geom.length; i++) {
-      const ax = e.geom[i - 1][0], ay = e.geom[i - 1][1];
-      const gx = e.geom[i][0], gy = e.geom[i][1];
-      const ex = gx - ax, ey = gy - ay, l2 = ex * ex + ey * ey || 1;
-      let t = ((cx - ax) * ex + (cy - ay) * ey) / l2;
-      t = Math.max(0, Math.min(1, t));
-      const px = ax + t * ex, py = ay + t * ey;
-      const d = (px - cx) ** 2 + (py - cy) ** 2;
-      if (d < bd) { bd = d; bx = px; by = py; dirx = ex; diry = ey; }
-    }
-    if (bd > MAXD) continue;
+    if (!e.name || e.name === currentStreet) continue;
+    const g = e.geom;
+    const d0 = (g[0][0] - cx) ** 2 + (g[0][1] - cy) ** 2;
+    const dN = (g[g.length - 1][0] - cx) ** 2 + (g[g.length - 1][1] - cy) ** 2;
+    const nearD = Math.min(d0, dN);
+    if (nearD > NEAR) continue;               // only streets whose junction with us is here
+    const p = walkAlong(g, d0 <= dN, INSET);  // step into the street from its near (junction) end
     const prev = byName.get(e.name);
-    if (!prev || bd < prev.bd) byName.set(e.name, { bd, bx, by, dirx, diry, name: e.name });
+    if (!prev || nearD < prev.nearD) byName.set(e.name, { ...p, name: e.name, nearD });
   }
   ctx.font = "600 12px ui-sans-serif,system-ui,sans-serif";
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (const L of byName.values()) {
-    const [sx, sy] = view.project(L.bx, L.by);
+    const [sx, sy] = view.project(L.x, L.y);
     // direction in screen space so text runs along the cross street. project() rotates by
     // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
     const a = view.rot, c = Math.cos(a), s = Math.sin(a);
@@ -153,10 +146,32 @@ function drawStreetLabels(ctx, view, vis, currentStreet) {
     ctx.rotate(ang);
     ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.75)";
     ctx.strokeText(L.name, 0, 0);             // halo for legibility on asphalt
-    ctx.fillStyle = "rgba(210,220,236,.78)";
+    ctx.fillStyle = "rgba(210,220,236,.82)";
     ctx.fillText(L.name, 0, 0);
     ctx.restore();
   }
+}
+
+// Walk `dist` metres along a polyline from one end; returns the point + local direction
+// (pointing INTO the street, away from the starting end).
+function walkAlong(geom, fromStart, dist) {
+  const idx = fromStart ? geom.map((_, i) => i) : geom.map((_, i) => geom.length - 1 - i);
+  let remain = dist;
+  for (let k = 1; k < idx.length; k++) {
+    const a = geom[idx[k - 1]], b = geom[idx[k]];
+    const ex = b[0] - a[0], ey = b[1] - a[1];
+    const L = Math.hypot(ex, ey);
+    if (L < 1e-6) continue;
+    if (remain <= L) {
+      const t = remain / L;
+      return { x: a[0] + ex * t, y: a[1] + ey * t, dirx: ex / L, diry: ey / L };
+    }
+    remain -= L;
+  }
+  // edge shorter than dist → far end + last segment direction
+  const a = geom[idx[idx.length - 2]], b = geom[idx[idx.length - 1]];
+  const ex = b[0] - a[0], ey = b[1] - a[1], L = Math.hypot(ex, ey) || 1;
+  return { x: b[0], y: b[1], dirx: ex / L, diry: ey / L };
 }
 
 // Stylized top-down car (nose-up: forward = −y). Body + cabin/glass + wheels + lights.
