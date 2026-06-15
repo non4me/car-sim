@@ -162,6 +162,8 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
             node_ways[nid] += 1
     control_nodes = {nid for nid, nd in nodes.items()
                      if nd.get("tags", {}).get("highway") in ("traffic_signals", "stop", "give_way")}
+    crossing_nodes = {nid for nid, nd in nodes.items()
+                      if nd.get("tags", {}).get("highway") == "crossing"}
     inter = {nid for nid, c in node_ways.items() if c >= 2} | control_nodes
 
     # split ways into edges at intersection nodes
@@ -250,6 +252,33 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
             for ei in mains:
                 place(ei, "priority_road")
 
+    # pedestrian crossings (zebra): a crossing node lying on a drivable way → a zebra band laid
+    # across that road. Tangent comes from the way neighbours so stripes sit square across the
+    # carriageway; width from the road class so the band spans kerb-to-kerb. One band per node.
+    crossings, seen_cross = [], set()
+    for wy in ways:
+        nl = wy["nodes"]
+        if len(nl) < 2:
+            continue
+        cdef = classes[wy["tags"]["highway"]]
+        lanes = int(wy["tags"]["lanes"]) if str(wy["tags"].get("lanes", "")).isdigit() else cdef["lanes"]
+        width = round(lanes * profile["lane_width_m"], 1)
+        for i, nid in enumerate(nl):
+            if nid not in crossing_nodes or nid in seen_cross or nid not in nodes:
+                continue
+            a, b = nl[max(0, i - 1)], nl[min(len(nl) - 1, i + 1)]
+            if a == b or a not in nodes or b not in nodes:
+                continue
+            ax, ay = to_xy(nodes[a]["lat"], nodes[a]["lon"])
+            bx, by = to_xy(nodes[b]["lat"], nodes[b]["lon"])
+            dx, dy = bx - ax, by - ay
+            L = math.hypot(dx, dy) or 1.0
+            cx, cy = to_xy(nodes[nid]["lat"], nodes[nid]["lon"])
+            seen_cross.add(nid)
+            crossings.append({"x": round(cx, 1), "y": round(cy, 1),
+                              "tx": round(dx / L, 3), "ty": round(dy / L, 3), "w": width})
+    print(f"  pedestrian crossings: {len(crossings)}")
+
     # bounds (metres)
     xs = [p[0] for ed in edges for p in ed["geom"]]
     ys = [p[1] for ed in edges for p in ed["geom"]]
@@ -267,7 +296,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         return
 
     # tile by grid
-    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": [], "signs": []})
+    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": [], "signs": [], "crossings": []})
     for ed in edges:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ed["geom"]}
         for k in keys:
@@ -278,6 +307,9 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
     for sg in signs:
         k = f"{int(sg['x']//TILE_M)}_{int(sg['y']//TILE_M)}"
         tiles[k]["signs"].append(sg)
+    for cr in crossings:
+        k = f"{int(cr['x']//TILE_M)}_{int(cr['y']//TILE_M)}"
+        tiles[k]["crossings"].append(cr)
     for ar in areas:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ar["poly"]}
         for k in keys:
@@ -292,7 +324,8 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         "country": country, "city": "praha", "district": name,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
-        "n_areas": len(areas), "n_signs": len(signs), "version": 2, "profile": country,
+        "n_areas": len(areas), "n_signs": len(signs), "n_crossings": len(crossings),
+        "version": 2, "profile": country,
         "snapshot": snapshot,   # OSM data date (pbf timestamp) — shown in-app
         "attribution": "© OpenStreetMap contributors (ODbL)",
     }
@@ -327,7 +360,8 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
     (out / "graph.json").write_text(json.dumps(graph, separators=(",", ":")), encoding="utf-8")
     sk = Counter(s["kind"] for s in signs)
     print(f"[{name}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
-          f"{len(junctions)} junctions, {len(areas)} areas, {len(signs)} signs {dict(sk)})")
+          f"{len(junctions)} junctions, {len(areas)} areas, {len(signs)} signs {dict(sk)}, "
+          f"{len(crossings)} crossings)")
 
 
 AREA_FILL = {"building": (40, 46, 58), "green": (32, 52, 40), "water": (30, 48, 70)}  # debug PNG

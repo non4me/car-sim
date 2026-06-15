@@ -59,7 +59,7 @@ export async function loadMap(base) {
   const loading = new Set();                        // keys currently being fetched
 
   // merged, deduped view of the resident tiles (what the renderer + rules read)
-  const map = { meta, edges: [], junctions: [], areas: [], signs: [], nearestEdge, onSurface, update };
+  const map = { meta, edges: [], junctions: [], areas: [], signs: [], crossings: [], nearestEdge, onSurface, update };
   let grid = new Map();
 
   function buildGrid(edges) {
@@ -84,7 +84,7 @@ export async function loadMap(base) {
   // tiles (dedupe by signature); junctions/signs are baked into exactly one tile (no dupes).
   function rebuild() {
     const seen = new Set(), seenA = new Set();
-    const edges = [], junctions = [], areas = [], signs = [];
+    const edges = [], junctions = [], areas = [], signs = [], crossings = [];
     for (const t of resident.values()) {
       for (const e of t.edges) {
         const sig = `${e.a}_${e.b}_${e.cls}_${e.geom.length}`;
@@ -102,9 +102,10 @@ export async function loadMap(base) {
         areas.push(a);
       }
       for (const s of t.signs || []) signs.push(s);
+      for (const c of t.crossings || []) crossings.push(c);
     }
     grid = buildGrid(edges);
-    map.edges = edges; map.junctions = junctions; map.areas = areas; map.signs = signs;
+    map.edges = edges; map.junctions = junctions; map.areas = areas; map.signs = signs; map.crossings = crossings;
   }
 
   function candidates(x, y) {
@@ -162,7 +163,7 @@ export async function loadMap(base) {
     loading.add(k);
     return fetch(`${base}/tiles/${k}.json`).then((r) => r.json()).then((t) => {
       loading.delete(k);
-      resident.set(k, { edges: t.edges || [], junctions: t.junctions || [], areas: t.areas || [], signs: t.signs || [] });
+      resident.set(k, { edges: t.edges || [], junctions: t.junctions || [], areas: t.areas || [], signs: t.signs || [], crossings: t.crossings || [] });
     }).catch(() => { loading.delete(k); });
   }
 

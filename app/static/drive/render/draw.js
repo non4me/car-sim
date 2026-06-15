@@ -86,6 +86,9 @@ export function draw(ctx, view, map, car, rules, route) {
   //     (a road marking, so it's drawn on the asphalt and rotates with the road).
   if (zoom >= 9) drawStopLines(ctx, view, vis, map.junctions, zoom);
 
+  // 2d) pedestrian crossings — a zebra ladder laid square across the road (road marking).
+  if (zoom >= 8) drawCrossings(ctx, view, map, zoom);
+
   // 3) signs — billboarded glyphs (STOP / give-way / signal / priority-road), placed per
   //    approach (explicit OSM tags + derived from road-class priority). Zoomed out, the few
   //    explicitly-controlled junctions still get a faint dot so they read on the overview.
@@ -213,6 +216,37 @@ function drawStopLines(ctx, view, vis, junctions, zoom) {
       const [ax, ay] = view.project(wp.x + px * half, wp.y + py * half);
       const [bx, by] = view.project(wp.x - px * half, wp.y - py * half);
       ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+// Pedestrian crossings: a zebra ladder. Each crossing carries its centre, the road tangent
+// (tx,ty) and the carriageway width; we lay white bars transverse to the road, repeated along
+// the travel direction over a fixed depth. All corners are projected from world space, so the
+// zebra sits on the asphalt and turns with the heading-up camera.
+function drawCrossings(ctx, view, map, zoom) {
+  const cr = map.crossings;
+  if (!cr || !cr.length) return;
+  const R = view.visR();
+  const DEPTH = 4.0, BAR = 0.5, GAP = 0.5;          // metres: band depth along road, bar + gap
+  ctx.save();
+  ctx.fillStyle = "rgba(236,239,246,.80)";
+  for (const c of cr) {
+    if (!view.near(c.x, c.y, R)) continue;
+    const tx = c.tx, ty = c.ty;                     // road tangent (unit) — bars run across this
+    const px = -ty, py = tx;                        // across-road perpendicular
+    const half = (c.w || 6) / 2 + 0.3;              // span kerb-to-kerb (+ small overhang)
+    for (let s0 = -DEPTH / 2; s0 < DEPTH / 2 - 1e-6; s0 += BAR + GAP) {
+      const sc = s0 + BAR / 2;                       // bar centre along the road
+      const mx = c.x + tx * sc, my = c.y + ty * sc;
+      const ax = tx * (BAR / 2), ay = ty * (BAR / 2);   // half-thickness along road
+      const bx = px * half, by = py * half;             // half-width across road
+      const pts = [[mx + ax + bx, my + ay + by], [mx + ax - bx, my + ay - by],
+                   [mx - ax - bx, my - ay - by], [mx - ax + bx, my - ay + by]];
+      ctx.beginPath();
+      for (let i = 0; i < 4; i++) { const [X, Y] = view.project(pts[i][0], pts[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+      ctx.closePath(); ctx.fill();
     }
   }
   ctx.restore();

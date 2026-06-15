@@ -59,7 +59,9 @@ def read_pbf(path: str):
             if not o.location.valid():
                 continue
             hw = o.tags.get("highway")
-            if hw in CONTROL:
+            if hw in CONTROL or hw == "crossing":
+                # store control + crossing nodes BEFORE the way pass so their tag survives (the way
+                # pass only adds untagged nodes it hasn't seen) — build_artifact reads highway= off it.
                 nodes[o.id] = {"lat": o.location.lat, "lon": o.location.lon, "tags": {"highway": hw}}
             place, nm = o.tags.get("place"), o.tags.get("name")
             if place in PLACE_KINDS and nm and s <= o.location.lat <= n and w <= o.location.lon <= e:
