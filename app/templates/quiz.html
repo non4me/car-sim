@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — Quizzes</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+    a.back{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+    h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:.4em 0 .1em}
+    .accent{color:var(--accent)}
+    .sub{color:#8a93a6;margin-top:6px}
+    .cards{display:grid;gap:14px;margin-top:22px}
+    .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:16px;
+      padding:18px;text-decoration:none;color:inherit;transition:border-color .15s}
+    .card:hover{border-color:rgba(91,156,255,.6)}
+    .card .t{font-weight:800;font-size:18px}
+    .card .d{color:#8a93a6;font-size:13px;margin-top:4px}
+    .card.soon{opacity:.55}
+    .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385;border:1px solid var(--line);
+      border-radius:999px;padding:2px 8px;margin-left:8px}
+    .tag.live{color:#06203f;background:var(--accent);border-color:transparent}
+    footer{color:#5b6477;font-size:12px;margin-top:32px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back" href="/">← car-sim</a>
+    <h1>🧠 <span class="accent">Quizzes</span></h1>
+    <div class="sub">Learn Czech road rules on real Prague street photos — free, no login.</div>
+
+    <div class="cards">
+      <a class="card" href="/quiz/photo">
+        <div class="t">📷 Photo quiz <span class="tag live">live</span></div>
+        <div class="d">Real street photos, 10 languages. Quick · Exam · Survival modes, XP &amp; ranks, leaderboard.</div>
+      </a>
+      <div class="card soon"><div class="t">🚦 Situation simulator <span class="tag">soon</span></div>
+        <div class="d">Top-down intersection scenarios — who goes first, when to stop.</div></div>
+      <div class="card soon"><div class="t">🛑 Sign trainer <span class="tag">soon</span></div>
+        <div class="d">Flashcards for every Czech road sign, spaced repetition.</div></div>
+      <div class="card soon"><div class="t">📜 Rules flashcards <span class="tag">soon</span></div>
+        <div class="d">Key §§ of zákon 361/2000 Sb., bite-sized and searchable.</div></div>
+    </div>
+
+    <footer>Foto: Panoramax (CC-BY-SA) · Map data © OpenStreetMap contributors (ODbL). Educational project.</footer>
+  </div>
+</body>
+</html>

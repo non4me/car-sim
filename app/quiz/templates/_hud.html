@@ -1,0 +1,30 @@
+{# Game HUD: rank/level + XP progress, score, streak combo, mode row (lives or progress) #}
+{% set md = '×2' if hud.mult == 2.0 else ('×1.5' if hud.mult > 1 else '') %}
+<div class="mb-3">
+  <div class="flex items-center justify-between text-xs mb-1.5">
+    <div class="flex items-center gap-2">
+      <span class="inline-grid place-items-center w-6 h-6 rounded-md bg-accent/20 text-accent text-[11px] font-bold">{{ hud.rank.level }}</span>
+      <span class="text-slate-300 font-medium">{{ hud.rank.name }}</span>
+    </div>
+    <div class="flex items-center gap-3">
+      {% if hud.streak >= 1 %}
+      <span class="tabular-nums {{ 'text-amber-400' if md else 'text-slate-400' }}">🔥 {{ hud.streak }}{% if md %} <b>{{ md }}</b>{% endif %}</span>
+      {% endif %}
+      <span class="tabular-nums text-slate-400">{{ t.score }}: <b class="text-white">{{ hud.score }}</b></span>
+    </div>
+  </div>
+  <div class="h-1 w-full rounded-full bg-line overflow-hidden" title="{{ t.level }} {{ hud.rank.level }}">
+    <div class="h-full bg-accent/70 rounded-full transition-all" style="width: {{ hud.rank.progress }}%"></div>
+  </div>
+  <div class="mt-2 flex items-center justify-between text-xs text-slate-400">
+    {% if hud.mode == 'survival' %}
+      <span class="text-base leading-none tracking-tight">{% for i in range(hud.survival_lives_max) %}{{ '❤️' if i < hud.lives else '🖤' }}{% endfor %}</span>
+      <span class="tabular-nums">{{ t.question }} {{ hud.qnum }}</span>
+    {% else %}
+      <span class="tabular-nums whitespace-nowrap">{{ t.question }} {{ hud.qnum }}/{{ hud.total }}</span>
+      <div class="flex-1 ml-3 h-1 rounded-full bg-line overflow-hidden">
+        <div class="h-full bg-slate-500 rounded-full transition-all" style="width: {{ (hud.qnum / hud.total * 100)|round }}%"></div>
+      </div>
+    {% endif %}
+  </div>
+</div>

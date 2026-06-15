@@ -1,0 +1,33 @@
+{% include "_hud.html" %}
+
+{# countdown timer #}
+<div id="qtimer" data-seconds="{{ secs }}" class="mb-3">
+  <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+    <span>⏱</span><span data-num class="tabular-nums">{{ secs }}</span>
+  </div>
+  <div class="h-1.5 w-full rounded-full bg-line overflow-hidden">
+    <div data-bar class="timerbar h-full bg-accent rounded-full" style="width:100%"></div>
+  </div>
+</div>
+
+{# real street photo #}
+<figure class="rounded-xl overflow-hidden border border-line photo">
+  <img src="{{ base }}{{ q.photo }}" alt="Praha" class="w-full aspect-[4/3] object-cover" loading="eager">
+  <figcaption class="px-2.5 py-1 text-[10px] text-slate-500 flex justify-between">
+    <span>📍 Praha</span><span>{{ t.photo_by }}: {{ q.photographer }} · {{ q.license }}</span>
+  </figcaption>
+</figure>
+
+<h2 class="mt-4 text-lg font-semibold leading-snug">{{ q.question }}</h2>
+
+<div id="options" class="mt-3 grid gap-2.5">
+  {% for opt in q.options %}
+  <button
+    class="opt opt-answer text-left rounded-xl border border-line bg-panel px-4 py-3 hover:border-accent/60 hover:bg-panel/70"
+    hx-post="{{ base }}/answer" hx-vals='{"choice": {{ loop.index0 }}}'
+    hx-target="#game" hx-swap="innerHTML">
+    <span class="inline-grid place-items-center w-6 h-6 mr-2 rounded-md bg-line text-slate-300 text-sm align-middle">{{ "ABCD"[loop.index0] }}</span>
+    <span class="align-middle">{{ opt }}</span>
+  </button>
+  {% endfor %}
+</div>

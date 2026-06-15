@@ -1,0 +1,1848 @@
+{
+ "plzen": [
+  {
+   "photo_id": "05fd052f-acce-429f-992f-6efb6ec8f6cf",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá kruhová značka s červeným lemem a jedním červeným šikmým pruhem, kterou vidíte u kraje vozovky?",
+   "options_cs": [
+    "Zákaz stání – vozidlo zde nesmí stát, smí však krátce zastavit (např. pro nastoupení či vystoupení).",
+    "Zákaz zastavení – vozidlo zde nesmí zastavit ani stát.",
+    "Zákaz vjezdu všech vozidel v obou směrech.",
+    "Parkoviště – místo vyhrazené k parkování."
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrý kruh s červeným lemem a jedním šikmým červeným pruhem je značka B29 'Zákaz stání'. Zakazuje stání, tedy stát na místě déle, než je nezbytně nutné k neprodlenému nastoupení nebo vystoupení osob anebo k naložení nebo složení nákladu. Krátké zastavení k těmto úkonům je dovoleno. Dva zkřížené pruhy by znamenaly 'Zákaz zastavení' (B28), kde nesmíte ani zastavit.",
+   "citation": "značka B29, § 27 zákona č. 361/2000 Sb.",
+   "rule_tag": "zakaz_stani",
+   "confidence": 0.9,
+   "what_you_see": "Modrá kruhová dopravní značka s červeným lemem a jedním červeným šikmým pruhem (zleva nahoře doprava dolů) umístěná na sloupku u kraje dlážděné vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "142333c4-32c7-44ee-8185-60f17143929c",
+   "type": "sign_identification",
+   "question_cs": "Která dopravní značka je na sloupku u levého kraje vozovky (modrý kruh s červeným lemem a jedním červeným šikmým pruhem)?",
+   "options_cs": [
+    "Zákaz stání (B29)",
+    "Zákaz zastavení (B28)",
+    "Zákaz vjezdu všech vozidel (B1)",
+    "Parkoviště (IP11a)"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jde o značku B29 'Zákaz stání' – modrý kruh s červeným lemem a jediným šikmým červeným pruhem. Zakazuje stání, krátké zastavení k nastoupení/vystoupení nebo naložení/složení nákladu je možné. Značka 'Zákaz zastavení' (B28) má pruhy dva (do kříže), 'Zákaz vjezdu všech vozidel' (B1) je červený kruh s bílým vodorovným pruhem a 'Parkoviště' (IP11a) je modrý čtverec s bílým 'P'.",
+   "citation": "značka B29, § 27 zákona č. 361/2000 Sb.",
+   "rule_tag": "zakaz_stani",
+   "confidence": 0.9,
+   "what_you_see": "Na sloupku vlevo modrá kruhová značka s červeným lemem a jedním červeným šikmým pruhem; vpravo na samostatném sloupku modrá čtvercová značka 'P' (Parkoviště) s dodatkovou tabulkou.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "152bdbf9-3102-4bc8-b625-82a6d16d6b9a",
+   "type": "sign_meaning",
+   "question_cs": "Co řidiči sděluje modrá obdélníková značka s bílými šipkami uspořádanými do jízdních pruhů, kterou vidíte vpravo u vozovky?",
+   "options_cs": [
+    "Informuje o uspořádání (řazení) jízdních pruhů před křižovatkou – do kterého pruhu se zařadit podle zamýšleného směru jízdy.",
+    "Přikazuje odbočit vpravo.",
+    "Označuje jednosměrnou ulici.",
+    "Zakazuje předjíždění."
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá značka s bílými šipkami znázorňujícími jízdní pruhy je informativní provozní značka IP19 'Řadicí pruhy'. Ukazuje počet a uspořádání jízdních pruhů a jejich určení pro jednotlivé směry jízdy před křižovatkou; řidič se podle ní má včas zařadit do pruhu odpovídajícího jeho zamýšlenému směru. Nejde o příkazovou ani zákazovou značku – nepřikazuje odbočení ani neoznačuje jednosměrku.",
+   "citation": "značka IP19, § 12 zákona č. 361/2000 Sb.",
+   "rule_tag": "radici_pruhy",
+   "confidence": 0.74,
+   "what_you_see": "Modrá obdélníková značka vpravo u vozovky s bílými šipkami znázorňujícími jízdní pruhy (přímé pruhy a pruh odbočující vpravo) – uspořádání řadicích pruhů před křižovatkou.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "2057f437-5643-49f3-a6e2-47c89d241ece",
+   "type": "sign_meaning",
+   "question_cs": "Vozovku uprostřed odděluje přerušovaná podélná čára. Co pro vás jako řidiče znamená?",
+   "options_cs": [
+    "Čáru je dovoleno přejíždět, je-li to bezpečné (např. při předjíždění)",
+    "Čáru nesmíte za žádných okolností přejet ani se jí dotknout",
+    "Označuje okraj vozovky a zákaz vjezdu vpravo od ní",
+    "Znamená zákaz předjíždění na celém úseku"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Přerušovaná podélná čára (vodorovná značka V2a/V2b) odděluje jízdní pruhy a smí se přejíždět, pokud to dovoluje situace a je to bezpečné – typicky při předjíždění nebo objíždění. Souvislou (plnou) čáru by naopak přejíždět nebylo dovoleno.",
+   "citation": "vyhláška 294/2015 Sb., značka V2 (přerušovaná čára); § 12",
+   "rule_tag": "vodorovne-znaceni-prerusovana-cara",
+   "confidence": 0.85,
+   "what_you_see": "Přímý víceproudý úsek silnice, uprostřed vozovky vodorovná přerušovaná bílá podélná čára; vozidlo právě předjíždí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "2be5c8fd-63b9-4255-bbf5-4739157a7e48",
+   "type": "sign_meaning",
+   "question_cs": "Po pravé straně vozovky je kulatá značka s červeným okrajem a přeškrtnutou šipkou doprava, pod ní dodatková tabulka s nákladním vozidlem. Co tato sestava přikazuje?",
+   "options_cs": [
+    "Nákladním vozidlům je zde zakázáno odbočovat vpravo",
+    "Všem vozidlům je zakázáno odbočovat vlevo",
+    "Nákladní vozidla zde musí odbočit vpravo",
+    "Zákaz vjezdu nákladních vozidel do celé oblasti"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kulatá značka s červeným lemem a přeškrtnutou šipkou zahnutou vpravo je B24a 'Zákaz odbočování vpravo'. Dodatková tabulka s vyobrazením nákladního vozidla omezuje platnost značky pouze na nákladní automobily. Sestava tedy znamená, že nákladní vozidla zde nesmějí odbočit vpravo; pro ostatní vozidla zákaz neplatí.",
+   "citation": "značka B24a, § 63 vyhl. 294/2015 Sb.",
+   "rule_tag": "zakaz-odbocovani",
+   "confidence": 0.85,
+   "what_you_see": "Kulatá zákazová značka B24a (přeškrtnutá šipka doprava) s dodatkovou tabulkou zobrazující nákladní vozidlo, na sloupku u pravého okraje vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "37a8e359-d6e8-4ced-83fc-0ddc3d936476",
+   "type": "sign_meaning",
+   "question_cs": "Na sloupku u pravé strany křižovatky je kulatá značka s červeným okrajem a přeškrtnutou šipkou zahnutou vlevo. Co tato značka znamená?",
+   "options_cs": [
+    "Zákaz odbočování vlevo",
+    "Zákaz otáčení (zákaz otáčení do protisměru)",
+    "Přikázaný směr jízdy vpravo",
+    "Zákaz odbočování vpravo"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kulatá značka s červeným lemem a černou přeškrtnutou šipkou zahnutou doleva je B24b 'Zákaz odbočování vlevo'. Zakazuje odbočit vlevo (a tím i otáčení vlevo) v místě, kde je umístěna. Není to zákaz otáčení (ten má jinou šipku ve tvaru obrácené smyčky U) ani příkazová modrá značka.",
+   "citation": "značka B24b, § 63 vyhl. 294/2015 Sb.",
+   "rule_tag": "zakaz-odbocovani",
+   "confidence": 0.83,
+   "what_you_see": "Kulatá zákazová značka B24b s přeškrtnutou šipkou zahnutou doleva, umístěná na sloupku u rohu budovy na pravé straně křižovatky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "46ff6ae3-b830-4a1b-9f3b-98282566e296",
+   "type": "sign_meaning",
+   "question_cs": "Na sloupu vpravo před křižovatkou je dopravní značka v podobě trojúhelníku postaveného na vrchol s červeným okrajem a bílou plochou. Co tato značka znamená?",
+   "options_cs": [
+    "Dej přednost v jízdě – řidič musí dát přednost vozidlům jedoucím po hlavní pozemní komunikaci",
+    "Stůj, dej přednost v jízdě – řidič musí vždy zastavit vozidlo",
+    "Konec hlavní pozemní komunikace",
+    "Zákaz vjezdu všech vozidel do křižovatky"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Trojúhelník postavený na vrchol s červeným okrajem je značka P4 „Dej přednost v jízdě!“. Ukládá řidiči povinnost dát přednost vozidlům jedoucím po hlavní (křižující) komunikaci; zastavit musí jen tehdy, je-li to k dání přednosti nutné. Zastavit vždy přikazuje až značka P6 „Stůj, dej přednost v jízdě!“ s osmiúhelníkem.",
+   "citation": "značka P4, § 22 zák. 361/2000 Sb.",
+   "rule_tag": "give_way_sign",
+   "confidence": 0.9,
+   "what_you_see": "Červeně lemovaný trojúhelník postavený na vrchol (značka P4 Dej přednost v jízdě) na sloupu vpravo před křižovatkou, doplněný semaforem.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "46ff6ae3-b830-4a1b-9f3b-98282566e296",
+   "type": "right_of_way",
+   "question_cs": "Před křižovatkou je značka „Dej přednost v jízdě“ a zároveň světelný semafor, který právě svítí červeně. Jak se má řidič zachovat?",
+   "options_cs": [
+    "Zastaví před křižovatkou; signál červeného světla má přednost před významem značky",
+    "Pokračuje v jízdě, protože svislá značka má vždy přednost před semaforem",
+    "Jen zpomalí a dá přednost, červené světlo u značky neplatí",
+    "Smí na červenou vjet, pokud na hlavní silnici žádné vozidlo nejede"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Svítí-li semafor, řídí se provoz podle světelných signálů, které mají přednost před svislými značkami upravujícími přednost. Červené světlo („Stůj!“) znamená povinnost zastavit vozidlo před hranicí křižovatky. Značka P4 by se uplatnila až ve chvíli, kdy je semafor mimo provoz nebo bliká přerušovaná žlutá.",
+   "citation": "§ 70 odst. 2 a § 4 písm. c) zák. 361/2000 Sb.",
+   "rule_tag": "signal_overrides_sign",
+   "confidence": 0.86,
+   "what_you_see": "Semafor svítící červeně pod značkou Dej přednost v jízdě na pravém sloupu před křižovatkou.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "5b0ff141-2224-4e8a-89f9-15744db20dc9",
+   "type": "sign_meaning",
+   "question_cs": "U kraje vozovky stojí kulatá značka s modrým podkladem, červeným okrajem a červeným křížem (dvě úhlopříčky). Co řidiči přikazuje?",
+   "options_cs": [
+    "Zákaz zastavení – řidič nesmí na tomto úseku ani zastavit",
+    "Zákaz stání – zastavit na nezbytně nutnou dobu je dovoleno",
+    "Parkoviště – místo vyhrazené k stání vozidel",
+    "Zóna s dopravním omezením"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrý kruh s červeným okrajem a dvěma červenými úhlopříčkami (křížem) je značka B28 „Zákaz zastavení“. Řidič v daném úseku nesmí vozidlo ani zastavit, tj. uvést je do klidu. Pouze jedna úhlopříčka by znamenala značku B29 „Zákaz stání“, kde je krátké zastavení (např. pro nastoupení) dovoleno.",
+   "citation": "značka B28, § 27 zák. 361/2000 Sb.",
+   "rule_tag": "no_stopping_sign",
+   "confidence": 0.9,
+   "what_you_see": "Kulatá modrá značka s červeným okrajem a červeným křížem (B28 Zákaz zastavení) na přenosném podstavci u kraje vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "5b0ff141-2224-4e8a-89f9-15744db20dc9",
+   "type": "sign_identification",
+   "question_cs": "Na sloupu vlevo je modrá čtvercová značka s bílým písmenem „P“, pod ní piktogram automobilu a dodatková tabulka s textem o době a podmínkách (Po–Pá, placené / s parkovacím oprávněním, zóna). O jakou značku jde?",
+   "options_cs": [
+    "IP13 – Parkoviště (s dodatkovou tabulkou upravující dobu a podmínky stání)",
+    "B28 – Zákaz zastavení",
+    "IP11 – pouze informace o čerpací stanici",
+    "P2 – Hlavní pozemní komunikace"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým „P“ je informativní provozní značka řady IP13 „Parkoviště“. Dodatková tabulka pod ní vymezuje, kdy a za jakých podmínek (pracovní dny Po–Pá, placené stání / s platným parkovacím oprávněním v dané zóně) je zde stání dovoleno. Modrý čtverec není zákazová značka – ta má kruhový tvar.",
+   "citation": "značka IP13, § 63 odst. 1 písm. e) zák. 361/2000 Sb.",
+   "rule_tag": "parking_information_sign",
+   "confidence": 0.82,
+   "what_you_see": "Modrá čtvercová značka „P“ s piktogramem auta a dodatkovou tabulkou (Po–Pá, placené parkování / parkovací oprávnění, zóna) na sloupu vlevo.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "454bfb96-3f5f-4de3-9491-1a17880b1601",
+   "type": "road_situation",
+   "question_cs": "Jízdní pruhy pro stejný směr jízdy jsou na této vozovce odděleny přerušovanou bílou podélnou čarou. Co tato čára řidiči umožňuje?",
+   "options_cs": [
+    "Přejíždět ji a měnit jízdní pruh, je-li to bezpečné a neohrozí jiné účastníky provozu",
+    "Přejíždění je zcela zakázáno, čára funguje jako plná čára",
+    "Smí ji přejet jen vozidlo s právem přednostní jízdy",
+    "Označuje okraj vozovky a zákaz stání"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Přerušovaná podélná čára (vodorovná značka V2) odděluje jízdní pruhy a smí se přejíždět při dodržení pravidel provozu – tedy při změně pruhu nebo předjíždění, je-li to bezpečné. Přejíždět nebo přes ni najíždět nesmí řidič jen tehdy, pokud by tím ohrozil ostatní. Zákaz přejíždění by vyjadřovala až plná čára V1a.",
+   "citation": "značka V2, § 12 a § 13 zák. 361/2000 Sb.",
+   "rule_tag": "broken_lane_line",
+   "confidence": 0.8,
+   "what_you_see": "Přerušovaná bílá podélná čára oddělující dva jízdní pruhy téhož směru na vícepruhové vozovce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "8ccadffa-208a-4a57-bb27-4f137456d82a",
+   "type": "sign_meaning",
+   "question_cs": "Modrá kulatá značka s červeným okrajem a jedním šikmým červeným pruhem vlevo znamená, že řidič na tomto místě nesmí:",
+   "options_cs": [
+    "zastavit ani stát",
+    "pouze dlouhodobě parkovat, krátké zastavení je dovoleno",
+    "vjet do protisměru",
+    "předjíždět"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jde o značku B 28 „Zákaz zastavení“. Na rozdíl od zákazu stání (B 29 s křížem) tato značka zakazuje i krátké zastavení vozidla, tedy jakékoli uvedení vozidla do klidu.",
+   "citation": "značka B 28, § 25 a § 27 zákona 361/2000 Sb.",
+   "rule_tag": "prohibitory_sign",
+   "confidence": 0.8,
+   "what_you_see": "Modrá kulatá značka s červeným okrajem a jedním šikmým červeným pruhem na sloupku vlevo, vpravo modrá značka parkoviště s dodatkovou tabulkou.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "aa19ce41-8d76-46b9-8068-4862c45afb60",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená kulatá modrá značka s červeným lemem a jednou červenou šikmou čárou, kterou vidíte na sloupku na okraji prostranství?",
+   "options_cs": [
+    "Zákaz stání – nesmíte zde stát (ponechat vozidlo bez činnosti), zastavení je dovoleno",
+    "Zákaz zastavení – nesmíte zde ani krátce zastavit",
+    "Parkoviště – zde je dovoleno parkovat",
+    "Zákaz vjezdu všech vozidel"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrý kruh s červeným lemem a jedinou šikmou červenou čárou je značka B29 'Zákaz stání'. Zakazuje stání (delší ponechání vozidla), krátké zastavení pro nastoupení/vystoupení nebo naložení/vyložení je však dovoleno. Dvě zkřížené čáry by znamenaly přísnější 'Zákaz zastavení' (B28).",
+   "citation": "značka B29, § 27 zákona č. 361/2000 Sb.",
+   "rule_tag": "zakazova_znacka_zakaz_stani",
+   "confidence": 0.92,
+   "what_you_see": "Kulatá modrá značka s červeným lemem a jednou červenou šikmou čárou (zleva shora doprava dolů) na sloupku u kraje dlážděného prostranství.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "a50ef9e1-2c50-4ed9-b569-128b05db4672",
+   "type": "road_situation",
+   "question_cs": "Na světelné rampě nad křižovatkou svítí ve všech jízdních pruzích červené signály. Jak se zachováte?",
+   "options_cs": [
+    "Zastavím vozidlo před světelným signalizačním zařízením (před příčnou čarou) a vyčkám na zelený signál",
+    "Mohu pokračovat, pokud jedu rovně a v pruhu přede mnou není jiné vozidlo",
+    "Zastavím jen tehdy, jedu-li doleva; rovně mohu projet",
+    "Snížím rychlost a projedu křižovatkou opatrně, protože červená zde platí jen pro tramvaje"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Signál s červeným světlem 'Stůj!' znamená pro řidiče povinnost zastavit vozidlo před světelným signalizačním zařízením, popřípadě před příčnou čarou souvislou. Červená platí pro všechny jízdní pruhy, ve kterých svítí, bez ohledu na zamýšlený směr jízdy. Pokračovat lze až po rozsvícení zeleného signálu.",
+   "citation": "§ 70 odst. 2 zákona č. 361/2000 Sb. (signál červené světlo „Stůj!“)",
+   "rule_tag": "svetelny_signal_cervena_stuj",
+   "confidence": 0.9,
+   "what_you_see": "Příčná světelná rampa nad vozovkou s vícepruhovou křižovatkou; ve všech pruzích svítí červené signály, nad pruhy jsou modré směrové značky a kolony vozidel stojí před křižovatkou.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b138b3db-11b5-4eac-bef9-23a8086226fd",
+   "type": "road_situation",
+   "question_cs": "Jedete po vozovce s podélnou přerušovanou čárou oddělující jízdní pruhy téhož směru. Co tato čára umožňuje?",
+   "options_cs": [
+    "Přejíždět ji a měnit jízdní pruh, pokud tím neohrozíte ostatní",
+    "Je zakázáno ji jakkoli přejíždět",
+    "Smí ji přejíždět pouze vozidla s právem přednostní jízdy",
+    "Znamená trvalý zákaz předjíždění v celém úseku"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Přerušovaná podélná čára (V2) odděluje jízdní pruhy a smí se přejíždět při dodržení ostatních pravidel – tedy lze měnit jízdní pruh nebo předjíždět, pokud tím neohrozíte a neomezíte jiné účastníky provozu. Zákaz přejíždění platí jen u plné (souvislé) čáry.",
+   "citation": "značka V2, § 12",
+   "rule_tag": "road_markings",
+   "confidence": 0.8,
+   "what_you_see": "Bílá přerušovaná podélná čára uprostřed vozovky oddělující dva jízdní pruhy stejného směru na přímém úseku silnice.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b82eb45e-9491-4537-b9d8-a0200ad81110",
+   "type": "sign_identification",
+   "question_cs": "Modrý kruhový terč s červeným okrajem a jedním šikmým červeným pruhem u kraje vozovky. Která značka to je?",
+   "options_cs": [
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Zákaz vjezdu všech vozidel",
+    "Konec zákazu předjíždění"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrý kruh s červeným lemováním a JEDNÍM šikmým červeným pruhem je značka „Zákaz stání“ (IP – B29). Zastavit (krátké stání pro nastoupení, vystoupení nebo naložení) je dovoleno, ale ponechat zde vozidlo stát nelze. Dva zkřížené pruhy by naopak znamenaly „Zákaz zastavení“.",
+   "citation": "značka B29, § 27",
+   "rule_tag": "no_parking",
+   "confidence": 0.83,
+   "what_you_see": "Modrý kruhový dopravní terč s červeným okrajem a jediným šikmým červeným pruhem na sloupku u kraje silnice, vedle modré značky parkoviště.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b902cb6e-33f8-4c5a-b06c-c66c6aee6a91",
+   "type": "sign_identification",
+   "question_cs": "Modrý kruhový terč s červeným okrajem a dvěma zkříženými červenými pruhy (do tvaru X) vpravo u silnice. Co znamená?",
+   "options_cs": [
+    "Zákaz zastavení",
+    "Zákaz stání",
+    "Konec všech zákazů",
+    "Křižovatka s vedlejší pozemní komunikací"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrý kruh s červeným okrajem a DVĚMA zkříženými červenými pruhy (X) je značka „Zákaz zastavení“ (B28). Vozidlo zde nesmí ani zastavit, natož stát. Liší se od „Zákazu stání“, který má jen jeden šikmý pruh a zastavení dovoluje.",
+   "citation": "značka B28, § 27",
+   "rule_tag": "no_stopping",
+   "confidence": 0.88,
+   "what_you_see": "Modrý kruhový terč s červeným okrajem a dvěma zkříženými červenými pruhy do tvaru X na sloupku u pravého okraje vozovky pod mostem.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d57016b7-9c28-43a4-ad95-e717da95bb55",
+   "type": "road_situation",
+   "question_cs": "Před vozidlem je na vozovce příčné bílé pruhové značení (zebra). Co označuje a jak se před ním musíte chovat?",
+   "options_cs": [
+    "Přechod pro chodce – řidič nesmí chodce ohrozit, a přechází-li chodec, musí mu umožnit nerušené a bezpečné přejití, případně zastavit",
+    "Stezku pro cyklisty, kde mají cyklisté přednost před vozidly",
+    "Vyznačené parkovací stání pro vozidla podél vozovky",
+    "Místo pro otáčení vozidel doprostřed křižovatky"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Příčné bílé pruhy přes vozovku tvoří vodorovnou značku V7 – přechod pro chodce. Podle § 5 odst. 2 písm. f) a § 4 zákona 361/2000 Sb. nesmí řidič ohrozit nebo omezit chodce přecházejícího po přechodu; musí mu umožnit nerušené a bezpečné přejití, a je-li to nutné, i zastavit vozidlo. Na přechodu a bezprostředně před ním platí zákaz předjíždění.",
+   "citation": "značka V7, § 5 odst. 2 písm. f)",
+   "rule_tag": "pedestrian_crossing",
+   "confidence": 0.9,
+   "what_you_see": "Příčné bílé pruhy (zebra) přes vozovku v popředí – přechod pro chodce na rozlehlé křižovatce s tramvajovým trolejovým vedením.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "de7293dc-3060-4ddb-8a46-2e1b35a666cb",
+   "type": "road_situation",
+   "question_cs": "Jízdní pruhy v jednom směru jsou odděleny podélnou přerušovanou bílou čárou. Co pro vás tato čára znamená?",
+   "options_cs": [
+    "Je to čára, kterou se smí přejíždět při dodržení pravidel provozu (např. při změně jízdního pruhu nebo předjíždění)",
+    "Je to čára, kterou je zakázáno přejíždět i přes ni najíždět",
+    "Označuje okraj vozovky a konec zpevněné krajnice",
+    "Vyznačuje zákaz zastavení podél celé vozovky"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Podélná přerušovaná čára (vodorovná značka V2) odděluje jízdní pruhy a smí se přes ni přejíždět, je-li to potřebné a dovolují-li to pravidla provozu – například při změně jízdního pruhu nebo předjíždění. Naproti tomu podélnou souvislou čáru (V1) je zakázáno přejíždět nebo přes ni najíždět.",
+   "citation": "značka V2, § 26 (vyhláška 294/2015 Sb.)",
+   "rule_tag": "road_marking",
+   "confidence": 0.82,
+   "what_you_see": "Podélná přerušovaná bílá čára oddělující dva jízdní pruhy v témže směru na vícepruhové silnici; vpravo souvislá vodorovná čára na okraji vozovky.",
+   "severity": "ok"
+  }
+ ],
+ "hradec_kralove": [
+  {
+   "photo_id": "13c84d3c-4f26-4019-89d1-6dc5d2bd2e9c",
+   "type": "sign_identification",
+   "question_cs": "Co znamená modrá čtvercová značka s bílým písmenem „P“ umístěná na sloupku vpravo u parkovacích stání?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Parkoviště pouze pro invalidy"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová informativní značka IP11a „Parkoviště“ označuje místo (plochu), kde je dovoleno zastavit a stát. Často je doplněna dodatkovou tabulkou s podmínkami stání (např. zpoplatek, časový režim, vyhrazení). Nejde o žádnou zákazovou značku – zákazy stání či zastavení mají kulatý tvar s červeným okrajem.",
+   "citation": "značka IP11a, § 14 vyhlášky 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.92,
+   "what_you_see": "Modrá čtvercová značka s bílým „P“ na sloupku vpravo, pod ní bílá dodatková tabulka s textem, vedle řada zaparkovaných aut na náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "038cf6f8-0e77-4fd3-b066-e01cbe35141e",
+   "type": "road_situation",
+   "question_cs": "Na vozovce před vámi je bílými pruhy vyznačený přechod pro chodce. Jak se k němu máte jako řidič chovat?",
+   "options_cs": [
+    "Snížit rychlost, případně zastavit, a umožnit chodci, který přechází nebo zjevně hodlá přejít, bezpečné přejití",
+    "Mám absolutní přednost, chodci musí počkat, až projedu",
+    "Na přechod smím vjet jen na zelenou, jinak je vždy zakázán vjezd",
+    "Smím přechod přejet zvýšenou rychlostí, abych jej rychle uvolnil"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Před přechodem pro chodce vyznačeným vodorovnou značkou (bílé pruhy) musí řidič podle § 5 odst. 2 písm. f) zákona 361/2000 Sb. umožnit chodci, který je na přechodu nebo jej zjevně hodlá použít, nerušené a bezpečné přejití; je-li třeba, musí zastavit. Řidič zde nesmí chodce ohrozit, a proto k přechodu přijíždí připraven snížit rychlost či zastavit.",
+   "citation": "§ 5 odst. 2 písm. f), § 5 odst. 1 zákona 361/2000 Sb.",
+   "rule_tag": "prechod_pro_chodce_prednost",
+   "confidence": 0.8,
+   "what_you_see": "Široká dlážděná ulice s trolejovým vedením, přes vozovku v dáli vyznačený přechod pro chodce (bílé pruhy zebry).",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "28a30d56-3836-4da8-a6d5-7b923bcbd4ee",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá dopravní značka s bílým písmenem \"P\", kterou vidíte vpravo na sloupku?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno stání vozidel",
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Konec všech zákazů"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem \"P\" je informativní provozní značka IP13c (Parkoviště) a označuje místo, kde je dovoleno stání. Na tomto sloupku je navíc doplněna textovou tabulkou \"Zakazuje se stání bez parkovacího poplatku\", což znamená, že jde o placené parkoviště. Modrá barva značí informaci/povolení, nikoli zákaz – zákazové značky jsou kulaté s červeným okrajem.",
+   "citation": "značka IP13c, § 13 vyhlášky 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.9,
+   "what_you_see": "Modrá čtvercová značka s bílým \"P\" na sloupku vpravo, s doplňkovou tabulkou \"Zakazuje se stání bez parkovacího poplatku\" a šipkou nahoru.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "4fe25882-9c04-4a9b-888c-ca60c25fb1ac",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku vpravo u kraje náměstí?",
+   "options_cs": [
+    "Zákaz odbočování vlevo",
+    "Zákaz odbočování vpravo",
+    "Přikázaný směr jízdy vpravo",
+    "Zákaz otáčení"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Na fotografii je kruhová značka s bílým podkladem, červeným okrajem a černou šipkou zahnutou doleva, která je přeškrtnuta červeným šikmým pruhem. To je značka B 24a „Zákaz odbočování vlevo“. Šipka směřuje doleva, proto nejde o zákaz odbočení vpravo ani o zákaz otáčení (ten má šipku tvaru smyčky / písmene U).",
+   "citation": "značka B 24a, § 63 odst. 1 zákona 361/2000 Sb.",
+   "rule_tag": "zakazova-znacka",
+   "confidence": 0.95,
+   "what_you_see": "Kruhová značka s červeným okrajem a černou šipkou doleva přeškrtnutou červeným pruhem, na samostatném sloupku u kraje náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "547df163-d9c4-4e7f-87a4-78259299ba2a",
+   "type": "sign_identification",
+   "question_cs": "Jaká dopravní značka je umístěná na sloupku u nárožní budovy s podloubím?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (v obou směrech)",
+    "Zákaz zastavení",
+    "Jednosměrný provoz",
+    "Zákaz stání"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Na fotografii je kruhová červená značka s vodorovným bílým pruhem uprostřed – to je značka B 2 „Zákaz vjezdu všech vozidel (v obou směrech)“. Zákaz zastavení i zákaz stání jsou modré kruhové značky s červeným lemem a šikmými pruhy; jednosměrný provoz je modrá obdélníková značka s bílou šipkou.",
+   "citation": "značka B 2, § 63 odst. 1 zákona 361/2000 Sb.",
+   "rule_tag": "zakaz-vjezdu",
+   "confidence": 0.95,
+   "what_you_see": "Kruhová červená značka s vodorovným bílým pruhem na sloupku u nároží budovy s podloubím na okraji náměstí.",
+   "severity": "minor"
+  },
+  {
+   "photo_id": "547df163-d9c4-4e7f-87a4-78259299ba2a",
+   "type": "sign_meaning",
+   "question_cs": "Co tato značka přikazuje řidiči, který k ní přijíždí?",
+   "options_cs": [
+    "Nesmí do ulice za značkou vjet (vjezd je zakázán)",
+    "Smí vjet, ale jen v jednom směru",
+    "Smí vjet pouze vozidla zásobování",
+    "Musí dát přednost protijedoucím vozidlům"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Značka B 2 „Zákaz vjezdu všech vozidel (v obou směrech)“ znamená, že řidič nesmí do úseku za značkou vjet. Nejedná se o povolení vjezdu v jednom směru ani o omezení jen pro zásobování (to by muselo být uvedeno dodatkovou tabulkou) a není to značka upravující přednost.",
+   "citation": "značka B 2, § 63 zákona 361/2000 Sb.",
+   "rule_tag": "zakaz-vjezdu",
+   "confidence": 0.92,
+   "what_you_see": "Kruhová červená značka s bílým vodorovným pruhem (zákaz vjezdu) na sloupku před vjezdem do ulice u nároží náměstí.",
+   "severity": "minor"
+  },
+  {
+   "photo_id": "58da2fe6-97d3-4a01-a79f-b88f7c0a896d",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá značka s bílým písmenem „P“ umístěná u budovy vpravo?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Konec parkoviště",
+    "Placené parkoviště pouze pro autobusy"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem „P“ je informativní provozní značka IP11a „Parkoviště“. Označuje místo (plochu), kde je dovoleno zastavení a stání vozidel. Nejde o příkaz ani zákaz – pouze informuje řidiče o vyhrazené parkovací ploše.",
+   "citation": "značka IP11a, § 25",
+   "rule_tag": "informative_sign_parking",
+   "confidence": 0.86,
+   "what_you_see": "Modrá čtvercová značka s bílým „P“ (parkoviště) na sloupku u světle žluté budovy na pravé straně Velkého náměstí, před řadou zaparkovaných aut.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "61a62f9e-70cd-4b9b-85dc-970258160023",
+   "type": "sign_identification",
+   "question_cs": "Jaká dopravní značka je umístěná na rohu budovy vpravo (kulatá, červená s bílým vodorovným pruhem)?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (jednosměrka v protisměru)",
+    "Zákaz zastavení",
+    "Stůj, dej přednost v jízdě",
+    "Hlavní pozemní komunikace"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kulatá značka s červeným podkladem a širokým bílým vodorovným pruhem je značka B2 „Zákaz vjezdu všech vozidel“. Zakazuje vjezd do dané ulice ze strany, kde je značka umístěna – typicky se používá na výjezdovém konci jednosměrné ulice. Řidič tudy nesmí vjet.",
+   "citation": "značka B2, § 4 a § 29",
+   "rule_tag": "prohibitory_no_entry",
+   "confidence": 0.83,
+   "what_you_see": "Kulatá značka s červeným podkladem a bílým vodorovným pruhem (zákaz vjezdu) zavěšená na rohu žluté barokní budovy nad úzkou jednosměrnou uličkou s černým vozidlem Mercedes.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "6de008cf-b6c6-4046-af09-e3be0a0745e6",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená kulatá červená značka s bílým vodorovným pruhem na rohu budovy vlevo?",
+   "options_cs": [
+    "Do této ulice je zakázán vjezd všech vozidel",
+    "Vjezd povolen jen pro osobní automobily",
+    "Slepá ulice",
+    "Konec zákazu předjíždění"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jde o značku B2 „Zákaz vjezdu všech vozidel“ – kulatá, červená s bílým vodorovným pruhem. Zakazuje vjezd všech vozidel do ulice ze strany, kde je značka umístěna. Nejčastěji uzavírá výjezdový konec jednosměrné komunikace, takže řidič tudy nesmí do ulice vjet.",
+   "citation": "značka B2, § 4 odst. a) a § 29",
+   "rule_tag": "prohibitory_no_entry",
+   "confidence": 0.83,
+   "what_you_see": "Kulatá značka s červeným podkladem a bílým vodorovným pruhem (zákaz vjezdu) na rohu světlé budovy vlevo na Velkém náměstí, u podloubí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "744807fa-53fe-4f65-8964-b42234bdd2a8",
+   "type": "sign_meaning",
+   "question_cs": "Modrá čtvercová značka s bílým písmenem „P\" a symbolem parkovacího automatu, doplněná tabulkou „Zakazuje se stání bez parkovacího poplatku\". Co tato značka řidiči sděluje?",
+   "options_cs": [
+    "Parkoviště, na kterém je stání zpoplatněno (placené parkování s parkovacím automatem)",
+    "Zákaz stání i zastavení v celém prostoru náměstí",
+    "Bezplatné parkoviště vyhrazené pouze pro rezidenty",
+    "Konec parkoviště a začátek zóny zákazu zastavení"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá značka s bílým „P\" (IP11/IP13b – Parkoviště s parkovacím automatem) označuje místo, kde je dovoleno stání. Symbol parkovacího automatu spolu s dodatkovou tabulkou „Zakazuje se stání bez parkovacího poplatku\" znamená, že parkování je zde zpoplatněno a řidič musí zaplatit poplatek (lístek z automatu). Nejde o zákazovou značku – modrá barva je informativní, nikoli příkazová či zákazová.",
+   "citation": "značka IP13b (IP11a), vyhláška 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.9,
+   "what_you_see": "Modrá čtvercová značka „P\" se symbolem parkovacího automatu a bílou dodatkovou tabulkou s textem „ZAKAZUJE SE STÁNÍ BEZ PARKOVACÍHO POPLATKU\" na sloupku u zaparkovaných aut na náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "7d77a022-fc9e-4f48-bb62-5e03564335a9",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová dopravní značka s bílým písmenem „P\" na sloupku u kraje náměstí?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavení a stání vozidel",
+    "Zákaz stání po celé délce vozovky",
+    "Přikázaný směr jízdy vpravo",
+    "Konec obce"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem „P\" (IP11a – Parkoviště) je informativní značka, která označuje místo, kde je dovoleno zastavení a stání vozidel. Modrá barva u čtvercových značek znamená informaci, nikoli zákaz či příkaz. Zákaz stání má naopak podobu kruhové modré značky s červeným okrajem a šikmým červeným pruhem.",
+   "citation": "značka IP11a, vyhláška 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.83,
+   "what_you_see": "Modrá čtvercová značka s bílým „P\" a se symbolem parkovacího automatu, umístěná na sloupku u zaparkovaných vozidel na pravé straně náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "959ddd0e-f901-48fd-8eed-260e8869f389",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová značka s bílým písmenem „P“, kterou vidíte na sloupku vpravo u kraje náměstí?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Konec parkoviště"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým „P“ je informativní provozní značka IP11a „Parkoviště“. Označuje místo (úsek), kde je dovoleno zastavit a stát; podrobnosti (způsob stání, čas, platbu) určují případné dodatkové tabulky. Nejde o žádný zákaz.",
+   "citation": "značka IP11a, § 14 vyhlášky 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.88,
+   "what_you_see": "Modrá čtvercová informativní značka s bílým symbolem „P“ na sloupku vpravo u kraje Velkého náměstí, s bílou dodatkovou tabulkou pod ní.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "aae635ab-20a3-4377-9e6f-59700813b3c4",
+   "type": "sign_meaning",
+   "question_cs": "Modrá čtvercová značka s bílým „P“ na sloupku vpravo informuje řidiče především o čem?",
+   "options_cs": [
+    "Že zde je parkoviště, kde lze zastavit a stát",
+    "Že zde platí zákaz stání",
+    "Že zde končí obec",
+    "Že je zde dálnice"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jedná se o informativní provozní značku IP11a „Parkoviště“. Sděluje, že označený prostor slouží k stání vozidel; konkrétní podmínky (např. placené stání, vyhrazení) upřesňují dodatkové tabulky. Není to zákazová ani koncová značka obce.",
+   "citation": "značka IP11a, § 14 vyhlášky 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.86,
+   "what_you_see": "Modrá čtvercová informativní značka s bílým symbolem „P“ na sloupku vpravo u parkovacích míst na Velkém náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b0609253-7925-4280-9cc8-499420ebda3a",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku u parkoviště na náměstí?",
+   "options_cs": [
+    "IP11a „Parkoviště\" (bílé P na modré čtvercové ploše)",
+    "IP4b „Jednosměrný provoz\"",
+    "P4 „Dej přednost v jízdě!\"",
+    "IP6 „Přechod pro chodce\""
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílé písmeno „P\" na modré čtvercové ploše je informativní provozní značka IP11a „Parkoviště\". Označuje místo (plochu), kde je dovoleno zastavení a stání vozidel. Pod ní bývá dodatková tabulka upřesňující podmínky stání (např. čas, způsob, zpoplatnění).",
+   "citation": "značka IP11a, vyhláška 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_parkoviste",
+   "confidence": 0.92,
+   "what_you_see": "Modrá čtvercová značka s bílým písmenem P na sloupku, pod ní bílá dodatková tabulka, na okraji parkoviště na náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b1a63dd6-e03c-4a57-947d-09257e362b49",
+   "type": "sign_meaning",
+   "question_cs": "Vlevo na náměstí je kulatá značka s červeným okrajem, červeným polem a bílým vodorovným pruhem uprostřed. Co znamená?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (do tohoto úseku se nesmí vjíždět)",
+    "Zákaz zastavení",
+    "Hlavní pozemní komunikace",
+    "Konec všech zákazů"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová červená značka s bílým vodorovným pruhem je B2 „Zákaz vjezdu všech vozidel\" (v jednom směru). Do takto označeného úseku nesmí žádné vozidlo vjet – nejčastěji označuje výjezd z jednosměrné ulice nebo plochu, kam je vjezd zakázán. Zákaz zastavení má jiný symbol (modré pole s červeným křížem), hlavní silnice je žlutý kosočtverec.",
+   "citation": "značka B2, § 4 zákona 361/2000 Sb.",
+   "rule_tag": "zakaz_vjezdu_vsech_vozidel",
+   "confidence": 0.85,
+   "what_you_see": "Kulatá značka s červeným polem a bílým vodorovným pruhem (B2) na sloupku vlevo u okraje náměstí, částečně zakrytá zaparkovanými auty.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "cdc1a448-eb05-4eb2-863f-32faa33bd25a",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená dopravní značka (červený kruh s vodorovnou bílou pruhou) umístěná u podloubí vlevo?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (v jednom směru)",
+    "Zákaz vjezdu nákladních automobilů",
+    "Zákaz zastavení",
+    "Konec všech zákazů"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Značka B2 \"Zákaz vjezdu všech vozidel\" (červený kruh s bílým vodorovným pruhem) zakazuje vjezd všem vozidlům do daného úseku, typicky proti směru jednosměrné ulice. Často doplňuje na protějším konci značku IP4b. Neplatí pro nákladní vozidla samostatně ani nesouvisí se zastavením.",
+   "citation": "značka B2, § 8 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zakaz-vjezdu",
+   "confidence": 0.9,
+   "what_you_see": "Kruhová dopravní značka s červeným okrajem a vodorovným bílým pruhem (B2 zákaz vjezdu) na sloupku u kamenného podloubí vlevo na Velkém náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d10d2860-bbcc-4c2c-8350-0833400f991d",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová značka s bílým písmenem \"P\" u parkoviště na náměstí?",
+   "options_cs": [
+    "Parkoviště (místo, kde je dovoleno stání)",
+    "Zákaz stání",
+    "Zastávka autobusu",
+    "Nemocnice"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem \"P\" je informativní značka IP11a \"Parkoviště\" a označuje místo, kde je dovoleno zastavení a stání vozidel. Nejde o zákazovou značku ani o označení zastávky či nemocnice.",
+   "citation": "značka IP11a, § 13 vyhlášky 294/2015 Sb.",
+   "rule_tag": "parkoviste",
+   "confidence": 0.92,
+   "what_you_see": "Modrá čtvercová informativní značka s bílým písmenem \"P\" (IP11a Parkoviště) na sloupku u řady zaparkovaných vozidel na náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d4dc4b28-95ea-4742-a88a-2a59932f123a",
+   "type": "sign_identification",
+   "question_cs": "Jak se nazývá kruhová značka s červeným okrajem a vodorovným bílým pruhem u podloubí vlevo?",
+   "options_cs": [
+    "B2 – Zákaz vjezdu všech vozidel",
+    "P6 – Stůj, dej přednost v jízdě",
+    "C2a – Přikázaný směr jízdy přímo",
+    "B1 – Zákaz vjezdu všech vozidel v obou směrech"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jde o značku B2 \"Zákaz vjezdu všech vozidel (v jednom směru)\" – červený kruh s bílým vodorovným pruhem. Značka B1 (zákaz vjezdu v obou směrech) je plný červený kruh bez pruhu, P6 je osmiúhelník STOP a C2a je modrá příkazová značka, takže ostatní možnosti neodpovídají vyobrazení.",
+   "citation": "značka B2, § 8 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zakaz-vjezdu",
+   "confidence": 0.9,
+   "what_you_see": "Kruhová dopravní značka s červeným okrajem a vodorovným bílým pruhem (B2) na sloupku u kamenného podloubí vlevo na náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "e452cf01-ec18-462a-8e21-e7a2779e6986",
+   "type": "sign_meaning",
+   "question_cs": "Na pravé straně náměstí je modrá čtvercová značka s bílým písmenem „P\" a pod ní dodatková tabulka s parkovacím automatem. Co tato značka znamená?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát; dodatková tabulka upřesňuje placené stání",
+    "Zákaz stání po celé délce ulice",
+    "Konec všech zákazů a omezení",
+    "Vyhrazené parkoviště pouze pro vozidla taxislužby"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým „P\" je informativní provozní značka IP11a „Parkoviště\". Označuje místo, kde je dovoleno zastavit a stát. Dodatková tabulka s vyobrazením parkovacího automatu informuje, že stání je zpoplatněné (placené stání). Nejde o zákaz stání ani o konec omezení.",
+   "citation": "značka IP11a, § 25 zákona 361/2000 Sb.",
+   "rule_tag": "informative_sign_parking",
+   "confidence": 0.9,
+   "what_you_see": "Modrá čtvercová značka s bílým písmenem „P\" (IP11a Parkoviště) na sloupku vpravo, s dodatkovou tabulkou znázorňující parkovací automat (placené stání).",
+   "severity": "minor"
+  },
+  {
+   "photo_id": "fee8fbe8-4080-4af6-a698-8ba1da213023",
+   "type": "sign_identification",
+   "question_cs": "Vlevo u podloubí je na sloupku kulatá značka s červeným okrajem a bílým vodorovným pruhem uprostřed. Jak se tato značka jmenuje a co zakazuje?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (v jednom směru) – do této ulice je vjezd zakázán",
+    "Zákaz zastavení – nesmíte zde zastavit ani na okamžik",
+    "Stůj, dej přednost v jízdě – musíte zastavit vozidlo",
+    "Hlavní pozemní komunikace – máte přednost v jízdě"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kulatá značka s červeným kruhem a bílým vodorovným pruhem je B2 „Zákaz vjezdu všech vozidel (v jednom směru)\". Zakazuje vjezd všem vozidlům do takto označeného úseku, typicky proti jednosměrné ulici. Nezaměňujte ji se zákazem zastavení (modrý kruh s červeným křížem) ani se značkou Stůj, dej přednost v jízdě (osmiúhelník).",
+   "citation": "značka B2, § 4 vyhlášky 294/2015 Sb.",
+   "rule_tag": "prohibition_sign_no_entry",
+   "confidence": 0.92,
+   "what_you_see": "Kulatá značka s červeným okrajem a bílým vodorovným pruhem (B2 Zákaz vjezdu všech vozidel) na sloupku vlevo u podloubí.",
+   "severity": "ok"
+  }
+ ],
+ "ceske_budejovice": [
+  {
+   "photo_id": "02540bd4-2555-4f6a-9618-3f5c5354335d",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená červeně orámovaná značka s přeškrtnutým automobilem a motocyklem na sloupku?",
+   "options_cs": [
+    "Zákaz vjezdu všech motorových vozidel",
+    "Zákaz stání osobních automobilů a motocyklů",
+    "Konec zóny s dovoleným vjezdem motorových vozidel",
+    "Zákaz předjíždění osobních automobilů a motocyklů"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová značka s červeným lemem a vyobrazením přeškrtnutého osobního automobilu a motocyklu je značka B11 „Zákaz vjezdu všech motorových vozidel“. Zakazuje vjezd všem vozidlům s motorem. Dodatková tabulka pod značkou („VOZIDLŮM ÚDRŽBY A MAJITELŮM ZAHRAD“) z tohoto zákazu vyjímá vyjmenované oprávněné uživatele.",
+   "citation": "značka B11, § 4 vyhlášky 294/2015 Sb.",
+   "rule_tag": "prohibition_no_motor_vehicles",
+   "confidence": 0.9,
+   "what_you_see": "Kruhová značka s červeným okrajem a přeškrtnutým automobilem a motocyklem, pod ní dodatková tabulka s textem o vozidlech údržby a majitelích zahrad.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "02540bd4-2555-4f6a-9618-3f5c5354335d",
+   "type": "sign_meaning",
+   "question_cs": "Co řidiči sděluje modrá čtvercová značka nahoře na sloupku (modrý podklad s bílým „T“ obrysem)?",
+   "options_cs": [
+    "Slepá pozemní komunikace – silnice dále nepokračuje",
+    "Parkoviště pro vozidla údržby",
+    "Nemocnice nebo zdravotnické zařízení",
+    "Obytná zóna"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová informativní značka s bílým symbolem ve tvaru „T“ (svislá čára zakončená příčnou) je IP10a „Slepá pozemní komunikace“. Upozorňuje, že komunikace, k níž se vztahuje, je slepá a dále nepokračuje.",
+   "citation": "značka IP10a, vyhláška 294/2015 Sb.",
+   "rule_tag": "info_dead_end",
+   "confidence": 0.83,
+   "what_you_see": "Modrá čtvercová značka s bílým symbolem ve tvaru písmene T umístěná nad zákazovou značkou na sloupku.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "02dc0ab9-9167-4077-acb0-f6c5bb458c0d",
+   "type": "sign_meaning",
+   "question_cs": "Žlutý kosočtverec s bílým lemem umístěný u křižovatky znamená, že řidič:",
+   "options_cs": [
+    "jede po hlavní pozemní komunikaci a má přednost v jízdě",
+    "musí dát přednost vozidlům přijíždějícím zprava i zleva",
+    "se blíží k železničnímu přejezdu",
+    "vjíždí do zóny s placeným stáním"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Žlutý kosočtverec s bílým okrajem je značka P2 „Hlavní pozemní komunikace“. Označuje, že řidič jedoucí po této komunikaci má v křižovatce přednost v jízdě před vozidly přijíždějícími z vedlejších silnic.",
+   "citation": "značka P2, § 22 zákona 361/2000 Sb.",
+   "rule_tag": "priority_main_road",
+   "confidence": 0.9,
+   "what_you_see": "Žlutý kosočtverec s bílým lemem (značka hlavní pozemní komunikace) zavěšený u křižovatky se světelnou signalizací.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "02dc0ab9-9167-4077-acb0-f6c5bb458c0d",
+   "type": "road_situation",
+   "question_cs": "Světelný signál nad křižovatkou svítí červeně. Jak má řidič reagovat?",
+   "options_cs": [
+    "Zastavit vozidlo před příčnou čárou souvislou, resp. před přechodem pro chodce",
+    "Pokračovat v jízdě, protože má značku hlavní silnice",
+    "Zpomalit a projet křižovatkou opatrně bez zastavení",
+    "Zastavit jen tehdy, jede-li vozidlo z boční silnice"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Signál s červeným světlem „Stůj!“ znamená pro řidiče povinnost zastavit vozidlo před příčnou čárou souvislou, a kde není, před světelným signalizačním zařízením, popřípadě před přechodem pro chodce. Značka hlavní silnice ani jiná přednost nedává právo červené světlo ignorovat – světelná signalizace je nadřazena svislým značkám upravujícím přednost.",
+   "citation": "§ 70 odst. 2 písm. a) zákona 361/2000 Sb.",
+   "rule_tag": "traffic_light_red",
+   "confidence": 0.88,
+   "what_you_see": "Nad křižovatkou svítí červené světlo světelného signalizačního zařízení, před vozidlem je vodorovně vyznačený přechod pro chodce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "1dba535b-55f6-4ef5-bab0-60baf18fc575",
+   "type": "road_situation",
+   "question_cs": "Na vozovce v jízdním pruhu vidíte vodorovnou směrovou šipku, jejíž dřík směřuje rovně a zároveň z ní odbočuje rameno doleva. Co tato šipka řidiči přikazuje?",
+   "options_cs": [
+    "V tomto pruhu smíte pokračovat rovně nebo odbočit vlevo",
+    "V tomto pruhu smíte pouze odbočit vlevo",
+    "V tomto pruhu smíte odbočit vlevo nebo vpravo",
+    "V tomto pruhu je jízda zakázána, slouží jen pro otáčení"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Vodorovná směrová šipka (značka V9a – Směrové šipky) určuje, kterým směrem smí řidič z daného jízdního pruhu pokračovat. Šipka mířící rovně s ramenem doleva znamená, že z tohoto pruhu lze jet přímo nebo odbočit vlevo. Řidič se musí zařadit do pruhu podle směru, kterým chce pokračovat.",
+   "citation": "značka V9a, § 12 vyhlášky 294/2015 Sb.",
+   "rule_tag": "vodorovne_znaceni_smerove_sipky",
+   "confidence": 0.82,
+   "what_you_see": "Bílá vodorovná směrová šipka na vozovce – dřík míří rovně a zároveň z něj vychází rameno zatáčející doleva (kombinace rovně + vlevo).",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "1dba535b-55f6-4ef5-bab0-60baf18fc575",
+   "type": "road_situation",
+   "question_cs": "Při levém okraji vozovky vidíte plochu vyznačenou bílými šikmými rovnoběžnými čarami (\"zebra\" šrafování) ohraničenou plnou čarou. Jak se k této ploše máte chovat?",
+   "options_cs": [
+    "Do plochy nesmíte vjet ani na ní stát, vyznačuje prostor, kam je vjezd zakázán",
+    "Je to vyhrazené parkovací stání, smíte zde zastavit",
+    "Je to přechod pro chodce, musíte dát přednost chodcům",
+    "Je to plocha pro otáčení vozidel, smíte ji použít k otočení"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Šikmé rovnoběžné čáry (značka V13 – Šikmé rovnoběžné čáry) vyznačují plochu, do které nesmí řidič vjet ani na ni vjet zastavením či stáním, pokud to není nutné k objíždění apod. Plocha obvykle usměrňuje provoz nebo odděluje protisměrné proudy a nahrazuje fyzický ostrůvek. Není to ani parkovací stání, ani přechod.",
+   "citation": "značka V13, § 13 vyhlášky 294/2015 Sb.",
+   "rule_tag": "vodorovne_znaceni_sikme_cary",
+   "confidence": 0.8,
+   "what_you_see": "Plocha vyznačená bílými šikmými rovnoběžnými čarami (šrafování) při levém okraji vozovky, ohraničená čarou – usměrňující dopravní plocha.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "3dcaa388-b344-430f-9caa-2e5e005bf9a2",
+   "type": "sign_meaning",
+   "question_cs": "Pod modrou značkou „Vyhrazené parkoviště\" (RESERVE) je bílá tabulka s textem „PRO M.M. PO – PÁ 7:00 – 18:00 hod.\". Co tato bílá tabulka znamená?",
+   "options_cs": [
+    "Je to dodatková tabulka, která omezuje platnost vyhrazeného parkoviště pouze na pracovní dny (pondělí až pátek) v době od 7:00 do 18:00 hodin",
+    "Znamená, že parkoviště je v uvedené době zcela uzavřené a nesmí na něj vjet žádné vozidlo",
+    "Stanovuje maximální povolenou dobu stání na 7 až 18 hodin pro každé vozidlo",
+    "Určuje, že se zde vybírá parkovné pouze v pracovní dny od 7:00 do 18:00 hodin"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílá tabulka pod hlavní značkou je dodatková tabulka. Upřesňuje nebo omezuje platnost značky, pod kterou je umístěna. Zde uvedené dny „PO – PÁ\" a časový údaj „7:00 – 18:00 hod.\" znamenají, že vyhrazení parkoviště (zde pro konkrétního uživatele „M.M.\") platí pouze v pracovní dny v tomto časovém rozmezí. Mimo tuto dobu vyhrazení neplatí. Nejde o uzavření plochy, o dobu stání ani o výběr parkovného.",
+   "citation": "značka IP12, dodatková tabulka E13, vyhláška 294/2015 Sb.",
+   "rule_tag": "dodatkova_tabulka_vyhrazene_parkoviste",
+   "confidence": 0.86,
+   "what_you_see": "Modrá čtvercová značka „RESERVE\" (vyhrazené parkoviště) a pod ní bílá dodatková tabulka s textem „PRO M.M. PO – PÁ 7:00 – 18:00 hod.\", úplně dole směrová šipka, v garážovém objektu.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "5d27a01b-2ae8-466d-b358-b5ee14c77660",
+   "type": "sign_meaning",
+   "question_cs": "Na pravé části tabule je modrá značka „P\" s vyobrazením parkovacího automatu (hodin) a šipkou. Co tento symbol u parkoviště znamená?",
+   "options_cs": [
+    "Placené stání – parkování je zpoplatněné parkovacím automatem",
+    "Parkoviště je zdarma bez jakéhokoli omezení",
+    "Zákaz stání pro všechna vozidla",
+    "Parkoviště pouze pro vozidla s parkovacím průkazem pro invalidy"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá značka IP11a „Parkoviště\" doplněná symbolem parkovacího automatu označuje placené stání – řidič musí za parkování zaplatit prostřednictvím parkovacího automatu. Potvrzuje to i text na tabuli „PLACENÉ PO-PÁ 06-20 hod\". Šipka ukazuje směr k tomuto parkovišti.",
+   "citation": "značka IP11a + symbol č. E (parkovací automat), § 12 vyhl. 294/2015 Sb.",
+   "rule_tag": "parking_signs",
+   "confidence": 0.85,
+   "what_you_see": "Velká informační tabule „PARKOVIŠTĚ DLOUHÁ LOUKA\"; pravý modrý panel se značkou P, symbolem parkovacího automatu (hodin), šipkou doprava a symboly obytných vozidel; vlevo dole text „PLACENÉ PO-PÁ 06-20 hod\".",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "62d2685d-2e4e-4344-a27c-a42bf7bbc143",
+   "type": "road_situation",
+   "question_cs": "Na světelném signalizačním zařízení před křižovatkou svítí červené světlo „Stůj!\". Jak musí řidič zareagovat?",
+   "options_cs": [
+    "Zastavit vozidlo před světelným signalizačním zařízením a stát",
+    "Pomalu projet křižovatkou se zvýšenou opatrností",
+    "Zastavit, rozhlédnout se a poté pokračovat v jízdě",
+    "Pokračovat v jízdě, červená platí jen pro chodce"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Signál červeného světla „Stůj!\" znamená pro řidiče povinnost zastavit vozidlo před světelným signalizačním zařízením. V jízdě smí pokračovat až po rozsvícení signálu se zeleným světlem „Volno\". Červené světlo nelze projet ani pomalu, ani po zastavení.",
+   "citation": "§ 70 odst. 2 písm. a) zákona 361/2000 Sb.",
+   "rule_tag": "traffic_lights",
+   "confidence": 0.9,
+   "what_you_see": "Městská křižovatka s trolejovým vedením; na semaforu nad jízdním pruhem svítí červené světlo; před křižovatkou stojí vozidla, na vozovce nápis „TRANZ\" a modré příkazové značky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "667ae058-d86a-4b8b-a662-33de04792a92",
+   "type": "road_situation",
+   "question_cs": "Na náměstí v popředí vidíte vodorovné dopravní značení v podobě bílých příčných pruhů přes vozovku. Co toto značení označuje a jak se zde má řidič chovat?",
+   "options_cs": [
+    "Přechod pro chodce – řidič musí umožnit chodci, který je na přechodu nebo do něj vstupuje, nerušené a bezpečné přejití",
+    "Stezku pro cyklisty, kterou řidič nesmí přejíždět",
+    "Vyhrazené parkovací stání, kde nesmí zastavit",
+    "Zpomalovací práh, před kterým je nutné zastavit"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílé příčné pruhy (zebra) tvoří přechod pro chodce (značka V7). Podle § 5 odst. 2 písm. f) a § 5 odst. 2 zákona 361/2000 Sb. je řidič povinen umožnit chodci, který je na přechodu nebo na něj vstupuje, nerušené a bezpečné přejití; přitom se nesmí jednat o náhlé vstoupení do těsné blízkosti vozidla. Není to stezka pro cyklisty, parkovací stání ani zpomalovací práh.",
+   "citation": "značka V7, § 5 odst. 2 písm. f)",
+   "rule_tag": "prechod_pro_chodce",
+   "confidence": 0.85,
+   "what_you_see": "Bílé příčné pruhy (zebra) vodorovného přechodu pro chodce přes dlážděnou vozovku v popředí náměstí.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "67e988e8-95a8-41e2-baf8-129c10b0e739",
+   "type": "sign_identification",
+   "question_cs": "U pravého okraje vozovky před billboardem je umístěna svislá dopravní značka ve tvaru trojúhelníku postaveného na vrchol (špičkou dolů) s červeným okrajem. Která značka to je?",
+   "options_cs": [
+    "Dej přednost v jízdě! (P4)",
+    "Stůj, dej přednost v jízdě! (P6)",
+    "Hlavní pozemní komunikace (P2)",
+    "Křižovatka s vedlejší pozemní komunikací (A8)"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Trojúhelník postavený na vrchol (špičkou dolů) s červeným okrajem je značka P4 'Dej přednost v jízdě!'. Ukládá řidiči povinnost dát přednost v jízdě vozidlům jedoucím po hlavní komunikaci. Značka P6 'Stůj, dej přednost v jízdě!' je osmiúhelníková (STOP), P2 'Hlavní pozemní komunikace' je žlutý kosočtverec a A8 je výstražný trojúhelník postavený na základnu.",
+   "citation": "značka P4, § 22",
+   "rule_tag": "prednost_v_jizde",
+   "confidence": 0.8,
+   "what_you_see": "Svislá značka u pravého okraje vozovky ve tvaru trojúhelníku obráceného špičkou dolů s červeným okrajem.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "771441a1-df0a-4e98-80fa-ac2325e29a39",
+   "type": "sign_identification",
+   "question_cs": "Co znamená modrá kruhová značka s bílou šipkou směřující šikmo dolů doprava, kterou vidíte u závory parkoviště?",
+   "options_cs": [
+    "Přikázaný směr objíždění vpravo",
+    "Přikázaný směr jízdy vpravo (zatáčení)",
+    "Slepá pozemní komunikace",
+    "Parkoviště"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá kruhová značka s bílou šipkou skloněnou šikmo dolů doprava je značka C4a „Přikázaný směr objíždění“. Přikazuje řidiči objet překážku (např. ostrůvek nebo závoru) z té strany, kam šipka ukazuje – zde vpravo. Nezaměňujte ji se značkou C2 (přikázaný směr jízdy), kde je šipka vodorovná nebo zahnutá a označuje samotný směr jízdy, nikoli objíždění překážky.",
+   "citation": "značka C4a, § 9 vyhlášky 294/2015 Sb.",
+   "rule_tag": "prikazove_znacky",
+   "confidence": 0.86,
+   "what_you_see": "Modrá kruhová dopravní značka na sloupku u závory parkoviště s bílou šipkou směřující šikmo dolů doprava (C4a).",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "786be4eb-a2fe-42be-ba9a-7ff19b6450e3",
+   "type": "sign_meaning",
+   "question_cs": "Modrá čtvercová značka vpravo zobrazuje chodce na přechodu. Jak se musíte jako řidič chovat při blížení se k tomuto místu?",
+   "options_cs": [
+    "Umožnit chodci, který je na přechodu nebo do něj vstupuje, nerušené a bezpečné přejití – v případě potřeby zastavit",
+    "Zde je zakázáno chodcům vstupovat na vozovku, řidič má vždy přednost",
+    "Značka jen informuje o zastávce MHD, na chování řidiče nemá vliv",
+    "Řidič musí vždy úplně zastavit jako u značky STOP, i když tam není žádný chodec"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s chodcem na přechodu je IP6 „Přechod pro chodce“ a označuje místo přechodu pro chodce. Řidič nesmí chodce, který je na přechodu nebo na něj vstupuje, ohrozit; musí mu umožnit nerušené a bezpečné přejití a v případě potřeby zastavit vozidlo. Nejde o značku STOP – řidič nezastavuje vždy, ale jen je-li to nutné kvůli chodci. Na vozovce jsou navíc patrné příčné pruhy přechodu (vodorovná značka V7).",
+   "citation": "značka IP6, § 5 odst. 2 písm. f) a § 54 zákona 361/2000 Sb.",
+   "rule_tag": "prechod_pro_chodce",
+   "confidence": 0.84,
+   "what_you_see": "Modrá čtvercová informativní značka vpravo u silnice s bílým piktogramem chodce kráčejícího po přechodu (IP6), na vozovce příčné pruhy přechodu pro chodce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "ad734a1f-1d57-4c4a-bb5c-7b0d353465dd",
+   "type": "sign_meaning",
+   "question_cs": "Vpravo na sloupku v místě zúžení a prací na silnici vidíte kulatou značku s červeným okrajem a číslem 30. Co tato značka znamená?",
+   "options_cs": [
+    "Nejvyšší dovolená rychlost 30 km/h",
+    "Doporučená rychlost 30 km/h",
+    "Konec nejvyšší dovolené rychlosti 30 km/h",
+    "Minimální dovolená rychlost 30 km/h"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kulatá značka s červeným okrajem a černým číslem na bílém podkladu je B20a 'Nejvyšší dovolená rychlost'. Řidič nesmí překročit rychlost vyznačenou na značce, zde tedy 30 km/h. Doporučená rychlost má modrý podklad (IP), konec omezení je přeškrtnutý (B26/B20b) a minimální rychlost je modrá kulatá (C6a).",
+   "citation": "značka B20a, § 4 zákona 361/2000 Sb.",
+   "rule_tag": "speed_limit",
+   "confidence": 0.88,
+   "what_you_see": "Kulatá značka 'nejvyšší dovolená rychlost 30' (červený okraj, číslo 30) na sloupku v zóně dopravního omezení / prací na silnici.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b1d8cb55-0670-4723-83d4-9c12232d3d72",
+   "type": "sign_meaning",
+   "question_cs": "Vpravo u vozovky vidíte modrou kulatou značku s vyobrazením chodce a jízdního kola vedle sebe. Co tato značka přikazuje?",
+   "options_cs": [
+    "Společnou stezku pro chodce a cyklisty (smí ji užívat oba)",
+    "Jen stezku pro cyklisty, chodci mají vstup zakázán",
+    "Zákaz vjezdu cyklistů i vstupu chodců",
+    "Konec stezky pro chodce a cyklisty"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá kulatá značka s chodcem a kolem vedle sebe je C9a 'Stezka pro chodce a cyklisty' (společný provoz). Stezku smějí užívat jak chodci, tak cyklisté a navzájem se nesmějí ohrozit. Samostatná stezka pro cyklisty (C8a) má jen kolo, zákazové značky jsou kulaté s červeným okrajem a konec stezky (C9b) je přeškrtnutý šedým pruhem.",
+   "citation": "značka C9a, § 14 vyhlášky 294/2015 Sb.",
+   "rule_tag": "sign_C9a_shared_path",
+   "confidence": 0.86,
+   "what_you_see": "Modrá kulatá příkazová značka s chodcem a jízdním kolem vedle sebe (společná stezka pro chodce a cyklisty) na sloupku vpravo u silnice s křižovatkou se světelnou signalizací.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "cdc7dbfe-66a0-4c5e-b28d-221203c2a6c6",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená symbol parkovacích hodin v modré dopravní značce „P\" na tomto parkovišti?",
+   "options_cs": [
+    "Jde o placené parkoviště (stání je zpoplatněno)",
+    "Parkoviště je vyhrazeno pouze pro vozidla taxislužby",
+    "Parkování je zde zdarma a bez časového omezení",
+    "Jde o parkoviště výhradně pro elektromobily s nabíjením"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá značka IP 13b „Parkoviště s parkovacím automatem\" obsahuje symbol parkovacích hodin a označuje placené parkoviště, kde je stání zpoplatněno (úhrada parkovacím automatem nebo na základě platného parkovacího oprávnění). Doplňující text na značce zde upřesňuje placené stání PO–PÁ 06–20 hod. mimo svátků, max. 24 hod. Symbol tedy neznamená bezplatné stání ani vyhrazení pouze pro taxi či elektromobily.",
+   "citation": "značka IP 13b, vyhláška č. 294/2015 Sb.",
+   "rule_tag": "informativní značka – placené parkoviště",
+   "confidence": 0.9,
+   "what_you_see": "Velká bílá informační tabule s nápisem PARKOVIŠTĚ DLOUHÁ LOUKA a dvěma modrými značkami „P\" se symbolem parkovacích hodin; pod nimi symboly osobního automobilu a obytného vozu a text PLACENÉ PO–PÁ 06–20 hod. MIMO SVÁTKŮ, STÁNÍ NA DOBU MAX. 24 hod.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "ded38257-4511-4381-b9b3-ef44f426b07a",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá obdélníková značka se dvěma svislými šipkami nahoru u pravého okraje vozovky?",
+   "options_cs": [
+    "Informuje o uspořádání jízdních pruhů – před vámi pokračují dva jízdní pruhy v tomtéž směru jízdy",
+    "Přikazuje odbočit vlevo nebo vpravo podle směru šipek",
+    "Označuje jednosměrnou silnici, po které smíte jet jen rovně",
+    "Zakazuje předjíždění ve dvou jízdních pruzích"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jde o informativní provozní značku IP19 'Řadicí pruhy'. Dvě šipky směřující vzhůru znázorňují uspořádání a počet jízdních pruhů ve stejném směru jízdy před křižovatkou. Doplňkový symbol nejvyšší dovolené rychlosti (v červeném kruhu) na jednom z pruhů upozorňuje, že pro tento pruh platí uvedené omezení rychlosti. Značka nic nepřikazuje ani nezakazuje – pouze informuje o organizaci pruhů.",
+   "citation": "značka IP19 'Řadicí pruhy', vyhláška 294/2015 Sb.",
+   "rule_tag": "informativni_znacka_radici_pruhy",
+   "confidence": 0.82,
+   "what_you_see": "Modrá obdélníková značka u pravého okraje vozovky se dvěma bílými šipkami směřujícími vzhůru (dva jízdní pruhy v témž směru); na levém pruhu je vyznačen symbol nejvyšší dovolené rychlosti v červeném kruhu.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "e42cb67a-c10c-4134-aa21-4e9bfa82f17f",
+   "type": "road_situation",
+   "question_cs": "V pracovním úseku jsou na vozovce žluté vodorovné čáry vedle původních bílých. Kterými se musíte řídit?",
+   "options_cs": [
+    "Žlutými (dočasnými) čarami – mají přednost před bílým trvalým značením",
+    "Bílými trvalými čarami, žluté jsou jen orientační",
+    "Tou čarou, která je blíže ke středu vozovky",
+    "Můžete si zvolit kterékoli značení podle situace"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "V místech přechodné úpravy provozu (např. při pracích na silnici) se vyznačuje dočasné vodorovné značení žlutou nebo oranžovou barvou. Toto přechodné značení má přednost před původním (bílým) trvalým značením, které tím pozbývá platnosti. Řidič se proto musí řídit žlutými čarami, i když vedou jinudy než původní bílé.",
+   "citation": "§ 12, vyhláška 294/2015 Sb. (přechodné vodorovné značení)",
+   "rule_tag": "docasne_zlute_znaceni_prednost",
+   "confidence": 0.84,
+   "what_you_see": "Pracovní úsek silnice s dopravními kužely a červeno-bílými směrovacími deskami (Z4); na vozovce jsou vyznačeny žluté (dočasné) vodorovné čáry vedoucí jinudy než původní bílé značení.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "fd0d2213-2586-4fb6-974e-801f9687bf96",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modré pozadí těchto velkých směrových tabulí (návěstí) nad křižovatkou?",
+   "options_cs": [
+    "Vede vás po silnici (mimo dálnici) – jsou to informativní směrové značky pro běžné pozemní komunikace",
+    "Označují trasu po dálnici nebo silnici pro motorová vozidla",
+    "Jde o zákazové značky platné jen v noci",
+    "Upozorňují na placený úsek komunikace (mýtné)"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Velké modré tabule nad vozovkou s názvy obcí (J. Hradec, Praha, N. Hrady, Borovany, Husova kolonie) a směrovými šipkami jsou informativní směrové značky – návěst před křižovatkou (skupina IS). Modré pozadí se v ČR používá pro směrové značení na běžných silnicích a v obcích. Zelené pozadí by naopak označovalo trasu po dálnici nebo silnici pro motorová vozidla. Tyto značky pouze informují o směru jízdy k jednotlivým cílům, nic nezakazují ani nenařizují.",
+   "citation": "skupina IS (informativní směrové značky), vyhláška 294/2015 Sb.",
+   "rule_tag": "informativni_smerova_znacka",
+   "confidence": 0.82,
+   "what_you_see": "Velké modré návěstní tabule nad křižovatkou s názvy obcí (J. Hradec, Praha, Husova kolonie, N. Hrady, Borovany), symbolem kruhového objezdu a směrovými šipkami; noční scéna se semafory.",
+   "severity": "ok"
+  }
+ ],
+ "brno": [
+  {
+   "photo_id": "0d585e1d-c188-4832-8f15-1c55a1217716_y0",
+   "type": "speed_limit",
+   "question_cs": "Vjíždíte do oblasti označené značkou „ZÓNA 30“ (modrá tabule s číslem 30 v červeném kruhu). Jaká nejvyšší dovolená rychlost zde platí?",
+   "options_cs": [
+    "30 km/h v celé této zóně až po značku „Konec zóny“",
+    "30 km/h pouze v místě umístění značky, dál opět 50 km/h",
+    "50 km/h jako v každé obci",
+    "30 km/h pouze pro nákladní vozidla, osobní auta mohou 50 km/h"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá zónová značka „ZÓNA 30“ (IZ8a – zóna s dopravním omezením) stanovuje nejvyšší dovolenou rychlost 30 km/h pro celou oblast, nikoli jen pro jedno místo. Toto omezení platí až do značky „Konec zóny“ (IZ8b). Platí pro všechna vozidla bez rozdílu.",
+   "citation": "značka IZ8a, § 18 zákona 361/2000 Sb.",
+   "rule_tag": "zona_30",
+   "confidence": 0.92,
+   "what_you_see": "Modrá svislá zónová značka vpravo s nápisem „ZÓNA“, číslicí 30 v červeném kruhu a doplňkovým modrým symbolem placeného stání („OBLAST PLACENÉHO STÁNÍ“).",
+   "severity": "minor"
+  },
+  {
+   "photo_id": "166ffa61-b4ef-4963-a921-01461a05bc8a_y180",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku u rohu budovy na konci ulice?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (jednosměrka z této strany)",
+    "Stůj, dej přednost v jízdě",
+    "Zákaz zastavení",
+    "Zákaz vjezdu jízdních kol"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová značka s červeným okrajem a bílým vodorovným pruhem uprostřed je značka B2 'Zákaz vjezdu všech vozidel'. Typicky uzavírá vjezd do jednosměrné ulice z nesprávné strany. Do takto označeného úseku nesmí vjet žádné vozidlo. Značka 'Stůj, dej přednost' je osmiúhelníková, zákaz zastavení je modrý kruh s červeným křížem a zákaz vjezdu jízdních kol obsahuje symbol kola.",
+   "citation": "značka B2, § 11 vyhl. 294/2015 Sb.",
+   "rule_tag": "zakaz_vjezdu",
+   "confidence": 0.92,
+   "what_you_see": "Kruhová červená značka s bílým vodorovným pruhem (B2 zákaz vjezdu všech vozidel) na sloupku u rohu budovy H&M, na konci jednosměrné ulice.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "166ffa61-b4ef-4963-a921-01461a05bc8a_y180",
+   "type": "road_situation",
+   "question_cs": "Jaké vodorovné dopravní značení je vyznačeno bílými pruhy napříč vozovkou u rohu vpravo?",
+   "options_cs": [
+    "Přechod pro chodce",
+    "Příčná čára souvislá (stop čára)",
+    "Zákaz stání",
+    "Vodicí čára"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Široké bílé pruhy vyznačené rovnoběžně s osou vozovky (tzv. 'zebra') tvoří přechod pro chodce (značka V7). Řidič musí umožnit chodci, který je na přechodu nebo na něj vstupuje, nerušené a bezpečné přejití; přitom nesmí chodce ohrozit. Příčná čára souvislá je jediná plná čára kolmá ke směru jízdy.",
+   "citation": "značka V7, § 5 odst. 2 písm. f) zák. 361/2000 Sb.",
+   "rule_tag": "prechod_pro_chodce",
+   "confidence": 0.85,
+   "what_you_see": "Bílé rovnoběžné pruhy (zebra) napříč vozovkou u rohu budovy vpravo — vodorovné značení V7 přechod pro chodce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "132f3d9a-bcc6-42a5-b75b-f685e7b1d488_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová značka s bílým písmenem 'P' na sloupku u budovy vlevo?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Konec parkoviště",
+    "Placené parkoviště pouze pro autobusy"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem 'P' je informativní značka IP11a 'Parkoviště' a označuje místo, kde je dovoleno zastavení a stání vozidel. Případný symbol na dodatkové tabulce může parkování dále upřesnit (např. způsob stání, vyhrazení), ale samotná značka 'P' nikdy neznamená zákaz – zákazové značky jsou červeno-modré kruhy.",
+   "citation": "značka IP11a, § 14 vyhl. 294/2015 Sb.",
+   "rule_tag": "parkoviste",
+   "confidence": 0.8,
+   "what_you_see": "Modrá čtvercová značka s bílým 'P' (IP11a Parkoviště) na sloupku u budovy na levé straně pěší/obytné ulice.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "34cab536-9f78-43c0-9e11-32458a163f65_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená dopravní značka „ZÓNA\" s červeně lemovaným číslem 30, kterou vidíte na pravé straně u vjezdu do oblasti?",
+   "options_cs": [
+    "Vjíždíte do zóny, kde je nejvyšší dovolená rychlost 30 km/h",
+    "Doporučená rychlost v zatáčce je 30 km/h, lze ji překročit",
+    "Za 30 metrů začíná pěší zóna",
+    "Nejnižší dovolená rychlost v této oblasti je 30 km/h"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Jde o značku IZ8a „Zóna s dopravním omezením\". Na bílé desce je nápis ZÓNA a vyobrazení zákazové/omezující značky – zde kruh s číslem 30 v červeném lemu. To znamená, že v celé takto vyznačené oblasti platí nejvyšší dovolená rychlost 30 km/h (a další uvedená omezení, zde placené stání). Omezení platí až do značky IZ8b „Konec zóny\". Nejde o doporučenou ani nejnižší rychlost.",
+   "citation": "značka IZ8a, § 50 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zona_30_zacatek",
+   "confidence": 0.9,
+   "what_you_see": "Bílá obdélníková značka „ZÓNA\" s červeně lemovaným kruhem s číslem 30 a symbolem placeného stání, nápis OBLAST PLACENÉHO STÁNÍ, u vjezdu do oblasti vpravo.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "2ff39a19-ec2a-4d6a-b615-ca53dd882be0_y180",
+   "type": "sign_meaning",
+   "question_cs": "Co pro vás znamená tato dopravní značka „ZÓNA 30\" přeškrtnutá šikmým pruhem, kterou míjíte vpravo u silnice?",
+   "options_cs": [
+    "Končí zóna s omezením, přestává platit dosavadní rychlost 30 km/h",
+    "Začíná nová zóna s rychlostí 30 km/h",
+    "Zákaz vjezdu vozidel rychlejších než 30 km/h",
+    "Konec dálnice"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Přeškrtnutá značka „ZÓNA\" s číslem 30 je značka IZ8b „Konec zóny s dopravním omezením\". Ukončuje platnost omezení, která platila v zóně – tedy i nejvyšší dovolené rychlosti 30 km/h. Za touto značkou platí obecná úprava (v obci zpravidla 50 km/h), pokud jiná značka nestanoví jinak. Nejde o začátek nové zóny ani o konec dálnice.",
+   "citation": "značka IZ8b, § 50 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zona_30_konec",
+   "confidence": 0.88,
+   "what_you_see": "Bílá obdélníková značka s nápisem „ZÓNA\" a kruhem s číslem 30, celá přeškrtnutá šikmým šedým pruhem, na sloupku vpravo u vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "355a5a22-478e-488c-b6e3-45239ee1ec15_y180",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená dopravní značka na sloupku vpravo, na které je vyobrazena zóna „30“ přeškrtnutá šikmými čarami?",
+   "options_cs": [
+    "Konec zóny s dopravním omezením (konec zóny 30 km/h)",
+    "Začátek zóny s nejvyšší dovolenou rychlostí 30 km/h",
+    "Nejvyšší dovolená rychlost 30 km/h na celém úseku",
+    "Doporučená rychlost 30 km/h"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Vyobrazení zóny přeškrtnuté šikmými čarami označuje KONEC zóny s dopravním omezením – zde konec zóny s nejvyšší dovolenou rychlostí 30 km/h. Za touto značkou již omezení platné v zóně neplatí a vrací se obecná pravidla (v obci zpravidla 50 km/h). Začátek zóny by byl naopak vyobrazen bez přeškrtnutí.",
+   "citation": "značka IZ8b (Konec zóny s dopravním omezením), § 14 vyhlášky 294/2015 Sb.",
+   "rule_tag": "konec_zony_30",
+   "confidence": 0.86,
+   "what_you_see": "Bílá dopravní značka na sloupku se symbolem zóny „30“ (číslo 30 v kruhu) přeškrtnutým šikmými čarami, s doplňujícím textem o oblasti placeného stání.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "423283db-3d9c-4f86-b403-905d1c6bfc41_y180",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku vlevo (kruhová červená značka s bílým vodorovným pruhem) a co znamená?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (do jednosměrné ulice) – do této ulice nesmíte vjet",
+    "Stůj, dej přednost v jízdě",
+    "Zákaz zastavení",
+    "Zákaz odbočení vlevo"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová značka s červeným podkladem a bílým vodorovným pruhem je značka B2 „Zákaz vjezdu všech vozidel“. Nejčastěji uzavírá výjezd z jednosměrné ulice – z tohoto směru do ulice vjet nesmíte. Nezaměňujte ji se značkou „Stůj, dej přednost v jízdě“ (osmiúhelník) ani se zákazem zastavení (modrá s křížem).",
+   "citation": "značka B2, § 10 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zakaz_vjezdu_B2",
+   "confidence": 0.92,
+   "what_you_see": "Kruhová červená dopravní značka s bílým vodorovným pruhem (B2 – zákaz vjezdu všech vozidel) na sloupku vlevo na rohu budovy s nápisem H&M, v popředí vlevo přechod pro chodce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "423283db-3d9c-4f86-b403-905d1c6bfc41_y0",
+   "type": "sign_identification",
+   "question_cs": "Co znamená modrá čtvercová značka s bílým písmenem „P“ na sloupku vlevo?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno stání vozidel",
+    "Zákaz stání",
+    "Nemocnice",
+    "Konec parkoviště"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem „P“ je informativní provozní značka IP11a „Parkoviště“. Označuje místo (plochu), kde je dovoleno zastavení a stání vozidel; bližší podmínky upřesňuje dodatková tabulka pod značkou. Zákaz stání je naopak modrý kruh s červeným okrajem a jedním šikmým pruhem.",
+   "citation": "značka IP11a, § 13 vyhlášky 294/2015 Sb.",
+   "rule_tag": "parkoviste_IP11a",
+   "confidence": 0.88,
+   "what_you_see": "Modrá čtvercová informativní značka s bílým „P“ (IP11a – Parkoviště) s dodatkovou tabulkou na sloupku vlevo, dlážděné náměstí s parkujícími vozidly.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "5da8eba6-0cf8-48cd-8f90-1a5056bc1f39_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová dopravní značka s bílým písmenem „P\", kterou vidíte na sloupku u levého okraje vozovky?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Konec parkoviště"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým „P\" je informativní provozní značka IP11a „Parkoviště\". Označuje místo, kde je dovoleno zastavit a stát; podmínky stání (např. zpoplatnění či vyhrazení) upřesňuje dodatková tabulka pod značkou. Zde je parkoviště navíc vyznačeno i modrou vodorovnou čarou na vozovce.",
+   "citation": "značka IP11a, § 12 vyhlášky 294/2015 Sb.",
+   "rule_tag": "informative_sign_parking",
+   "confidence": 0.9,
+   "what_you_see": "Modrá čtvercová značka s bílým písmenem „P\" (IP11a Parkoviště) s dodatkovou tabulkou na sloupku u levého okraje, doprovázená modrou vodorovnou čarou parkovacího pruhu na dlážděné vozovce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "91cf1242-a781-46cc-a34e-acdbb09ca654_y180",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku před nárožní budovou (kulatá, červená s bílým vodorovným pruhem)?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (jednosměrka z druhé strany)",
+    "Zákaz zastavení",
+    "Stůj, dej přednost v jízdě",
+    "Konec všech zákazů"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová značka s červeným podkladem a bílým vodorovným pruhem je značka B2 „Zákaz vjezdu všech vozidel\". Zakazuje vjezd do daného úseku ve směru, ze kterého je značka vidět; typicky se používá na konci jednosměrné ulice. Nejde o zákaz zastavení (modrá s červeným křížem), ani o značku Stůj (osmiúhelník), ani o konec zákazů.",
+   "citation": "značka B2, § 4 vyhl. 294/2015 Sb.",
+   "rule_tag": "zakazova_znacka_B2",
+   "confidence": 0.95,
+   "what_you_see": "Kulatá značka s červeným podkladem a bílým vodorovným pruhem (zákaz vjezdu) na sloupku u nároží s prodejnou H&M.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "91cf1242-a781-46cc-a34e-acdbb09ca654_y180",
+   "type": "road_situation",
+   "question_cs": "V popředí přes vozovku vede bílé pruhované značení (zebra). Co označuje a jak se k němu máte chovat jako řidič?",
+   "options_cs": [
+    "Přechod pro chodce – musíte umožnit chodci nerušené a bezpečné přejití",
+    "Pouze vodicí pruh pro odvodnění, nemá pro řidiče význam",
+    "Stezku pro cyklisty, kde mají přednost cyklisté",
+    "Hranici křižovatky, kde se zastavuje na červenou"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílé pruhy napříč vozovkou (vodorovná značka V7) označují přechod pro chodce. Řidič nesmí ohrozit ani omezit chodce, který přechází nebo zjevně hodlá přejít, a musí mu umožnit nerušené a bezpečné přejití; nesmí na přechod vjet, pokud by jej musel zastavit na přechodu.",
+   "citation": "značka V7, § 5 odst. 2 písm. f) zák. 361/2000 Sb.",
+   "rule_tag": "prechod_pro_chodce",
+   "confidence": 0.88,
+   "what_you_see": "Bílé příčné pruhy (zebra – přechod pro chodce) napříč vozovkou v popředí u nároží.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "9bc3eeb0-88b5-4419-8427-828c1205a36e_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová dopravní značka s bílým písmenem „P\", kterou vidíte na sloupku u tohoto náměstí?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Konec parkoviště"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým „P\" je informativní provozní značka IP11a „Parkoviště\". Označuje místo, kde je dovoleno zastavit a stát. Nejde o zákazovou značku – zákazy stání a zastavení mají kruhový tvar s červeným okrajem.",
+   "citation": "značka IP11a, § 12 vyhlášky 294/2015 Sb.",
+   "rule_tag": "informativni-znacka-parkoviste",
+   "confidence": 0.92,
+   "what_you_see": "Modrá čtvercová značka s bílým písmenem „P\" (parkoviště) na sloupku u dlážděného náměstí, s dodatkovou tabulkou pod ní.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "a2280669-39a7-4136-97c0-051a6b70c35f_y0",
+   "type": "sign_identification",
+   "question_cs": "Modrá čtvercová značka s bílým „P\" na sloupku po levé straně této dlážděné ulice patří mezi:",
+   "options_cs": [
+    "Informativní provozní značky (parkoviště)",
+    "Výstražné značky",
+    "Zákazové značky",
+    "Příkazové značky"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka „P\" (IP11a Parkoviště) je informativní provozní značka – informuje řidiče o místě k parkování. Výstražné značky jsou trojúhelníkové s červeným okrajem, zákazové a příkazové značky jsou kruhové.",
+   "citation": "značka IP11a, § 12 vyhlášky 294/2015 Sb.",
+   "rule_tag": "kategorie-znacky-informativni",
+   "confidence": 0.85,
+   "what_you_see": "Modrá čtvercová značka „P\" na sloupku vlevo u dlážděné ulice s podélným stáním.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b601ace2-ee67-4370-9992-e9118daa7d5e_y0",
+   "type": "sign_meaning",
+   "question_cs": "Po obou stranách této dlážděné ulice je u parkovacích míst namalována modrá čára. Co tato modrá vodorovná čára vyznačuje?",
+   "options_cs": [
+    "Vyhrazené parkoviště v režimu placeného stání (modrá zóna)",
+    "Zákaz zastavení podél celé čáry",
+    "Cyklistický pruh",
+    "Hranici tramvajového pásu"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá vodorovná čára (značka V10f) vyznačuje parkovací místa v režimu placeného nebo rezidentního stání – tzv. modrou zónu. Parkovat zde lze jen za stanovených podmínek (rezidentní karta, parkovací automat). Není to zákaz zastavení ani jízdní pruh.",
+   "citation": "značka V10f, § 18 vyhlášky 294/2015 Sb.",
+   "rule_tag": "vodorovne-znaceni-modra-zona",
+   "confidence": 0.85,
+   "what_you_see": "Modré vodorovné čáry namalované na dlažbě podél podélných parkovacích stání po obou stranách ulice.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "9bc3eeb0-88b5-4419-8427-828c1205a36e_y180",
+   "type": "sign_identification",
+   "question_cs": "Bílá čtvercová značka s šikmým šedým pruhem přes celou plochu, umístěná na rohu budovy, znamená:",
+   "options_cs": [
+    "Konec zóny (s dopravním omezením)",
+    "Začátek zóny s dopravním omezením",
+    "Slepá ulice",
+    "Obytná zóna"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílá čtvercová značka přeškrtnutá šikmým šedým pruhem označuje konec zóny s dopravním omezením (IZ8b „Konec zóny\"). Začátek zóny má stejnou plochu, ale bez přeškrtnutí. Od tohoto místa přestávají platit omezení, která ve zóně platila.",
+   "citation": "značka IZ8b, § 14 vyhlášky 294/2015 Sb.",
+   "rule_tag": "konec-zony-omezeni",
+   "confidence": 0.7,
+   "what_you_see": "Bílá čtvercová značka s šikmým pruhem přes celou plochu (konec zóny) na rohu budovy u pěší zóny.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b68a5a92-6ef6-4ad9-a8e7-dc778c6b35b3_y180",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku po pravé straně ulice (kruhová značka s červeným okrajem a bílým vodorovným pruhem uprostřed)?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (v obou směrech)",
+    "Zákaz zastavení",
+    "Zákaz vjezdu všech vozidel v jednom směru (jednosměrka)",
+    "Hlavní pozemní komunikace"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová značka s červeným okrajem a bílým vodorovným pruhem na červeném podkladu je značka B2 „Zákaz vjezdu všech vozidel (v obou směrech)“. Zakazuje vjezd všem vozidlům z daného směru. Nezaměňujte ji se značkou C2 (jednosměrka – plný bílý znak na modrém podkladu) ani s červeným kruhem se šikmými pruhy (zákaz zastavení).",
+   "citation": "značka B2, § 63 odst. 1 zák. 361/2000 Sb., vyhl. 294/2015 Sb.",
+   "rule_tag": "zakaz_vjezdu",
+   "confidence": 0.9,
+   "what_you_see": "Kruhová dopravní značka s červeným okrajem a bílým vodorovným pruhem (B2 – zákaz vjezdu všech vozidel) na sloupku u budovy po pravé straně ulice.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "b68a5a92-6ef6-4ad9-a8e7-dc778c6b35b3_y0",
+   "type": "sign_meaning",
+   "question_cs": "Modrá čtvercová značka s bílým písmenem „P“ u kraje vozovky (doplněná modrou čarou na dlažbě) označuje:",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Zastávku autobusu",
+    "Konec obce"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým „P“ je informativní značka IP11a „Parkoviště“ a označuje místo, kde je dovoleno zastavit a stát. Modrá vodorovná čára na dlažbě navíc značí parkovací zónu s regulovaným stáním (modrá zóna). Nejde o zákazovou značku ani o zastávku MHD.",
+   "citation": "značka IP11a, § 12 vyhl. 294/2015 Sb.",
+   "rule_tag": "parkoviste",
+   "confidence": 0.85,
+   "what_you_see": "Modrá čtvercová značka s bílým písmenem „P“ (IP11a – Parkoviště) na sloupku nad zaparkovanými vozidly a modrá čára vyznačená na dlažbě podél vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d3ec8366-9f63-44cb-950f-87b597565ceb_y180",
+   "type": "sign_identification",
+   "question_cs": "Jakou dopravní značku vidíte na sloupku u pravé strany ulice (červený kruh s bílým vodorovným pruhem)?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (B2)",
+    "Zákaz zastavení (B28)",
+    "Stůj, dej přednost v jízdě (P6)",
+    "Konec zákazu předjíždění"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Červený kruh s bílým vodorovným pruhem je značka B2 \"Zákaz vjezdu všech vozidel\". Znamená zákaz vjezdu do ulice ve směru, kde je značka umístěna. Často se používá u jednosměrných ulic na konci, kam je vjezd zakázán.",
+   "citation": "značka B2, § 4 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zakazova_znacka_B2",
+   "confidence": 0.82,
+   "what_you_see": "Na sloupku u pravé strany ulice (před narůžovělou budovou) je kruhová dopravní značka – červený kruh s bílým vodorovným pruhem (zákaz vjezdu).",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d3ec8366-9f63-44cb-950f-87b597565ceb_y0",
+   "type": "road_situation",
+   "question_cs": "Vozovka u kraje vpravo je vyznačena modrými čarami pro stání. Co tato modrá zóna znamená?",
+   "options_cs": [
+    "Placené stání vyhrazené zpravidla rezidentům (modrá zóna)",
+    "Zákaz stání po celé délce čáry",
+    "Vyhrazené parkoviště pouze pro vozidla taxislužby",
+    "Stání zdarma bez omezení doby"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modré vodorovné značení parkovacích míst označuje tzv. modrou zónu – placené stání, které je zpravidla vyhrazeno rezidentům a abonentům s parkovacím oprávněním. Ostatní řidiči zde mohou stát jen za podmínek uvedených na dopravní značce (např. po zaplacení a po omezenou dobu).",
+   "citation": "§ 25, vodorovné značení V10, IP13c/IP12",
+   "rule_tag": "modra_zona_parkovani",
+   "confidence": 0.8,
+   "what_you_see": "Parkovací místa u pravého okraje vozovky jsou na dlažbě vyznačena modrými čarami (modrá rezidentní zóna), u sloupku je modrá parkovací značka.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "e03e49c7-1867-4dc2-a359-84df74a102f9_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá čtvercová dopravní značka s bílým písmenem „P“, kterou vidíte na sloupku po levé straně ulice?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Zákaz zastavení",
+    "Konec parkoviště"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová informativní značka s bílým „P“ je značka IP11a „Parkoviště“. Označuje místo (zónu nebo úsek), kde je dovoleno zastavit a stát. Nejde o zákazovou značku – zákazy zastavení a stání jsou kruhové značky s červeným okrajem (B28, B29), takže tyto možnosti jsou nesprávné.",
+   "citation": "značka IP11a, § 25 zákona 361/2000 Sb.",
+   "rule_tag": "informativní_značka_parkoviště",
+   "confidence": 0.86,
+   "what_you_see": "Modrá čtvercová značka s bílým písmenem „P“ na sloupku u levého chodníku dlážděné jednosměrné ulice.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "f31339de-39e6-4719-8c71-bcbf509ca173_y180",
+   "type": "sign_identification",
+   "question_cs": "U vjezdu do boční ulice vpravo (vedle prodejny H&M) je umístěna kulatá značka s červeným okrajem a vodorovným bílým pruhem. Co tato značka znamená?",
+   "options_cs": [
+    "Zákaz vjezdu všech vozidel (jednosměrná ulice z opačného směru)",
+    "Zákaz zastavení",
+    "Hlavní pozemní komunikace",
+    "Stezka pro chodce"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kulatá značka s červeným kruhem a vodorovným bílým pruhem je značka B2 'Zákaz vjezdu všech vozidel' (lidově 'zákaz vjezdu'). Zakazuje vjezd všem vozidlům v daném směru; nejčastěji označuje výjezd z jednosměrné ulice, do které tudíž nesmíte vjet.",
+   "citation": "značka B2, § 8 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zakaz_vjezdu_B2",
+   "confidence": 0.9,
+   "what_you_see": "Kulatá značka s červeným okrajem a vodorovným bílým pruhem (zákaz vjezdu, B2) u vjezdu do boční ulice vpravo vedle budovy H&M.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "f31339de-39e6-4719-8c71-bcbf509ca173_y0",
+   "type": "sign_meaning",
+   "question_cs": "U budovy vlevo je na sloupku modrá čtvercová značka s bílým písmenem 'P'. Co tato značka znamená?",
+   "options_cs": [
+    "Parkoviště – místo, kde je dovoleno zastavit a stát",
+    "Zákaz stání",
+    "Konec parkoviště",
+    "Placené stání pouze pro autobusy"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá čtvercová značka s bílým písmenem 'P' je informativní značka IP11a 'Parkoviště'. Označuje místo (plochu), kde je dovoleno zastavit a stát; způsob stání může upřesňovat dodatková tabulka pod značkou.",
+   "citation": "značka IP11a, § 13 vyhlášky 294/2015 Sb.",
+   "rule_tag": "parkoviste_IP11a",
+   "confidence": 0.83,
+   "what_you_see": "Modrá čtvercová informativní značka s bílým 'P' (Parkoviště, IP11a) na sloupku u budovy na levé straně ulice.",
+   "severity": "ok"
+  }
+ ],
+ "olomouc": [
+  {
+   "photo_id": "019bec2b-d1b0-47b5-97ec-70c76d4ad3e3_y0",
+   "type": "sign_meaning",
+   "question_cs": "Vozovku rozdělují podélné přerušované bílé čáry. Co pro řidiče znamená podélná čára přerušovaná (V2)?",
+   "options_cs": [
+    "Vyznačuje jízdní pruhy a smí se přejíždět, pokud to dovoluje provoz a bezpečnost",
+    "Je zakázáno ji přejíždět nebo nákladem přesahovat",
+    "Označuje místo, kde musí řidič dát přednost v jízdě",
+    "Vyznačuje krajnici a zákaz zastavení na vozovce"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Podélná čára přerušovaná (vodorovná značka V2) odděluje jízdní pruhy nebo vyznačuje hranici jízdního pruhu. Na rozdíl od podélné čáry souvislé (V1a) ji řidič smí přejíždět, pokud to vyžaduje situace v provozu a neohrozí tím bezpečnost (např. při předjíždění, objíždění nebo zařazování). Zákaz přejíždění platí u čáry souvislé, nikoli přerušované.",
+   "citation": "vodorovná značka V2, vyhláška 294/2015 Sb.",
+   "rule_tag": "vodorovne-znaceni-podelna-cara",
+   "confidence": 0.83,
+   "what_you_see": "Na vozovce jsou jasně viditelné bílé podélné přerušované čáry oddělující jízdní pruhy, vedle nich směrová šipka na vozovce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "28711a97-4c33-43be-92ee-327419fda217_y0",
+   "type": "sign_meaning",
+   "question_cs": "Na vozovce před vámi je vodorovně vyznačena směrová šipka rovně (přímý směr) v jízdním pruhu. Co tato šipka znamená?",
+   "options_cs": [
+    "Jízdní pruh je určen pro jízdu přímým směrem",
+    "Jízdní pruh je vyhrazen pouze pro autobusy",
+    "Šipka označuje konec jízdního pruhu",
+    "Šipka přikazuje zastavit a dát přednost"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Vodorovná značka V9a (směrové šipky) vyznačuje na vozovce způsob řazení do jízdních pruhů a směr jízdy, kterým smí řidič jet. Šipka rovně určuje, že z tohoto pruhu se pokračuje přímým směrem. Řidič je povinen řadit se do pruhu podle vyznačeného směru.",
+   "citation": "značka V9a, § 12 zákona 361/2000 Sb.",
+   "rule_tag": "road_markings_direction_arrows",
+   "confidence": 0.85,
+   "what_you_see": "Bílé směrové šipky (rovně) vyznačené na vozovce v jízdních pruzích na rovné městské ulici.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "27110996-7340-4f39-a17b-34f4035985ee_y180",
+   "type": "road_situation",
+   "question_cs": "Před vozidlem se nachází okružní křižovatka (kruhový objezd). Jak se má řidič při vjezdu na okružní křižovatku správně zachovat?",
+   "options_cs": [
+    "Dát přednost vozidlům jedoucím po kruhovém objezdu a vjet, až je to bezpečné",
+    "Vždy má přednost vozidlo vjíždějící na kruhový objezd",
+    "Na kruhovém objezdu platí vždy přednost zprava bez ohledu na značení",
+    "Před vjezdem na kruhový objezd je nutné vždy úplně zastavit"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Okružní křižovatka bývá označena značkou C1 (kruhový objezd) ve spojení se značkou P4 'Dej přednost v jízdě!'. Řidič vjíždějící na takto označený kruhový objezd musí dát přednost vozidlům, která už po něm jedou, a vjet teprve tehdy, když tím neohrozí ostatní. Zastavit musí jen tehdy, je-li to nutné k dání přednosti.",
+   "citation": "značka C1 + P4, § 22 zákona 361/2000 Sb.",
+   "rule_tag": "roundabout_give_way",
+   "confidence": 0.8,
+   "what_you_see": "Před vozidlem (s nákladem na střeše) se otevírá okružní křižovatka / kruhový objezd s ostrůvkem uprostřed.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "5590b231-f845-423b-91bc-4b7021224660_y0",
+   "type": "road_situation",
+   "question_cs": "Na fotografii vjíždíte na kruhový objezd se středním ostrovem. Kterým směrem objíždíte střední ostrov v České republice?",
+   "options_cs": [
+    "Doprava, tedy proti směru hodinových ručiček kolem ostrova",
+    "Doleva, tedy po směru hodinových ručiček kolem ostrova",
+    "Libovolným směrem podle toho, kde chcete vyjet",
+    "Vždy nejkratší cestou napříč přes střed objezdu"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "V České republice (pravostranný provoz) se kruhový objezd objíždí vždy vpravo kolem středního ostrova, tedy proti směru hodinových ručiček. Přejíždět přes střední ostrov nebo jej objíždět vlevo není dovoleno.",
+   "citation": "§ 22, značka C1 (Kruhový objezd)",
+   "rule_tag": "roundabout_direction",
+   "confidence": 0.93,
+   "what_you_see": "Kruhový objezd s vyvýšeným středním ostrovem porostlým zelení, dlážděná okružní vozovka zatáčející kolem ostrova a vozidlo objíždějící ostrov.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "5590b231-f845-423b-91bc-4b7021224660_y180",
+   "type": "road_situation",
+   "question_cs": "Na vozovce vpravo vidíte vodorovné značení tvořené širokými bílými pruhy napříč jízdním pruhem. Co toto značení znamená a jak se zde chováte?",
+   "options_cs": [
+    "Přechod pro chodce – musíte umožnit chodci, který přechází nebo zjevně hodlá přejít, bezpečné přejití",
+    "Stezka pro cyklisty – musíte zde dát přednost cyklistům",
+    "Vyznačený parkovací pruh, kde můžete zastavit",
+    "Zpomalovací práh, před kterým musíte zastavit"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Široké podélné bílé pruhy napříč vozovkou jsou přechod pro chodce (značka V7). Řidič nesmí chodce, který je na přechodu nebo na něj zjevně vstupuje, ohrozit; musí mu umožnit nerušené a bezpečné přejití a v případě potřeby zastavit. Nesmí zde předjíždět.",
+   "citation": "značka V7, § 5 odst. 2 písm. f)",
+   "rule_tag": "pedestrian_crossing",
+   "confidence": 0.9,
+   "what_you_see": "Přechod pro chodce vyznačený širokými bílými podélnými pruhy napříč vedlejší vozovkou na pravé straně.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "59f51809-fa71-4955-a892-f0f34f545cf5_y180",
+   "type": "sign_meaning",
+   "question_cs": "Na povrchu zpevněné cesty je vyznačen bílý/červený symbol jízdního kola. Co tento symbol na vozovce znamená?",
+   "options_cs": [
+    "Že je tato komunikace určena pro jízdu cyklistů (pruh/stezka pro cyklisty)",
+    "Že je vjezd jízdních kol na tuto cestu zakázán",
+    "Že zde mají cyklisté zákaz odbočení",
+    "Že jde o místo pro parkování jízdních kol"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Symbol jízdního kola vyznačený na povrchu komunikace (vodorovná značka V14 / symbol kola) označuje, že je dráha určena pro provoz cyklistů – jízdní pruh nebo stezku pro cyklisty. Zákaz vjezdu by byl naopak vyznačen svislou značkou s červeným kruhem, nikoli symbolem na vozovce.",
+   "citation": "značka V14 (Jízdní pruh pro cyklisty), § 57",
+   "rule_tag": "cycle_lane_marking",
+   "confidence": 0.85,
+   "what_you_see": "Symbol jízdního kola namalovaný na povrchu asfaltové cesty v parku, označující stezku/pruh pro cyklisty.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "648d6519-c254-4306-bc15-9bcc2c1d6587_y0",
+   "type": "road_situation",
+   "question_cs": "Na vozovce před vámi je vyznačen přechod pro chodce (vodorovné značení V7). Jak se musíte jako řidič chovat?",
+   "options_cs": [
+    "Nesmím ohrozit ani omezit chodce, kteří přecházejí nebo zjevně hodlají přejít; v případě potřeby musím zastavit vozidlo",
+    "Mám vždy přednost před chodci, protože jedu po hlavní silnici",
+    "Smím přes přechod projet vyšší rychlostí, abych jej rychle minul",
+    "Přechod platí jen pro chodce, řidiče se nijak netýká"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Před přechodem pro chodce vyznačeným značením V7 musí řidič podle § 5 odst. 2 písm. f) zákona 361/2000 Sb. umožnit chodci, který je na přechodu nebo jej zjevně hodlá použít, nerušené a bezpečné přejití vozovky; nesmí ho ohrozit ani omezit a v případě potřeby je povinen zastavit vozidlo. Předjíždět těsně před přechodem a na něm je rovněž zakázáno.",
+   "citation": "§ 5 odst. 2 písm. f), značení V7",
+   "rule_tag": "prechod_pro_chodce",
+   "confidence": 0.82,
+   "what_you_see": "V popředí vozovky jsou bílé pruhy vodorovného značení přechodu pro chodce (V7); vpravo po chodníku jdou chodci.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "702215ec-3044-476d-adae-120748b349fd_y0",
+   "type": "sign_meaning",
+   "question_cs": "Na vozovce vidíte červeně zvýrazněnou plochu s namalovaným bílým symbolem jízdního kola. Co toto vodorovné značení znamená?",
+   "options_cs": [
+    "Vyznačuje stezku (pruh) určenou pro cyklisty",
+    "Označuje místo pro zastavení autobusu MHD",
+    "Zakazuje vjezd všech vozidel včetně jízdních kol",
+    "Vyznačuje parkovací stání vyhrazené pro motocykly"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílý symbol jízdního kola na vozovce (vodorovná značka V14 – Symbol jízdního kola) vyznačuje stezku nebo pruh určený pro provoz cyklistů. Červené zvýraznění plochy upozorňuje na to, že jde o prostor pro cyklisty. Nejde o zastávku MHD ani o zákaz vjezdu, a s parkováním motocyklů nemá nic společného.",
+   "citation": "značka V14, vyhláška 294/2015 Sb.",
+   "rule_tag": "vodorovne_znaceni_cykliste",
+   "confidence": 0.83,
+   "what_you_see": "Asfaltová stezka v parku s červeně zvýrazněnou plochou a namalovaným bílým symbolem jízdního kola na povrchu vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "7adf3825-4451-4ae9-b354-0e39decd7d0c_y0",
+   "type": "sign_meaning",
+   "question_cs": "Vidíte kruhovou dopravní značku s červeným okrajem, bílým podkladem a černým číslem „10\" s písmenem „t\". Co tato značka znamená?",
+   "options_cs": [
+    "Zákaz vjezdu vozidel, jejichž okamžitá hmotnost přesahuje 10 tun",
+    "Nejvyšší dovolená rychlost 10 km/h",
+    "Doporučená rychlost 10 km/h v obytné zóně",
+    "Minimální vzdálenost mezi vozidly 10 metrů"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhová značka s červeným okrajem a údajem hmotnosti v tunách je značka B13 „Zákaz vjezdu vozidel, jejichž okamžitá hmotnost přesahuje vyznačenou mez\". Zde platí zákaz vjezdu pro vozidla těžší než 10 t. Rychlost (značka B20a) by neměla písmeno „t\" a měla by jiný význam.",
+   "citation": "značka B13, § 4 vyhlášky 294/2015 Sb.",
+   "rule_tag": "zakazova_znacka_hmotnost",
+   "confidence": 0.9,
+   "what_you_see": "Kruhová zákazová značka s červeným okrajem, bílým podkladem a černým nápisem „10 t\" umístěná na sloupku po pravé straně vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "7adf3825-4451-4ae9-b354-0e39decd7d0c_y0",
+   "type": "sign_identification",
+   "question_cs": "Do které skupiny dopravních značek patří kruhová značka s červeným okrajem s nápisem „10 t\", kterou vidíte na sloupku vpravo?",
+   "options_cs": [
+    "Zákazová značka (vyjadřuje zákaz nebo omezení)",
+    "Výstražná značka (upozorňuje na nebezpečí)",
+    "Informativní značka (poskytuje informace pro orientaci)",
+    "Příkazová značka (ukládá příkaz)"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kruhové značky s červeným okrajem a bílým (nebo modrým) podkladem jsou zákazové značky skupiny B. Tato konkrétní (B13) zakazuje vjezd vozidel nad vyznačenou hmotnost. Výstražné značky mají tvar trojúhelníku s červeným okrajem, příkazové jsou kruhové modré a informativní zpravidla obdélníkové.",
+   "citation": "skupina B (zákazové značky), § 4 vyhlášky 294/2015 Sb.",
+   "rule_tag": "kategorie_znacek",
+   "confidence": 0.88,
+   "what_you_see": "Kruhová značka s výrazným červeným okrajem, bílým podkladem a černým údajem „10 t\" na sloupku vpravo od vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "872cb402-1524-4071-b062-01dfb4bf2f41_y0",
+   "type": "sign_meaning",
+   "question_cs": "Vpravo u vozovky je modrá obdélníková návěst se symbolem kruhového objezdu a názvy směrů. Na co řidiče upozorňuje?",
+   "options_cs": [
+    "Na blížící se křižovatku s kruhovým objezdem a její směry",
+    "Na konec dálnice",
+    "Na placené parkoviště před centrem",
+    "Na zákaz odbočení vpravo i vlevo"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá obdélníková tabule se symbolem kruhového objezdu (kroužek se šipkami) a názvy cílů je směrová návěst před křižovatkou s kruhovým objezdem (IS). Informuje řidiče předem o uspořádání a směrech na blížícím se kruhovém objezdu, aby se mohl včas zařadit.",
+   "citation": "informativní směrová značka (IS) s kruhovým objezdem, vyhláška 294/2015 Sb.",
+   "rule_tag": "navest_kruhovy_objezd",
+   "confidence": 0.78,
+   "what_you_see": "Modrá obdélníková směrová návěst se symbolem kruhového objezdu a názvy směrů na pravém okraji vícepruhové silnice s dělicím pásem.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "89ac3a9c-5329-4677-9f04-b5276af39f2a_y180",
+   "type": "right_of_way",
+   "question_cs": "Blížíte se vozidlem k vyznačenému přechodu pro chodce a na přechod právě vstupuje chodec. Jak se zachováte?",
+   "options_cs": [
+    "Umožníte chodci nerušené a bezpečné přejití, v případě potřeby zastavíte vozidlo",
+    "Máte přednost, protože jste na vozovce, a projedete jako první",
+    "Zrychlíte, abyste přejel přechod dříve, než k němu chodec dojde",
+    "Přednost dáte jen tehdy, je-li u přechodu svislá značka 'Přechod pro chodce'"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Na fotografii je vodorovně vyznačený přechod pro chodce (zebra), na který vstupuje chodec. Řidič nesmí chodce ohrozit, musí mu umožnit nerušené a bezpečné přejití a v případě potřeby zastavit. Přednost chodce na přechodu vyplývá přímo z pravidla, ne z přítomnosti svislé značky.",
+   "citation": "§ 5 odst. 2 písm. f), zákon 361/2000 Sb.",
+   "rule_tag": "pedestrian_crossing",
+   "confidence": 0.86,
+   "what_you_see": "Vyznačený přechod pro chodce (zebra) u kruhového objezdu, na který vstupuje chodec; přijíždí dodávka.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "8ee8a891-eec0-4d79-9e21-8c9dec356d4b_y180",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená kruhová značka s modrým podkladem, červeným okrajem a jedním červeným šikmým pruhem u pravého okraje vozovky?",
+   "options_cs": [
+    "Zákaz stání",
+    "Zákaz vjezdu všech vozidel",
+    "Konec zóny placeného stání",
+    "Parkoviště vyhrazené pro osoby ZTP"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrý kruh s červeným lemem a jedním červeným šikmým pruhem je značka 'Zákaz stání' (B29). V úseku, kde značka platí, je zakázáno stání, vozidlo zde však smí krátce zastavit (např. pro vystoupení či naložení nákladu). Dva zkřížené pruhy by znamenaly zákaz zastavení.",
+   "citation": "značka B29 (Zákaz stání), vyhláška 294/2015 Sb.",
+   "rule_tag": "prohibitory_sign",
+   "confidence": 0.62,
+   "what_you_see": "Kruhová značka s modrým podkladem, červeným okrajem a červeným šikmým pruhem na sloupku u pravého okraje vozovky.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "9e7ac2da-fd75-41a1-b3f9-833bdbd13e6f_y180",
+   "type": "road_situation",
+   "question_cs": "Na povrchu cesty v parku je červeně podbarvený pruh se symbolem jízdního kola. Co toto vodorovné značení znamená?",
+   "options_cs": [
+    "Pruh je vyhrazen pro cyklisty (jízdu na jízdním kole) – ostatní zde jezdit nesmějí",
+    "Zákaz vjezdu jízdních kol do parku",
+    "Zde si cyklisté musí jízdní kolo vést a nesmějí na něm jet",
+    "Označení parkoviště vyhrazeného pro jízdní kola"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Symbol jízdního kola vyznačený na vozovce (zpravidla na červeně zvýrazněném povrchu) označuje pruh nebo stezku určenou pro cyklistickou dopravu. Tento prostor je vyhrazen cyklistům; řidiči ostatních vozidel ani chodci by do něj zbytečně nevstupovali a měli by zde počítat s pohybem cyklistů. Naopak zákaz ani příkaz vést kolo z tohoto značení neplyne.",
+   "citation": "V14 (symbol jízdního kola), § 12 vyhlášky č. 294/2015 Sb.",
+   "rule_tag": "vodorovne_znaceni_cykliste",
+   "confidence": 0.82,
+   "what_you_see": "Bílý piktogram jízdního kola namalovaný na červeně podbarveném pruhu na cestě v parku, kolem listí a chodci.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "add16fa3-67c6-4e37-9559-cd27e93af7d6_y180",
+   "type": "road_situation",
+   "question_cs": "Na vozovce před vámi je vyznačený přechod pro chodce a po něm právě přechází chodec. Jak se má řidič zachovat?",
+   "options_cs": [
+    "Snížit rychlost, případně zastavit a umožnit chodci nerušené a bezpečné přejití vozovky",
+    "Pokračovat stejnou rychlostí, protože přednost má vozidlo na vozovce",
+    "Zatroubit, aby chodec urychlil přecházení a uvolnil přechod",
+    "Objet chodce zezadu po protisměrné části vozovky bez snížení rychlosti"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Podle § 5 odst. 2 písm. f) zákona č. 361/2000 Sb. nesmí řidič ohrozit nebo omezit chodce přecházejícího pozemní komunikaci po přechodu pro chodce; v případě potřeby je povinen i zastavit vozidlo a umožnit chodci nerušené a bezpečné přejití. Troubení ani objíždění bez snížení rychlosti zákon nepřipouští.",
+   "citation": "§ 5 odst. 2 písm. f), § 5 odst. 1 zákona č. 361/2000 Sb.",
+   "rule_tag": "prechod_pro_chodce",
+   "confidence": 0.7,
+   "what_you_see": "Vyznačený přechod pro chodce (zebra) napříč vozovkou, po kterém přechází chodec, v pozadí historická budova a okružní křižovatka.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "c9c8627d-5d24-4f59-af76-4609c90397ab_y0",
+   "type": "road_situation",
+   "question_cs": "Na zpevněné cestě v parku je na asfaltu namalován bílý symbol jízdního kola a směrové šipky. Co tento symbol vyznačuje?",
+   "options_cs": [
+    "Že je cesta určena pro cyklisty (cyklistický pruh / stezka pro cyklisty)",
+    "Že je zde zakázán vjezd jízdních kol",
+    "Že zde musí cyklista vést kolo",
+    "Že zde platí nejvyšší dovolená rychlost 50 km/h"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Bílý symbol jízdního kola na vozovce (vodorovná dopravní značka V 14 – symbol jízdního kola) vyznačuje prostor určený pro jízdu cyklistů, tedy jízdní pruh pro cyklisty nebo stezku pro cyklisty. Naopak zákaz vjezdu kol by byl vyznačen svislou značkou (B 8), nikoli symbolem kola na zemi.",
+   "citation": "vodorovná značka V 14, § 12 a § 57 zák. 361/2000 Sb.",
+   "rule_tag": "vodorovne_znaceni_cykliste",
+   "confidence": 0.86,
+   "what_you_see": "Na asfaltové cestě v parku je bílou barvou namalován symbol jízdního kola spolu se směrovými šipkami v místě rozdělení cesty.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d6748c50-685b-431d-bf74-cbb9505be75e_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá kruhová značka se třemi šipkami do kruhu, kterou vidíte vpravo u vjezdu?",
+   "options_cs": [
+    "Kruhový objezd – přikázaný směr objíždění dokola",
+    "Zákaz odbočení vlevo i vpravo",
+    "Parkoviště s kruhovým uspořádáním stání",
+    "Doporučená rychlost v zatáčce"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá kruhová značka se třemi šipkami uspořádanými do kruhu je značka C 1 'Kruhový objezd'. Přikazuje jízdu po kruhovém objezdu ve směru šipek (u nás proti směru hodinových ručiček). Bývá doplněna značkou P 4 'Dej přednost v jízdě', jak je tomu i zde.",
+   "citation": "značka C 1, § 15 vyhlášky 294/2015 Sb.",
+   "rule_tag": "znacka_C1_kruhovy_objezd",
+   "confidence": 0.93,
+   "what_you_see": "Modrá kruhová značka C 1 (kruhový objezd – tři šipky do kruhu) umístěná pod červeným obráceným trojúhelníkem P 4 na sloupku vpravo u vjezdu na okružní křižovatku.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d6748c50-685b-431d-bf74-cbb9505be75e_y0",
+   "type": "right_of_way",
+   "question_cs": "Vpravo u vjezdu je obrácený červeno-bílý trojúhelník nad značkou kruhový objezd. Jak se zachováte při vjezdu na okružní křižovatku?",
+   "options_cs": [
+    "Dám přednost vozidlům jedoucím v kruhovém objezdu a vjedu, až bude volno",
+    "Mám přednost, protože vjíždím zprava",
+    "Zastavím vždy na hranici křižovatky bez ohledu na provoz",
+    "Vozidla v kruhu dají přednost mně, mohu vjet bez zastavení"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Obrácený trojúhelník je značka P 4 'Dej přednost v jízdě'. Spolu se značkou C 1 'Kruhový objezd' ukládá řidiči vjíždějícímu na okružní křižovatku dát přednost vozidlům, která už po kruhovém objezdu jedou. Zastavit musíte jen tehdy, je-li to k dání přednosti nutné.",
+   "citation": "značka P 4, § 22 zákona 361/2000 Sb.",
+   "rule_tag": "prednost_kruhovy_objezd_P4",
+   "confidence": 0.9,
+   "what_you_see": "Značka P 4 'Dej přednost v jízdě' (obrácený červeno-bílý trojúhelník) nad značkou C 1 vpravo u vjezdu na okružní křižovatku, kde po kruhu jedou vozidla.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "d6748c50-685b-431d-bf74-cbb9505be75e_y0",
+   "type": "road_situation",
+   "question_cs": "Přes vozovku před vámi vede pruh bílých příčných pruhů (zebra). Co označuje a jak se chováte?",
+   "options_cs": [
+    "Přechod pro chodce – musíte umožnit chodci nerušené a bezpečné přejití",
+    "Stezku pro cyklisty, kterou nesmíte přejet",
+    "Místo pro otáčení vozidel",
+    "Zákaz vjezdu pro motorová vozidla"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Příčné bílé pruhy (zebra) tvoří vodorovnou značku V 7 'Přechod pro chodce'. Řidič nesmí chodce na přechodu nebo vstupujícího na přechod ohrozit; musí mu umožnit nerušené a bezpečné přejití a v případě potřeby zastavit. Nesmí na přechod ani těsně před něj zastavit či stát.",
+   "citation": "značka V 7, § 5 odst. 2 písm. f) zákona 361/2000 Sb.",
+   "rule_tag": "prechod_pro_chodce_V7",
+   "confidence": 0.88,
+   "what_you_see": "Vodorovné značení V 7 – přechod pro chodce (souběžné bílé příčné pruhy přes vozovku) v popředí na vjezdu k okružní křižovatce.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "f906a71e-e8e5-4a68-813f-0a9ee8c1cd29_y0",
+   "type": "right_of_way",
+   "question_cs": "Vjíždíte do kruhového objezdu, před kterým je na sloupku umístěna značka „Dej přednost v jízdě!“ společně se značkou „Kruhový objezd“. Jak se zachováte?",
+   "options_cs": [
+    "Dám přednost vozidlům, která již jedou v kruhovém objezdu, a teprve poté vjedu",
+    "Mám přednost před vozidly v kruhovém objezdu, protože do něj vjíždím přímo",
+    "Zastavím na hranici křižovatky bez ohledu na provoz, jako u značky STOP",
+    "Přednost mají vozidla vjíždějící do objezdu zprava od mého vjezdu"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Kombinace značky P4 „Dej přednost v jízdě!“ se značkou C1 „Kruhový objezd“ ukládá řidiči vjíždějícímu do kruhového objezdu povinnost dát přednost v jízdě vozidlům, která už v kruhovém objezdu jedou. Není to značka STOP, takže nemusíte bezpodmínečně zastavit, pokud je vjezd volný.",
+   "citation": "značka P4 + C1, § 22 odst. 5 zákona 361/2000 Sb.",
+   "rule_tag": "roundabout_give_way",
+   "confidence": 0.92,
+   "what_you_see": "Na sloupku vpravo před vjezdem do kruhového objezdu je umístěna značka P4 „Dej přednost v jízdě!“ (obrácený červený trojúhelník) společně s modrou kulatou značkou C1 „Kruhový objezd“; v pozadí je vidět vlastní kruhový objezd se středovým ostrovem a projíždějícími vozidly.",
+   "severity": "ok"
+  },
+  {
+   "photo_id": "f906a71e-e8e5-4a68-813f-0a9ee8c1cd29_y0",
+   "type": "sign_meaning",
+   "question_cs": "Co znamená modrá kulatá značka s kruhem bílých šipek, kterou vidíte na sloupku vpravo před křižovatkou?",
+   "options_cs": [
+    "Kruhový objezd – přikazuje jet po kruhovém objezdu ve směru šipek",
+    "Zákaz vjezdu všech vozidel do prostoru křižovatky",
+    "Parkoviště s kruhovým uspořádáním stání",
+    "Konec všech zákazů platných pro projíždějící vozidla"
+   ],
+   "correct_index": 0,
+   "explanation_cs": "Modrá kruhová značka C1 „Kruhový objezd“ přikazuje jízdu po kruhovém objezdu ve směru vyznačených šipek (proti směru hodinových ručiček). Je-li doplněna značkou P4, musí řidič vjíždějící do objezdu dát přednost vozidlům jedoucím v kruhu.",
+   "citation": "značka C1, § 15 vyhlášky 294/2015 Sb.",
+   "rule_tag": "mandatory_roundabout_sign",
+   "confidence": 0.9,
+   "what_you_see": "Na sloupku vpravo je modrá kulatá značka C1 „Kruhový objezd“ s bílými šipkami uspořádanými do kruhu, umístěná pod obráceným červeným trojúhelníkem P4; za ní následuje skutečný kruhový objezd.",
+   "severity": "ok"
+  }
+ ]
+}

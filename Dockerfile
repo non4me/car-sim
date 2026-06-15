@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app/ ./app/
 COPY data/cities/ ./data/cities/
+COPY data/quiz/ ./data/quiz/
 
 EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=4s --start-period=10s --retries=5 \

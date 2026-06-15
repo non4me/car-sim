@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="pt-6 pb-4 fade-in">
+  <h1 class="text-2xl font-extrabold tracking-tight leading-tight text-center">{{ t.tagline }}</h1>
+  <p class="mt-2 text-slate-400 text-center text-sm max-w-md mx-auto">{{ t.intro }}</p>
+
+  {% if count %}
+  <form action="{{ base }}/start" method="post" class="mt-6">
+    <div class="text-xs uppercase tracking-wide text-slate-500 mb-2">{{ t.topic }}</div>
+    <div class="grid grid-cols-4 gap-2 mb-5">
+      {% for key, label in [('all', t.t_all), ('signs', t.t_signs), ('priority', t.t_priority), ('situation', t.t_situation)] %}
+      <label class="cursor-pointer">
+        <input type="radio" name="topic" value="{{ key }}" class="peer sr-only" {{ 'checked' if loop.first }}>
+        <div class="rounded-lg border border-line bg-panel py-2 text-center text-sm text-slate-300 peer-checked:border-accent peer-checked:text-white peer-checked:bg-accent/10 transition-colors">
+          {{ label }}<div class="text-[10px] text-slate-500">{{ counts[key] }}</div>
+        </div>
+      </label>
+      {% endfor %}
+    </div>
+
+    <div class="text-xs uppercase tracking-wide text-slate-500 mb-2">{{ t.choose_mode }}</div>
+    <div class="grid gap-3">
+      <button name="mode" value="quick" class="opt flex items-center gap-4 rounded-xl border border-line bg-panel p-4 text-left hover:border-accent/60">
+        <span class="text-2xl">⚡</span>
+        <span class="flex-1"><span class="font-bold block">{{ t.mode_quick }}</span><span class="text-xs text-slate-400">{{ t.mode_quick_d }}</span></span>
+        <span class="text-accent text-lg">▶</span>
+      </button>
+      <button name="mode" value="exam" class="opt flex items-center gap-4 rounded-xl border border-line bg-panel p-4 text-left hover:border-accent/60">
+        <span class="text-2xl">📋</span>
+        <span class="flex-1"><span class="font-bold block">{{ t.mode_exam }}</span><span class="text-xs text-slate-400">{{ t.mode_exam_d }}</span></span>
+        <span class="text-accent text-lg">▶</span>
+      </button>
+      <button name="mode" value="survival" class="opt flex items-center gap-4 rounded-xl border border-line bg-panel p-4 text-left hover:border-accent/60">
+        <span class="text-2xl">❤️</span>
+        <span class="flex-1"><span class="font-bold block">{{ t.mode_survival }}</span><span class="text-xs text-slate-400">{{ t.mode_survival_d }}</span></span>
+        <span class="text-accent text-lg">▶</span>
+      </button>
+    </div>
+  </form>
+
+  <div class="mt-5 text-center text-xs text-slate-500">📷 {{ t.real_photos }} · Praha · {{ count }} {{ t.questions_word }}</div>
+  {% else %}
+  <p class="mt-8 text-slate-400 text-center">{{ t.no_content }}</p>
+  {% endif %}
+</section>
+{% endblock %}

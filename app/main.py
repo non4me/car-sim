@@ -87,6 +87,10 @@ app.mount("/static", RevalidatingStatic(directory=str(STATIC)), name="static")  
 if CITIES.exists():
     app.mount("/citydata", RevalidatingStatic(directory=str(CITIES)), name="citydata")
 
+# photo quiz — migrated from the standalone "ulice" game (msg 2802), mounted as a sub-app under /quiz/photo
+from .quiz.photo import photo_app  # noqa: E402  (after app/mounts so its import side-effects are last)
+app.mount("/quiz/photo", photo_app)
+
 DEFAULT_CITY = ("cz", "praha", "vinohrady")
 PRAHA = CITIES / "cz" / "praha"
 _DISTRICT_RE = re.compile(r"[a-z0-9_-]{1,40}")
@@ -144,6 +148,14 @@ HTML_HEADERS = {"Cache-Control": "no-cache"}  # never cache the HTML that names 
 def intro(request: Request):
     return templates.TemplateResponse(request, "intro.html", {
         "districts": _districts(),
+        "user": auth.current_user(request),
+    }, headers=HTML_HEADERS)
+
+
+@app.get("/quiz", response_class=HTMLResponse)
+def quiz_hub(request: Request):
+    """Quizzes hub — indexes the sub-quizzes (photo quiz live; situations/signs/rules soon)."""
+    return templates.TemplateResponse(request, "quiz.html", {
         "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 

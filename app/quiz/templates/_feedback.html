@@ -1,0 +1,54 @@
+{% include "_hud.html" %}
+
+{# hidden data for the floating combo / level-up toast (read by base.html JS on swap) #}
+<div id="combo" class="hidden"
+     data-correct="{{ 1 if is_correct else 0 }}"
+     data-points="{{ points }}"
+     data-mult="{{ mult }}"
+     data-levelup="{{ 1 if level_up else 0 }}"
+     data-rank="{{ hud.rank.name }}"
+     data-lvltext="{{ t.level_up }}"></div>
+
+<figure class="rounded-xl overflow-hidden border border-line photo">
+  <img src="{{ base }}{{ q.photo }}" alt="Praha" class="w-full aspect-[4/3] object-cover">
+</figure>
+
+<h2 class="mt-4 text-lg font-semibold leading-snug">{{ q.question }}</h2>
+
+<div class="mt-3 grid gap-2.5">
+  {% for opt in q.options %}
+  {% set is_correct_opt = (loop.index0 == q.correct_index) %}
+  {% set is_chosen_wrong = (loop.index0 == chosen and not is_correct_opt) %}
+  <div class="text-left rounded-xl border px-4 py-3
+    {% if is_correct_opt %}border-good/70 bg-good/10 text-good
+    {% elif is_chosen_wrong %}border-bad/70 bg-bad/10 text-bad
+    {% else %}border-line bg-panel/40 text-slate-400{% endif %}">
+    <span class="inline-grid place-items-center w-6 h-6 mr-2 rounded-md text-sm align-middle
+      {% if is_correct_opt %}bg-good/20{% elif is_chosen_wrong %}bg-bad/20{% else %}bg-line{% endif %}">{{ "ABCD"[loop.index0] }}</span>
+    <span class="align-middle">{{ opt }}</span>
+    {% if is_correct_opt %}<span class="float-right">✓</span>{% elif is_chosen_wrong %}<span class="float-right">✕</span>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="mt-4 rounded-xl border {{ 'border-good/40 bg-good/5' if is_correct else 'border-bad/40 bg-bad/5' }} p-4 fade-in">
+  <div class="flex items-center justify-between">
+    <div class="font-bold {{ 'text-good' if is_correct else 'text-bad' }}">
+      {% if is_correct %}✓ {{ t.correct }}{% elif timed_out %}⏱ {{ t.timeout }}{% else %}✕ {{ t.wrong }}{% endif %}
+    </div>
+    {% if is_correct %}
+    <div class="text-xs text-slate-400 tabular-nums">
+      <span class="text-good font-semibold">+{{ points }}</span>
+      {% if time_bonus %} · ⚡+{{ time_bonus }}{% endif %}
+      {% if mult > 1 %} · <span class="text-amber-400">×{{ '2' if mult == 2.0 else '1.5' }}</span>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="mt-2 text-xs uppercase tracking-wide text-slate-500">{{ t.explanation }}</div>
+  <p class="mt-1 text-sm text-slate-200 leading-relaxed">{{ q.explanation }}</p>
+</div>
+
+<button class="opt mt-4 w-full rounded-xl bg-accent text-ink font-bold py-3.5 hover:brightness-110"
+  hx-post="{{ base }}/next" hx-target="#game" hx-swap="innerHTML">
+  {% if over %}{{ t.see_result }} →{% else %}{{ t.next }} →{% endif %}
+</button>

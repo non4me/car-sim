@@ -70,8 +70,10 @@
           {% for d in districts %}<a href="/drive?district={{ d.district }}" title="{{ d.n_edges }} úseků silnic">{% if d.district == 'prague' %}🌍 Celá Praha{% else %}{{ d.district|capitalize }} <span class="dist-note">(malá ukázka)</span>{% endif %}</a>{% endfor %}
         </div>
       </div>
-      <div class="card soon"><div class="t">🧠 Quizzes <span class="tag">soon</span></div>
-        <div class="d">Photo quiz · situation simulator · sign trainer · rules flashcards.</div></div>
+      <a class="card" href="/quiz">
+        <div class="t">🧠 Quizzes <span class="tag">live</span></div>
+        <div class="d">Photo quiz on real Prague streets · situation simulator · sign trainer · rules flashcards.</div>
+      </a>
       <div class="card soon"><div class="t">📖 Official documents <span class="tag">soon</span></div>
         <div class="d">Laws & rules of the road, searchable, kept current.</div></div>
     </div>

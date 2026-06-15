@@ -1,0 +1,18 @@
+{# survival leaderboard (also returned standalone by POST /leaderboard) #}
+<div>
+  <div class="text-xs uppercase tracking-wide text-slate-500 mb-2">🏆 {{ t.leaderboard }}</div>
+  {% if board %}
+  <ol class="space-y-1">
+    {% for e in board %}
+    <li class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm {{ 'bg-accent/15 border border-accent/40' if e.me else 'bg-panel/50' }}">
+      <span class="w-5 text-right tabular-nums {{ 'text-amber-400 font-bold' if e.rank <= 3 else 'text-slate-500' }}">{{ e.rank }}</span>
+      <span class="flex-1 truncate {{ 'text-white font-semibold' if e.me else 'text-slate-300' }}">{{ e.name }}{% if e.me %} <span class="text-[10px] text-accent">({{ t.you }})</span>{% endif %}</span>
+      <span class="tabular-nums text-slate-500 text-xs">{{ e.q }} q</span>
+      <span class="tabular-nums font-bold text-white w-12 text-right">{{ e.score }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="text-sm text-slate-500 text-center py-3">{{ t.no_scores }}</p>
+  {% endif %}
+</div>
