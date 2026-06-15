@@ -6,13 +6,17 @@ import hashlib
 import json
 import os
 import re
+import secrets
 from pathlib import Path
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response
+
+from . import auth, db
 
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parent
@@ -56,9 +60,28 @@ class RevalidatingStatic(StaticFiles):
 
 
 app = FastAPI(title="car-sim")
+
+# signed-cookie sessions for auth. SECRET_KEY must be stable across restarts (set in compose) or sessions
+# drop on every deploy; a random fallback keeps dev working. same_site=lax so the OAuth redirect keeps the
+# cookie; Secure flag on unless explicitly disabled for plain-http local runs.
+SECRET_KEY = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+SESSION_HTTPS = os.environ.get("SESSION_HTTPS", "1") != "0"
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, same_site="lax",
+                   https_only=SESSION_HTTPS, max_age=60 * 60 * 24 * 30)
+
 templates = Jinja2Templates(directory=str(BASE / "templates"))
 templates.env.cache = None  # avoid a Jinja LRUCache key issue under Python 3.14 (prod uses 3.12)
 templates.env.globals["asset_base"] = f"/s/{BUILD}"  # versioned static prefix for all templates
+auth.templates = templates                            # share the configured templates with the auth router
+app.include_router(auth.router)
+
+
+@app.on_event("startup")
+def _startup():
+    db.init_db()
+    auth.seed_admin()   # out-of-band admin bootstrap from SEED_ADMIN_EMAIL/PASSWORD env (if set)
+
+
 app.mount(f"/s/{BUILD}", ImmutableStatic(directory=str(STATIC)), name="assets")
 app.mount("/static", RevalidatingStatic(directory=str(STATIC)), name="static")  # legacy/direct hits
 if CITIES.exists():
@@ -121,6 +144,7 @@ HTML_HEADERS = {"Cache-Control": "no-cache"}  # never cache the HTML that names 
 def intro(request: Request):
     return templates.TemplateResponse(request, "intro.html", {
         "districts": _districts(),
+        "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 
 
@@ -142,4 +166,102 @@ def drive(request: Request, district: str = "prague"):
         "data_base": f"/citydata/{cc}/{city}/{district}",
         "snapshot": snapshot,
         "districts": _districts(),
+        "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
+
+
+# ---- accounts: /me (user) + /admin (role=admin) — guests are redirected to /login ----------------
+
+def _require_login(request: Request):
+    u = auth.current_user(request)
+    if u is None:
+        return None, RedirectResponse(f"/login?next={request.url.path}", status_code=303)
+    return u, None
+
+
+@app.get("/me", response_class=HTMLResponse)
+def me(request: Request):
+    u, redirect = _require_login(request)
+    if redirect:
+        return redirect
+    return templates.TemplateResponse(request, "me.html", {
+        "user": u, "trips": db.list_trips(u["id"], limit=50),
+    }, headers=HTML_HEADERS)
+
+
+@app.get("/me/export")
+def me_export(request: Request):
+    u, redirect = _require_login(request)
+    if redirect:
+        return redirect
+    data = db.export_user(u["id"])
+    return JSONResponse(data, headers={
+        "Content-Disposition": 'attachment; filename="car-sim-my-data.json"',
+        "Cache-Control": "no-store",
+    })
+
+
+@app.post("/me/delete")
+def me_delete(request: Request):
+    u, redirect = _require_login(request)
+    if redirect:
+        return redirect
+    db.delete_user(u["id"])              # cascades trips/events
+    auth.logout_user(request)
+    return RedirectResponse("/", status_code=303)
+
+
+def _require_admin(request: Request):
+    u = auth.current_user(request)
+    if u is None:
+        return None, RedirectResponse(f"/login?next={request.url.path}", status_code=303)
+    if u.get("role") != "admin":
+        return None, JSONResponse({"error": "forbidden"}, status_code=403)
+    return u, None
+
+
+@app.get("/admin", response_class=HTMLResponse)
+def admin(request: Request):
+    u, redirect = _require_admin(request)
+    if redirect:
+        return redirect
+    q = request.query_params.get("q") or None
+    users = db.list_users(q=q)
+    return templates.TemplateResponse(request, "admin.html", {
+        "user": u, "users": users, "q": q or "",
+        "total": db.count_users(), "admin_emails": sorted(auth.ADMIN_EMAILS),
+    }, headers=HTML_HEADERS)
+
+
+@app.post("/admin/users/{uid}/role")
+def admin_set_role(request: Request, uid: int, role: str = Form(...)):
+    u, redirect = _require_admin(request)
+    if redirect:
+        return redirect
+    if role not in ("user", "admin"):
+        raise HTTPException(status_code=400, detail="bad role")
+    target = db.get_user(uid)
+    if target and target["email"].lower() in auth.ADMIN_EMAILS and role != "admin":
+        raise HTTPException(status_code=400, detail="cannot demote a configured admin email")
+    db.set_role(uid, role)
+    return RedirectResponse("/admin", status_code=303)
+
+
+@app.post("/admin/users/{uid}/disable")
+def admin_disable(request: Request, uid: int, disabled: str = Form("1")):
+    u, redirect = _require_admin(request)
+    if redirect:
+        return redirect
+    db.set_disabled(uid, disabled == "1")
+    return RedirectResponse("/admin", status_code=303)
+
+
+@app.post("/admin/users/{uid}/delete")
+def admin_delete(request: Request, uid: int):
+    u, redirect = _require_admin(request)
+    if redirect:
+        return redirect
+    if uid == u["id"]:
+        raise HTTPException(status_code=400, detail="refusing to delete yourself")
+    db.delete_user(uid)
+    return RedirectResponse("/admin", status_code=303)

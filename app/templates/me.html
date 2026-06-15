@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="cs" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — Můj profil</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--bad:#ff6b6b;--good:#37d67a}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    a.home{color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+    .menu a{color:#8a93a6;text-decoration:none;font-size:13px;margin-left:14px}
+    .menu a:hover{color:#e6e9f0}
+    h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:22px 0 2px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;margin-top:18px}
+    .role{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;
+      border-radius:999px;border:1px solid var(--line);color:#8a93a6;margin-left:8px}
+    .role.admin{color:#06203f;background:var(--accent);border-color:var(--accent)}
+    .kv{display:grid;grid-template-columns:140px 1fr;gap:8px 16px;font-size:14px;margin-top:6px}
+    .kv .k{color:#6b7385}
+    .stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+    .stat{background:#0e131d;border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:120px}
+    .stat .n{font-size:22px;font-weight:800}
+    .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7385;margin-top:2px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+    th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+    th{color:#6b7385;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+    .empty{color:#6b7385;font-size:13px;margin-top:8px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .btn{background:#0e131d;border:1px solid var(--line);color:#cdd5e6;border-radius:9px;padding:9px 14px;
+      font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+    .btn:hover{border-color:var(--accent)}
+    .btn.danger{color:#ffb3b3;border-color:rgba(255,107,107,.4)}
+    .btn.danger:hover{background:rgba(255,107,107,.12)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="home" href="/">← <span style="color:#e6e9f0">car</span>-sim</a>
+      <div class="menu">
+        <a href="/drive">🚗 Jezdit</a>
+        {% if user.role == 'admin' %}<a href="/admin">🛠️ Admin</a>{% endif %}
+        <a href="/auth/logout">Odhlásit</a>
+      </div>
+    </div>
+
+    <h1>Můj profil
+      <span class="role {{ 'admin' if user.role == 'admin' else '' }}">{{ user.role }}</span>
+    </h1>
+
+    <div class="card">
+      <div class="kv">
+        <div class="k">Jméno</div><div>{{ user.display_name or '—' }}</div>
+        <div class="k">E-mail</div><div>{{ user.email }}</div>
+        <div class="k">Přihlášení</div><div>{{ 'Google' if user.provider == 'google' else 'E-mail + heslo' }}</div>
+        <div class="k">Účet od</div><div>{{ user.created_at[:10] }}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <b>Statistiky</b>
+      <div class="stats">
+        <div class="stat"><div class="n">{{ trips|length }}</div><div class="l">Jízd</div></div>
+        <div class="stat"><div class="n">{{ '%.1f'|format((trips|sum(attribute='distance_m'))/1000) }}</div><div class="l">km celkem</div></div>
+        <div class="stat"><div class="n">{{ trips|sum(attribute='n_violations') }}</div><div class="l">Přestupků</div></div>
+      </div>
+      {% if trips %}
+      <table>
+        <tr><th>Datum</th><th>Čtvrť</th><th>km</th><th>Čas</th><th>Přestupků</th></tr>
+        {% for t in trips %}
+        <tr>
+          <td>{{ (t.started_at or '')[:16]|replace('T',' ') }}</td>
+          <td>{{ t.district or '—' }}</td>
+          <td>{{ '%.2f'|format((t.distance_m or 0)/1000) }}</td>
+          <td>{{ '%d:%02d'|format((t.duration_s or 0)//60, (t.duration_s or 0)%60) }}</td>
+          <td>{{ t.n_violations or 0 }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+      <div class="empty">Zatím žádné uložené jízdy. Záznam jízd se zapne, jakmile budeš přihlášen a vyjedeš na <a href="/drive" style="color:var(--accent)">/drive</a>. (Brzy.)</div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <b>Tvá data (GDPR)</b>
+      <div class="empty">Stáhni si všechna svá data, nebo nech účet i s jízdami smazat.</div>
+      <div class="actions">
+        <a class="btn" href="/me/export">⬇️ Stáhnout má data (JSON)</a>
+        <form method="post" action="/me/delete" onsubmit="return confirm('Opravdu smazat účet a všechny jízdy? Nelze vrátit zpět.')">
+          <button class="btn danger" type="submit">🗑️ Smazat účet</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

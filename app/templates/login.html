@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="cs" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — {{ 'Registrace' if mode == 'register' else 'Přihlášení' }}</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--bad:#ff6b6b;--good:#37d67a}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:400px;margin:0 auto;padding:56px 20px 64px}
+    a.home{color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+    h1{font-size:24px;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
+    .sub{color:#8a93a6;font-size:13px;margin-bottom:20px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+    .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;box-sizing:border-box;
+      background:#fff;color:#1f2430;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;
+      cursor:pointer;text-decoration:none;margin-bottom:14px}
+    .gbtn:hover{background:#f1f3f6}
+    .gbtn svg{width:18px;height:18px}
+    .sep{display:flex;align-items:center;gap:10px;color:#5b6477;font-size:12px;margin:14px 0}
+    .sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--line)}
+    label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7385;margin:12px 0 5px}
+    input{width:100%;box-sizing:border-box;background:#0e131d;border:1px solid var(--line);border-radius:9px;
+      color:#e6e9f0;padding:10px 12px;font-size:14px}
+    input:focus{outline:none;border-color:var(--accent)}
+    button.primary{width:100%;margin-top:18px;background:var(--accent);color:#06203f;border:none;border-radius:10px;
+      padding:11px;font-size:14px;font-weight:800;cursor:pointer}
+    button.primary:hover{filter:brightness(1.06)}
+    .err{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.4);color:#ffb3b3;
+      border-radius:9px;padding:9px 12px;font-size:13px;margin-bottom:6px}
+    .toggle{text-align:center;margin-top:16px;font-size:13px;color:#8a93a6}
+    .toggle a{color:var(--accent);text-decoration:none;font-weight:700}
+    .note{color:#5b6477;font-size:11px;margin-top:18px;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="home" href="/">← <span style="color:#e6e9f0">car</span>-sim</a>
+    <h1>{{ 'Vytvořit účet' if mode == 'register' else 'Přihlásit se' }}</h1>
+    <div class="sub">Hraní je volné i bez účtu — účet jen ukládá tvé jízdy a statistiky.</div>
+
+    <div class="card">
+      {% if error %}<div class="err">{{ error }}</div>{% endif %}
+
+      {% if google_enabled %}
+      <a class="gbtn" href="/auth/google{% if next %}?next={{ next|urlencode }}{% endif %}">
+        <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.8 6.1C12.2 13.2 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7c4.3-4 6.9-9.9 6.9-17.4z"/><path fill="#FBBC05" d="M10.3 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.8-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.5-2 15.3-5.5l-7.3-5.7c-2 1.4-4.7 2.3-8 2.3-6.4 0-11.8-3.7-13.7-9l-7.8 6.1C6.4 42.6 14.6 48 24 48z"/></svg>
+        Pokračovat přes Google
+      </a>
+      <div class="sep">nebo e-mailem</div>
+      {% endif %}
+
+      {% if mode == 'register' %}
+      <form method="post" action="/auth/register{% if next %}?next={{ next|urlencode }}{% endif %}">
+        <label for="dn">Jméno (nepovinné)</label>
+        <input id="dn" name="display_name" type="text" autocomplete="name" placeholder="Jak ti říkat">
+        <label for="em">E-mail</label>
+        <input id="em" name="email" type="email" autocomplete="email" required placeholder="ty@email.cz">
+        <label for="pw">Heslo (aspoň 8 znaků)</label>
+        <input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8">
+        <button class="primary" type="submit">Vytvořit účet</button>
+      </form>
+      <div class="toggle">Už máš účet? <a href="/login?mode=login{% if next %}&next={{ next|urlencode }}{% endif %}">Přihlásit se</a></div>
+      {% else %}
+      <form method="post" action="/auth/login{% if next %}?next={{ next|urlencode }}{% endif %}">
+        <label for="em">E-mail</label>
+        <input id="em" name="email" type="email" autocomplete="email" required placeholder="ty@email.cz">
+        <label for="pw">Heslo</label>
+        <input id="pw" name="password" type="password" autocomplete="current-password" required>
+        <button class="primary" type="submit">Přihlásit se</button>
+      </form>
+      <div class="toggle">Nemáš účet? <a href="/login?mode=register{% if next %}&next={{ next|urlencode }}{% endif %}">Zaregistrovat se</a></div>
+      {% endif %}
+    </div>
+
+    <div class="note">Přihlášením souhlasíš s uložením session cookie a tvých herních jízd. Data si můžeš
+      kdykoli stáhnout nebo účet smazat v sekci <b>Můj profil</b>.</div>
+  </div>
+</body>
+</html>

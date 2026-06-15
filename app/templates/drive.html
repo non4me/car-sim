@@ -161,7 +161,10 @@
       </div>
       <button id="routeBtn" title="Trasa mezi ulicemi">🛣 Trasa</button>
     </div>
-    <div class="meta">Praha{% if snapshot %} · data OSM {{ snapshot }}{% endif %}</div>
+    <div class="meta">
+      Praha{% if snapshot %} · data OSM {{ snapshot }}{% endif %}
+      {% if user %}<a href="/me" style="margin-left:12px">👤 {{ (user.display_name or user.email).split('@')[0] }}</a>{% if user.role == 'admin' %} · <a href="/admin">🛠️</a>{% endif %}{% else %}<a href="/login" style="margin-left:12px">Přihlásit</a>{% endif %}
+    </div>
   </div>
 
   <div class="hud" id="minimap">

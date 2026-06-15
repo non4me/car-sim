@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="cs" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — Admin</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--bad:#ff6b6b;--good:#37d67a}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:1000px;margin:0 auto;padding:32px 20px 64px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    a.home{color:var(--accent);text-decoration:none;font-weight:700;font-size:15px}
+    .menu a{color:#8a93a6;text-decoration:none;font-size:13px;margin-left:14px}
+    .menu a:hover{color:#e6e9f0}
+    h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:22px 0 2px}
+    .sub{color:#8a93a6;font-size:13px}
+    .stats{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
+    .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 18px;min-width:110px}
+    .stat .n{font-size:24px;font-weight:800}
+    .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7385;margin-top:2px}
+    form.search{margin:8px 0 14px}
+    form.search input{background:#0e131d;border:1px solid var(--line);border-radius:9px;color:#e6e9f0;
+      padding:9px 12px;font-size:14px;width:260px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:6px 4px;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+    th{color:#6b7385;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+    tr:last-child td{border-bottom:none}
+    .role{font-size:10px;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:999px;
+      border:1px solid var(--line);color:#8a93a6}
+    .role.admin{color:#06203f;background:var(--accent);border-color:var(--accent)}
+    .pill{font-size:10px;padding:2px 7px;border-radius:999px}
+    .pill.off{color:#ffb3b3;background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.35)}
+    .pill.on{color:var(--good)}
+    .prov{color:#6b7385;font-size:12px}
+    .acts{display:flex;gap:6px}
+    .acts button{background:#0e131d;border:1px solid var(--line);color:#cdd5e6;border-radius:7px;padding:5px 9px;
+      font-size:12px;font-weight:600;cursor:pointer}
+    .acts button:hover{border-color:var(--accent)}
+    .acts button.danger{color:#ffb3b3;border-color:rgba(255,107,107,.4)}
+    .acts button.danger:hover{background:rgba(255,107,107,.12)}
+    .me-tag{font-size:10px;color:var(--accent);margin-left:6px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="home" href="/">← <span style="color:#e6e9f0">car</span>-sim</a>
+      <div class="menu">
+        <a href="/drive">🚗 Jezdit</a>
+        <a href="/me">👤 Profil</a>
+        <a href="/auth/logout">Odhlásit</a>
+      </div>
+    </div>
+
+    <h1>🛠️ Admin</h1>
+    <div class="sub">Správa uživatelů. Admin e-maily ({{ admin_emails|join(', ') }}) jsou povýšeny automaticky.</div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">{{ total }}</div><div class="l">Uživatelů</div></div>
+      <div class="stat"><div class="n">{{ users|selectattr('role','equalto','admin')|list|length }}</div><div class="l">Adminů</div></div>
+      <div class="stat"><div class="n">{{ users|sum(attribute='n_trips') }}</div><div class="l">Jízd</div></div>
+    </div>
+
+    <form class="search" method="get" action="/admin">
+      <input name="q" value="{{ q }}" placeholder="Hledat e-mail / jméno…" autocomplete="off">
+    </form>
+
+    <div class="card">
+      <table>
+        <tr>
+          <th>#</th><th>E-mail</th><th>Jméno</th><th>Role</th><th>Přihlášení</th>
+          <th>Stav</th><th>Jízd</th><th>Vytvořen</th><th>Naposledy</th><th>Akce</th>
+        </tr>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td>{{ u.email }}{% if u.id == user.id %}<span class="me-tag">(ty)</span>{% endif %}</td>
+          <td>{{ u.display_name or '—' }}</td>
+          <td><span class="role {{ 'admin' if u.role == 'admin' else '' }}">{{ u.role }}</span></td>
+          <td class="prov">{{ 'Google' if u.provider == 'google' else 'e-mail' }}</td>
+          <td>{% if u.disabled %}<span class="pill off">blokován</span>{% else %}<span class="pill on">aktivní</span>{% endif %}</td>
+          <td>{{ u.n_trips }}</td>
+          <td>{{ (u.created_at or '')[:10] }}</td>
+          <td>{{ (u.last_login_at or '')[:10] or '—' }}</td>
+          <td>
+            <div class="acts">
+              {% if u.role == 'admin' %}
+              <form method="post" action="/admin/users/{{ u.id }}/role"><input type="hidden" name="role" value="user">
+                <button type="submit" {% if u.email in admin_emails %}disabled title="konfigurovaný admin"{% endif %}>↓ user</button></form>
+              {% else %}
+              <form method="post" action="/admin/users/{{ u.id }}/role"><input type="hidden" name="role" value="admin">
+                <button type="submit">↑ admin</button></form>
+              {% endif %}
+              <form method="post" action="/admin/users/{{ u.id }}/disable">
+                <input type="hidden" name="disabled" value="{{ '0' if u.disabled else '1' }}">
+                <button type="submit">{{ 'odblokovat' if u.disabled else 'blokovat' }}</button></form>
+              {% if u.id != user.id %}
+              <form method="post" action="/admin/users/{{ u.id }}/delete" onsubmit="return confirm('Smazat {{ u.email }} a jeho jízdy?')">
+                <button class="danger" type="submit">smazat</button></form>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</body>
+</html>

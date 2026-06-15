@@ -15,6 +15,20 @@ services:
     restart: unless-stopped
     networks:
       - web
+    # SECRET_KEY (+ optional GOOGLE_CLIENT_ID/SECRET) come from /opt/car-sim/.env on Castle (NOT committed,
+    # excluded from rsync). app.db lives in the carsim-data named volume so it survives image rebuilds.
+    environment:
+      - CARSIM_DB=/app/var/app.db
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-vladimir.troyanenko@gmail.com}
+      - BASE_URL=${BASE_URL:-https://car-sim.troyanenko.com}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      # out-of-band first-admin bootstrap (trusted: only Castle-shell holders set .env)
+      - SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL:-}
+      - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD:-}
+    volumes:
+      - carsim-data:/app/var
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
@@ -27,3 +41,6 @@ services:
 networks:
   web:
     external: true
+
+volumes:
+  carsim-data:

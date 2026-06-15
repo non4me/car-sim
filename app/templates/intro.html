@@ -27,10 +27,25 @@
       border-radius:999px;padding:2px 8px;margin-left:8px}
     .dist a{color:var(--accent);text-decoration:none;margin-right:12px;font-size:13px}
     footer{color:#5b6477;font-size:12px;margin-top:32px}
+    .usermenu{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-bottom:4px}
+    .usermenu a{color:#8a93a6;text-decoration:none;font-size:13px;font-weight:600}
+    .usermenu a:hover{color:#e6e9f0}
+    .usermenu a.cta{color:#06203f;background:var(--accent);border-radius:8px;padding:6px 12px}
+    .usermenu a.cta:hover{filter:brightness(1.06)}
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="usermenu">
+      {% if user %}
+        <a href="/me">👤 {{ user.display_name or user.email }}</a>
+        {% if user.role == 'admin' %}<a href="/admin">🛠️ Admin</a>{% endif %}
+        <a href="/auth/logout">Odhlásit</a>
+      {% else %}
+        <a href="/login">Přihlásit se</a>
+        <a class="cta" href="/login?mode=register">Registrace</a>
+      {% endif %}
+    </div>
     <h1><span class="accent">car</span>-sim</h1>
     <div class="sub">Learn to drive a real city — on its actual streets, with real signs and limits.</div>
 
