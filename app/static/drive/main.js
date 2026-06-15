@@ -67,6 +67,7 @@ async function boot() {
   let routeLine = null;   // server-computed route polyline (world coords), drawn over the asphalt when set
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
+  let dbgFollow = null;        // last auto-pilot target+index (headless debug hook)
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -262,6 +263,7 @@ async function boot() {
     let handled = false;
     if (following) {
       const tgt = routeTarget();
+      dbgFollow = { tx: tgt.x, ty: tgt.y, i: routeI, done: tgt.done };   // debug hook
       if (tgt.done) { car.v = 0; finishRoute(); handled = true; }   // arrived → stop, hand back to manual
       else {
         const desired = Math.atan2(tgt.y - car.y, tgt.x - car.x);   // pure-pursuit: aim at the look-ahead
@@ -276,7 +278,10 @@ async function boot() {
 
     rules = evalRules(map, car);
     if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }   // map edge = real wall
-    else {
+    else if (!following) {
+      // off-road soft wall — but NOT while auto-following: the server route is on-road by construction,
+      // so the wall (which depends on whatever tiles have streamed in) must never fight it (would trap
+      // the car when a narrow street hasn't streamed into the grid yet).
       const pen = offroadPen(car.x, car.y);
       if (pen > wall && pen > offroadPen(px, py)) { car.x = px; car.y = py; car.blocked = true; }  // block deeper, DON'T brake
     }
@@ -308,6 +313,7 @@ async function boot() {
 
   window.__drive = {
     car, map, view, rules: () => rules,
+    routeLine: () => routeLine, following: () => routeFollowOn, followDbg: () => dbgFollow,   // headless route-test hooks
     set: (o) => { dbg = o; }, clear: () => { dbg = null; },
     // manual deterministic advance (for headless verification when RAF is throttled)
     tick: (n = 1) => { for (let i = 0; i < n; i++) update(1 / 60); render(); return { x: car.x, y: car.y, h: car.h, kmh: car.speedKmh, street: rules.street, zoom: +view.zoom.toFixed(1) }; },
