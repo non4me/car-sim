@@ -5,6 +5,7 @@
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -64,6 +65,21 @@ if CITIES.exists():
     app.mount("/citydata", RevalidatingStatic(directory=str(CITIES)), name="citydata")
 
 DEFAULT_CITY = ("cz", "praha", "vinohrady")
+PRAHA = CITIES / "cz" / "praha"
+_DISTRICT_RE = re.compile(r"[a-z0-9_-]{1,40}")
+
+
+def _district_dir(district: str) -> Path | None:
+    """Resolve a baked-district directory from a user-supplied name, refusing path traversal.
+    Returns the directory only if `district` is a safe slug, resolves inside data/cities/cz/praha,
+    and is actually a baked district (has meta.json). Otherwise None."""
+    if not _DISTRICT_RE.fullmatch(district):
+        return None
+    base = PRAHA.resolve()
+    d = (base / district).resolve()
+    if d.parent != base or not (d / "meta.json").is_file():
+        return None
+    return d
 
 
 def _districts() -> list[dict]:
@@ -88,8 +104,10 @@ def healthz():
 def route(district: str = "prague", fx: float = 0, fy: float = 0, tx: float = 0, ty: float = 0):
     """Shortest drivable path (one-ways honoured) between two map points, as a polyline."""
     from .routing import get_router
-    graph = CITIES / "cz" / "praha" / district / "graph.json"
-    r = get_router(graph)
+    d = _district_dir(district)
+    if d is None:
+        return JSONResponse({"polyline": [], "length_m": 0, "error": "unknown district"}, status_code=404)
+    r = get_router(d / "graph.json")
     if r is None:
         return JSONResponse({"polyline": [], "length_m": 0, "error": "no graph"}, status_code=404)
     res = r.route(fx, fy, tx, ty)
@@ -109,14 +127,14 @@ def intro(request: Request):
 @app.get("/drive", response_class=HTMLResponse)
 def drive(request: Request, district: str = "prague"):
     cc, city, _ = DEFAULT_CITY
-    meta_path = CITIES / cc / city / district / "meta.json"
-    if not meta_path.is_file():
+    d = _district_dir(district)
+    if d is None:                       # unknown/invalid slug → fall back to the always-present district
         district = "vinohrady"
-        meta_path = CITIES / cc / city / district / "meta.json"
+        d = _district_dir(district)
     snapshot = None
-    if meta_path.is_file():
+    if d is not None:
         try:
-            snapshot = json.loads(meta_path.read_text(encoding="utf-8")).get("snapshot")
+            snapshot = json.loads((d / "meta.json").read_text(encoding="utf-8")).get("snapshot")
         except (ValueError, OSError):
             pass
     return templates.TemplateResponse(request, "drive.html", {
