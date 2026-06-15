@@ -26,7 +26,10 @@
     .card-main{display:block;text-decoration:none;color:inherit}
     .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385;border:1px solid var(--line);
       border-radius:999px;padding:2px 8px;margin-left:8px}
-    .dist a{color:var(--accent);text-decoration:none;margin-right:12px;font-size:13px}
+    .dist{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .dist-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7385}
+    .dist a{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+    .dist-note{color:#6b7385;font-weight:400}
     footer{color:#5b6477;font-size:12px;margin-top:32px}
     .usermenu{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-bottom:4px}
     .usermenu a{color:#8a93a6;text-decoration:none;font-size:13px;font-weight:600}
@@ -63,7 +66,8 @@
           <div class="d">Free-roam the real streets of Prague. Arrows to drive, space to brake.</div>
         </a>
         <div class="dist" style="margin-top:10px">
-          {% for d in districts %}<a href="/drive?district={{ d.district }}">{{ d.district }} ({{ d.n_edges }})</a>{% endfor %}
+          <span class="dist-lbl">Začít v:</span>
+          {% for d in districts %}<a href="/drive?district={{ d.district }}" title="{{ d.n_edges }} úseků silnic">{% if d.district == 'prague' %}🌍 Celá Praha{% else %}{{ d.district|capitalize }} <span class="dist-note">(malá ukázka)</span>{% endif %}</a>{% endfor %}
         </div>
       </div>
       <div class="card soon"><div class="t">🧠 Quizzes <span class="tag">soon</span></div>
