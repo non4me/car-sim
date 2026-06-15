@@ -168,26 +168,34 @@ def quiz_hub(request: Request):
 @app.get("/docs", response_class=HTMLResponse)
 def docs(request: Request, q: str = "", lang: str = "cs"):
     """Official documents — the FULL texts of the Czech transport laws (road/rail/air/water, from the
-    legalize-cz source), with diacritics-insensitive full-text search across every § (msg 2820)."""
-    lang = "en" if lang == "en" else "cs"
+    legalize-cz source), with diacritics-insensitive full-text search across every § (msg 2820).
+    Law titles/cards localize to any UI language that has machine translations (msg 2828)."""
+    langs = docs_laws.hub_langs()
+    if lang not in {c for c, _ in langs}:
+        lang = "cs"
     query = (q or "").strip()
     results = docs_laws.search(query) if query else None
     return templates.TemplateResponse(request, "docs.html", {
         "lang": lang, "q": query, "results": results,
-        "groups": docs_laws.laws_by_mode(), "mode_label": docs_laws.MODE_LABEL,
+        "groups": docs_laws.laws_by_mode(lang), "ui": docs_laws.ui(lang), "langs": langs,
         "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 
 
 @app.get("/docs/{law_id}", response_class=HTMLResponse)
 def docs_law(request: Request, law_id: str, lang: str = "cs"):
-    """Full text of one law, §-by-§, with an in-page filter and a link to the authoritative e-Sbírka."""
+    """Full text of one law, §-by-§, in the chosen language (machine-translated for non-Czech, msg 2828),
+    with an in-page filter and a link to the authoritative e-Sbírka."""
     law = docs_laws.LAW_BY_ID.get(law_id)
     if law is None:
         raise HTTPException(status_code=404, detail="unknown law")
+    langs = docs_laws.law_langs(law_id)
+    if lang not in {c for c, _ in langs}:
+        lang = "cs"
+    localized = docs_laws.localize_law(law, lang)
     return templates.TemplateResponse(request, "docs_law.html", {
-        "lang": "en" if lang == "en" else "cs", "law": law,
-        "user": auth.current_user(request),
+        "lang": lang, "law": localized, "ui": docs_laws.ui(lang), "langs": langs,
+        "translated": localized["translated"], "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 
 

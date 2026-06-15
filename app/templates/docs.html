@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>car-sim — {% if lang == 'en' %}Official documents{% else %}Oficiální dokumenty{% endif %}</title>
+  <title>car-sim — {{ ui.docs_title_a }} {{ ui.docs_title_b }}</title>
   <style>
     :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--mut:#8a93a6}
     html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
@@ -11,8 +11,11 @@
     .wrap{max-width:820px;margin:0 auto;padding:26px 20px 64px}
     .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
     a.back{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
-    .lang a{color:var(--mut);text-decoration:none;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--line);border-radius:7px}
-    .lang a.on{color:#06203f;background:var(--accent);border-color:transparent}
+    select.langsel{background:var(--panel);color:#e6e9f0;border:1px solid var(--line);border-radius:8px;
+      padding:5px 8px;font-size:12.5px;font-weight:600;outline:none;cursor:pointer}
+    select.langsel:focus{border-color:var(--accent)}
+    .disc{margin:14px 0 0;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.4);
+      border-radius:10px;padding:10px 13px;color:#f0c277;font-size:12.5px;line-height:1.5}
     h1{font-size:27px;font-weight:800;letter-spacing:-.02em;margin:.5em 0 .1em}
     .accent{color:var(--accent)}
     .sub{color:var(--mut);margin-top:6px;font-size:14px}
@@ -46,26 +49,25 @@
   <div class="wrap">
     <div class="top">
       <a class="back" href="/">← car-sim</a>
-      <div class="lang">
-        <a href="/docs?lang=cs{% if q %}&q={{ q|urlencode }}{% endif %}" class="{{ 'on' if lang == 'cs' }}">CZ</a>
-        <a href="/docs?lang=en{% if q %}&q={{ q|urlencode }}{% endif %}" class="{{ 'on' if lang == 'en' }}">EN</a>
-      </div>
+      <select class="langsel" aria-label="language" onchange="location.href='/docs?lang='+this.value+'{% if q %}&q={{ q|urlencode }}{% endif %}'">
+        {% for code, name in langs %}<option value="{{ code }}" {{ 'selected' if code == lang }}>{{ name }}</option>{% endfor %}
+      </select>
     </div>
-    <h1>📖 {% if lang == 'en' %}Official <span class="accent">documents</span>{% else %}Oficiální <span class="accent">dokumenty</span>{% endif %}</h1>
-    <div class="sub">{% if lang == 'en' %}Full texts of the Czech transport laws — road, rail, air and water — with full-text search across every section.{% else %}Úplná znění českých dopravních zákonů — silniční, železniční, letecká i vodní doprava — s fulltextovým hledáním napříč všemi paragrafy.{% endif %}</div>
+    {% if lang != 'cs' %}<div class="disc">⚠️ {{ ui.disclaimer }}</div>{% endif %}
+    <h1>📖 {{ ui.docs_title_a }} <span class="accent">{{ ui.docs_title_b }}</span></h1>
+    <div class="sub">{{ ui.docs_sub }}</div>
 
     <form class="search" method="get" action="/docs">
       <input type="hidden" name="lang" value="{{ lang }}">
-      <input name="q" type="search" value="{{ q }}" autofocus
-        placeholder="{% if lang == 'en' %}Search all laws (e.g. roundabout, level crossing, speed)…{% else %}Hledat ve všech zákonech (např. kruhový objezd, přejezd, rychlost)…{% endif %}">
-      <button type="submit">{% if lang == 'en' %}Search{% else %}Hledat{% endif %}</button>
+      <input name="q" type="search" value="{{ q }}" autofocus placeholder="{{ ui.search_ph }}">
+      <button type="submit">{{ ui.search_btn }}</button>
     </form>
 
     {% if results is not none %}
       <div class="info">
-        {% if results %}{{ results|length }} {% if lang == 'en' %}result(s) for{% else %}výsledků pro{% endif %} «{{ q }}»
-        {% else %}{% if lang == 'en' %}Nothing found for{% else %}Nic nenalezeno pro{% endif %} «{{ q }}».{% endif %}
-        · <a class="back" href="/docs?lang={{ lang }}">{% if lang == 'en' %}all laws{% else %}seznam zákonů{% endif %}</a>
+        {% if results %}{{ results|length }} {{ ui.results_for }} «{{ q }}»
+        {% else %}{{ ui.nothing_for }} «{{ q }}».{% endif %}
+        · <a class="back" href="/docs?lang={{ lang }}">{{ ui.list_laws }}</a>
       </div>
       {% for r in results %}
       <a class="res" href="/docs/{{ r.law }}?lang={{ lang }}#{{ r.anchor }}">
@@ -78,16 +80,16 @@
       </a>
       {% endfor %}
     {% else %}
-      <div class="hint">{% if lang == 'en' %}Tip: search ignores accents — “prejezd” finds “přejezd”.{% else %}Tip: hledání nezohledňuje diakritiku — „prejezd“ najde „přejezd“.{% endif %}</div>
+      <div class="hint">{{ ui.tip }}</div>
       {% for g in groups %}
       <div class="grp">
-        <h2>{{ g.labels[lang] }}</h2>
+        <h2>{{ g.label }}</h2>
         <div class="laws">
           {% for law in g.laws %}
           <a class="law" href="/docs/{{ law.id }}?lang={{ lang }}">
             <div class="code">{{ law.code }}</div>
             <div class="t">{{ law.title }}</div>
-            <div class="meta">{{ law.n_sections }} §{% if law.updated %} · {% if lang == 'en' %}updated{% else %}aktuální k{% endif %} {{ law.updated }}{% endif %}{% if law.status == 'in_force' %} · {% if lang == 'en' %}in force{% else %}účinný{% endif %}{% endif %}</div>
+            <div class="meta">{{ law.n_sections }} §{% if law.updated %} · {{ ui.updated }} {{ law.updated }}{% endif %}{% if law.status == 'in_force' %} · {{ ui.in_force }}{% endif %}</div>
           </a>
           {% endfor %}
         </div>
@@ -95,7 +97,7 @@
       {% endfor %}
     {% endif %}
 
-    <footer>{% if lang == 'en' %}Source: github.com/legalize-dev/legalize-cz (MIT) · binding text: e-Sbírka, linked on each law.{% else %}Zdroj: github.com/legalize-dev/legalize-cz (MIT) · závazné znění: e-Sbírka, odkaz u každého zákona.{% endif %}</footer>
+    <footer>{{ ui.footer_docs }}</footer>
   </div>
 </body>
 </html>

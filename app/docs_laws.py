@@ -17,12 +17,32 @@ ROOT = BASE.parent
 LAWS_DIR = Path(os.environ.get("LAWS_DIR", ROOT / "data" / "docs" / "laws"))
 
 MODE_LABEL = {
-    "road":  {"cs": "Silniční provoz", "en": "Road traffic"},
-    "rail":  {"cs": "Železniční doprava", "en": "Rail"},
-    "air":   {"cs": "Civilní letectví", "en": "Air"},
-    "water": {"cs": "Vnitrozemská plavba", "en": "Water"},
+    "road":  {"cs": "Silniční provoz", "en": "Road traffic", "ru": "Дорожное движение",
+              "uk": "Дорожній рух", "sk": "Cestná premávka", "vi": "Giao thông đường bộ",
+              "de": "Straßenverkehr", "pl": "Ruch drogowy", "kk": "Жол қозғалысы", "ro": "Trafic rutier"},
+    "rail":  {"cs": "Železniční doprava", "en": "Rail", "ru": "Железнодорожный транспорт",
+              "uk": "Залізничний транспорт", "sk": "Železničná doprava", "vi": "Đường sắt",
+              "de": "Schienenverkehr", "pl": "Transport kolejowy", "kk": "Теміржол көлігі",
+              "ro": "Transport feroviar"},
+    "air":   {"cs": "Civilní letectví", "en": "Air", "ru": "Гражданская авиация",
+              "uk": "Цивільна авіація", "sk": "Civilné letectvo", "vi": "Hàng không",
+              "de": "Luftfahrt", "pl": "Lotnictwo cywilne", "kk": "Азаматтық авиация",
+              "ro": "Aviație civilă"},
+    "water": {"cs": "Vnitrozemská plavba", "en": "Water", "ru": "Внутреннее судоходство",
+              "uk": "Внутрішнє судноплавство", "sk": "Vnútrozemská plavba", "vi": "Đường thủy nội địa",
+              "de": "Binnenschifffahrt", "pl": "Żegluga śródlądowa", "kk": "Ішкі су көлігі",
+              "ro": "Navigație interioară"},
 }
 MODE_ORDER = ["road", "rail", "air", "water"]
+
+# Languages offered on /docs. cs is the binding original (always shown, never carries a disclaimer);
+# the rest appear only once a machine translation exists (msg 2828). Names are each language's own endonym.
+DOC_LANGS = [
+    ("cs", "Čeština"), ("en", "English"), ("ru", "Русский"), ("uk", "Українська"),
+    ("sk", "Slovenčina"), ("vi", "Tiếng Việt"), ("de", "Deutsch"), ("pl", "Polski"),
+    ("kk", "Қазақша"), ("ro", "Română"),
+]
+I18N_DIR = Path(os.environ.get("LAWS_I18N_DIR", ROOT / "data" / "docs" / "laws_i18n"))
 
 
 def _fold(s: str) -> str:
@@ -149,13 +169,118 @@ LAWS, SECTIONS = _load()
 LAW_BY_ID = {law["id"]: law for law in LAWS}
 
 
-def laws_by_mode():
-    """Laws grouped for the hub, in transport-mode order."""
+# ---- machine translations (msg 2828) -------------------------------------------------------------
+# Per-(lang, law) caches live in data/docs/laws_i18n/<lang>/<law_id>.json (built by tools/translate_laws.py).
+# Czech is the binding original and has no cache. A language only becomes selectable for a law once its
+# cache exists, so the site degrades gracefully before/while translations are generated.
+
+def _load_i18n():
+    translations = {}      # {lang: {law_id: doc}}
+    for code, _name in DOC_LANGS:
+        if code == "cs":
+            continue
+        d = I18N_DIR / code
+        if not d.is_dir():
+            continue
+        for law in LAWS:
+            f = d / f"{law['id']}.json"
+            try:
+                translations.setdefault(code, {})[law["id"]] = json.loads(f.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+    ui = {}
+    try:
+        ui = json.loads((I18N_DIR / "_ui.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        ui = {}
+    return translations, ui
+
+
+TRANSLATIONS, _UI = _load_i18n()
+
+# English fallbacks for the UI chrome, used when _ui.json is missing a language (mirrors translate_laws.py).
+_UI_EN = {
+    "disclaimer": "Unofficial machine translation. The binding and authoritative text is the Czech "
+                  "original; we accept no responsibility for the accuracy of this translation.",
+    "all_laws": "all laws", "in_force": "in force", "as_of": "current as of", "amendments": "amendments",
+    "binding_link": "binding text — e-Sbírka ↗", "filter_ph": "Filter within this law…",
+    "contents": "Contents", "no_match": "No section matches.",
+    "footer_law": "Text: legalize-cz (MIT). Binding & current version: e-Sbírka (link above).",
+    "docs_title_a": "Official", "docs_title_b": "documents",
+    "docs_sub": "Full texts of the Czech transport laws — road, rail, air and water — with full-text "
+                "search across every section.",
+    "search_ph": "Search all laws (e.g. roundabout, level crossing, speed)…", "search_btn": "Search",
+    "results_for": "result(s) for", "nothing_for": "Nothing found for", "list_laws": "all laws",
+    "tip": "Tip: search ignores accents — \"prejezd\" finds \"přejezd\".", "updated": "updated",
+    "footer_docs": "Source: github.com/legalize-dev/legalize-cz (MIT) · binding text: e-Sbírka, linked "
+                   "on each law.",
+}
+# Czech UI chrome (so the non-cs path can render the page entirely in one language).
+_UI_CS = {
+    "disclaimer": "", "all_laws": "všechny zákony", "in_force": "účinný", "as_of": "znění k",
+    "amendments": "novely", "binding_link": "závazné znění — e-Sbírka ↗", "filter_ph": "Filtrovat v tomto zákoně…",
+    "contents": "Obsah", "no_match": "Žádný paragraf neodpovídá.",
+    "footer_law": "Text: legalize-cz (MIT). Závazné a aktuální znění: e-Sbírka (odkaz výše).",
+    "docs_title_a": "Oficiální", "docs_title_b": "dokumenty",
+    "docs_sub": "Úplná znění českých dopravních zákonů — silniční, železniční, letecká i vodní doprava — "
+                "s fulltextovým hledáním napříč všemi paragrafy.",
+    "search_ph": "Hledat ve všech zákonech (např. kruhový objezd, přejezd, rychlost)…", "search_btn": "Hledat",
+    "results_for": "výsledků pro", "nothing_for": "Nic nenalezeno pro", "list_laws": "seznam zákonů",
+    "tip": "Tip: hledání nezohledňuje diakritiku — „prejezd“ najde „přejezd“.", "updated": "aktuální k",
+    "footer_docs": "Zdroj: github.com/legalize-dev/legalize-cz (MIT) · závazné znění: e-Sbírka, odkaz u každého zákona.",
+}
+
+
+def ui(lang: str) -> dict:
+    if lang == "cs":
+        return _UI_CS
+    base = dict(_UI_EN)
+    base.update(_UI.get(lang, {}))
+    return base
+
+
+def law_langs(law_id: str):
+    """[(code, name, is_current_lang-unused)] languages available for one law: cs + any with a cache."""
+    avail = ["cs"] + [c for c, _ in DOC_LANGS if c != "cs" and law_id in TRANSLATIONS.get(c, {})]
+    return [(c, n) for c, n in DOC_LANGS if c in avail]
+
+
+def hub_langs():
+    """Languages selectable on the /docs hub: cs + any language that has at least one translated law."""
+    avail = {"cs"} | {c for c in TRANSLATIONS if TRANSLATIONS.get(c)}
+    return [(c, n) for c, n in DOC_LANGS if c in avail]
+
+
+def localize_law(law: dict, lang: str) -> dict:
+    """Return the law with title/parts/chapters/section headings+bodies swapped to `lang` where a
+    translation exists (Czech fallback per field). Adds 'translated' so the view can show the disclaimer."""
+    tr = TRANSLATIONS.get(lang, {}).get(law["id"]) if lang != "cs" else None
+    if not tr:
+        return {**law, "translated": False}
+    secs = []
+    for s in law["sections"]:
+        t = tr.get("sections", {}).get(s["anchor"], {})
+        secs.append({**s,
+                     "heading": t.get("heading") or s["heading"],
+                     "text": t.get("text") or s["text"],
+                     "chapter": tr.get("chapters", {}).get(s["chapter"], s["chapter"]),
+                     "part": tr.get("parts", {}).get(s["part"], s["part"])})
+    return {**law, "title": tr.get("title") or law["title"], "sections": secs, "translated": True}
+
+
+def laws_by_mode(lang: str = "cs"):
+    """Laws grouped for the hub, in transport-mode order, with each law's title localized to `lang`."""
     out = []
     for mode in MODE_ORDER:
-        group = [law for law in LAWS if law["mode"] == mode]
+        group = []
+        for law in LAWS:
+            if law["mode"] != mode:
+                continue
+            tr = TRANSLATIONS.get(lang, {}).get(law["id"]) if lang != "cs" else None
+            group.append({**law, "title": (tr or {}).get("title") or law["title"]})
         if group:
-            out.append({"mode": mode, "labels": MODE_LABEL[mode], "laws": group})
+            mode_label = MODE_LABEL[mode].get(lang) or MODE_LABEL[mode]["en"]
+            out.append({"mode": mode, "label": mode_label, "labels": MODE_LABEL[mode], "laws": group})
     return out
 
 

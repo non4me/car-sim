@@ -11,8 +11,11 @@
     .wrap{max-width:820px;margin:0 auto;padding:24px 20px 80px}
     .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
     a.back{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
-    .lang a{color:var(--mut);text-decoration:none;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--line);border-radius:7px}
-    .lang a.on{color:#06203f;background:var(--accent);border-color:transparent}
+    select.langsel{background:var(--panel);color:#e6e9f0;border:1px solid var(--line);border-radius:8px;
+      padding:5px 8px;font-size:12.5px;font-weight:600;outline:none;cursor:pointer}
+    select.langsel:focus{border-color:var(--accent)}
+    .disc{margin:14px 0 2px;background:rgba(245,158,11,.09);border:1px solid rgba(245,158,11,.4);
+      border-radius:10px;padding:10px 13px;color:#f0c277;font-size:12.5px;line-height:1.5}
     .code{color:var(--accent);font-weight:800;font-size:14px;margin-top:14px}
     h1{font-size:23px;font-weight:800;letter-spacing:-.01em;margin:.2em 0 .2em;line-height:1.25}
     .meta{color:var(--mut);font-size:12.5px;line-height:1.6}
@@ -38,26 +41,25 @@
 <body>
   <div class="wrap">
     <div class="top">
-      <a class="back" href="/docs?lang={{ lang }}">← {% if lang == 'en' %}all laws{% else %}všechny zákony{% endif %}</a>
-      <div class="lang">
-        <a href="/docs/{{ law.id }}?lang=cs" class="{{ 'on' if lang == 'cs' }}">CZ</a>
-        <a href="/docs/{{ law.id }}?lang=en" class="{{ 'on' if lang == 'en' }}">EN</a>
-      </div>
+      <a class="back" href="/docs?lang={{ lang }}">← {{ ui.all_laws }}</a>
+      <select class="langsel" aria-label="language" onchange="location.href='/docs/{{ law.id }}?lang='+this.value">
+        {% for code, name in langs %}<option value="{{ code }}" {{ 'selected' if code == lang }}>{{ name }}</option>{% endfor %}
+      </select>
     </div>
+    {% if translated %}<div class="disc">⚠️ {{ ui.disclaimer }}</div>{% endif %}
     <div class="code">{{ law.code }}</div>
     <h1>{{ law.title }}</h1>
     <div class="meta">
-      {{ law.n_sections }} §{% if law.status == 'in_force' %} · {% if lang == 'en' %}in force{% else %}účinný{% endif %}{% endif %}{% if law.updated %} · {% if lang == 'en' %}current as of{% else %}znění k{% endif %} {{ law.updated }}{% endif %}<br>
-      {% if law.amendments %}{% if lang == 'en' %}amendments{% else %}novely{% endif %}: {{ law.amendments }}<br>{% endif %}
-      {% if law.source %}<a href="{{ law.source }}" target="_blank" rel="noopener">{% if lang == 'en' %}binding text — e-Sbírka ↗{% else %}závazné znění — e-Sbírka ↗{% endif %}</a>{% endif %}
+      {{ law.n_sections }} §{% if law.status == 'in_force' %} · {{ ui.in_force }}{% endif %}{% if law.updated %} · {{ ui.as_of }} {{ law.updated }}{% endif %}<br>
+      {% if law.amendments %}{{ ui.amendments }}: {{ law.amendments }}<br>{% endif %}
+      {% if law.source %}<a href="{{ law.source }}" target="_blank" rel="noopener">{{ ui.binding_link }}</a>{% endif %}
     </div>
 
-    <input id="filter" class="filter" type="search" autocomplete="off"
-      placeholder="{% if lang == 'en' %}Filter within this law…{% else %}Filtrovat v tomto zákoně…{% endif %}">
+    <input id="filter" class="filter" type="search" autocomplete="off" placeholder="{{ ui.filter_ph }}">
     <div class="fcount" id="fcount"></div>
 
     <details class="toc">
-      <summary>{% if lang == 'en' %}Contents{% else %}Obsah{% endif %} ({{ law.n_sections }} §)</summary>
+      <summary>{{ ui.contents }} ({{ law.n_sections }} §)</summary>
       <div class="tlist">
         {% for s in law.sections %}<a href="#{{ s.anchor }}">{{ s.ref }}{% if s.heading %} — {{ s.heading }}{% endif %}</a>{% endfor %}
       </div>
@@ -73,9 +75,9 @@
         </section>
       {% endfor %}
     </div>
-    <div class="nores" id="nores">{% if lang == 'en' %}No section matches.{% else %}Žádný paragraf neodpovídá.{% endif %}</div>
+    <div class="nores" id="nores">{{ ui.no_match }}</div>
 
-    <footer>{% if lang == 'en' %}Text: legalize-cz (MIT). Binding & current version: e-Sbírka (link above).{% else %}Text: legalize-cz (MIT). Závazné a aktuální znění: e-Sbírka (odkaz výše).{% endif %}</footer>
+    <footer>{{ ui.footer_law }}</footer>
   </div>
 
   <script>
