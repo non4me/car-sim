@@ -60,7 +60,9 @@ class RevalidatingStatic(StaticFiles):
         return resp
 
 
-app = FastAPI(title="car-sim")
+# Disable FastAPI's auto Swagger/ReDoc — this is a user-facing app, and the built-in /docs would otherwise
+# shadow our Official-documents page (msg 2802c).
+app = FastAPI(title="car-sim", docs_url=None, redoc_url=None, openapi_url=None)
 
 # signed-cookie sessions for auth. SECRET_KEY must be stable across restarts (set in compose) or sessions
 # drop on every deploy; a random fallback keeps dev working. same_site=lax so the OAuth redirect keeps the
