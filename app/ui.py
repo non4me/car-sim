@@ -64,7 +64,7 @@ _CSS = """
   padding:9px 18px;background:rgba(11,14,20,.86);backdrop-filter:blur(8px);
   border-bottom:1px solid #1c2330;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 .ah-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:#e6e9f0;font-weight:800;
-  font-size:17px;letter-spacing:-.02em}
+  font-size:17px;letter-spacing:-.02em;white-space:nowrap}
 .ah-mark{flex:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.4)}
 .ah-logo .ac{color:#5b9cff}
 .ah-spacer{flex:1}
