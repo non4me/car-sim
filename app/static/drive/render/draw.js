@@ -3,11 +3,7 @@
 import { PARAMS as P } from "../vehicle/params.js";
 
 const BG = "#0e1118";
-const ASPHALT = "#2c333f";
-const CLASS_TINT = {
-  motorway: "#48525f", trunk: "#444e5c", primary: "#3e4654",
-  secondary: "#39414e", tertiary: "#343c48",
-};
+const ASPHALT = "#2c333f";   // single road-surface colour (uniform → no seams where roads cross)
 // schematic backdrop fills (drawn behind the roads). Buildings get a brighter edge so
 // the block structure reads like a city map; roads stay the lightest (drivable) layer.
 const AREA_FILL = { building: "#232a3a", green: "#1f3327", water: "#173757" };
@@ -38,12 +34,15 @@ export function draw(ctx, view, map, car, rules) {
   ctx.fillRect(0, 0, w, h);
 
   const R = view.visR();
-  const vis = map.edges.filter((e) => view.boxVisible(e.bb));
+  // narrowest first so wider roads paint last (on top) → clean crossings, hierarchy by width
+  const vis = map.edges.filter((e) => view.boxVisible(e.bb)).sort((a, b) => a.width - b.width);
 
   // 0) schematic backdrop — buildings, greens, water (behind the roads)
   drawAreas(ctx, view, map);
 
-  // 1) asphalt (casing then surface)
+  // 1) asphalt: ALL casings first, then ALL surfaces in ONE uniform colour. Per-class tints made
+  //    crossing roads show a visible seam where two different shades overlapped (Vlad's screenshot);
+  //    a single surface colour blends seamlessly, and road hierarchy still reads through width.
   ctx.lineCap = "round"; ctx.lineJoin = "round";
   for (const e of vis) {
     path(ctx, view, e.geom);
@@ -51,9 +50,9 @@ export function draw(ctx, view, map, car, rules) {
     ctx.lineWidth = e.width * zoom + 4;
     ctx.stroke();
   }
+  ctx.strokeStyle = ASPHALT;
   for (const e of vis) {
     path(ctx, view, e.geom);
-    ctx.strokeStyle = CLASS_TINT[e.cls] || ASPHALT;
     ctx.lineWidth = Math.max(2, e.width * zoom);
     ctx.stroke();
   }
