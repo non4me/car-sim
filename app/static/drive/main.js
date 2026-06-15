@@ -147,19 +147,29 @@ async function boot() {
     const toEl = document.getElementById("routeTo");
     const goBtn = document.getElementById("routeGo");
     const info = document.getElementById("routeInfo");
-    let from = null, to = null;
+    let from = null, to = null, fromIsCurrent = false;   // fromIsCurrent → "From" = the car's live position
     const syncGo = () => { goBtn.disabled = !(from && to); };
-    // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords)
+    // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords). Picking a
+    // street explicitly clears the "current position" default.
     makeSearchBox(fromEl, document.getElementById("routeFromRes"), items,
-      (x, y) => { from = { x, y }; info.textContent = to ? "připraveno" : "vyber cíl"; info.className = ""; syncGo(); });
+      (x, y) => { from = { x, y }; fromIsCurrent = false; info.textContent = to ? "připraveno" : "vyber cíl"; info.className = ""; syncGo(); });
     makeSearchBox(toEl, document.getElementById("routeToRes"), items,
       (x, y) => { to = { x, y }; info.textContent = from ? "připraveno" : "vyber start"; info.className = ""; syncGo(); });
+    // default "Odkud" to the street the car is on now, so the common case is "route from here"
+    const prefillFrom = () => {
+      if (fromEl.value || !(rules && rules.street)) return;
+      fromEl.value = rules.street;
+      from = { x: car.x, y: car.y }; fromIsCurrent = true;
+      info.textContent = to ? "připraveno" : "vyber cíl"; info.className = ""; syncGo();
+    };
     btn.addEventListener("click", () => {
+      const opening = panel.classList.contains("hidden");
       panel.classList.toggle("hidden");
       btn.classList.toggle("on", !panel.classList.contains("hidden"));
-      if (!panel.classList.contains("hidden")) fromEl.focus();
+      if (opening) { prefillFrom(); (from ? toEl : fromEl).focus(); }   // From filled → cursor goes to "Kam"
     });
     goBtn.addEventListener("click", async () => {
+      if (fromIsCurrent) from = { x: car.x, y: car.y };   // refresh to the car's live position at search time
       if (!from || !to) return;
       info.textContent = "hledám trasu…"; info.className = "";
       try {
@@ -178,7 +188,7 @@ async function boot() {
       }
     });
     document.getElementById("routeClear").addEventListener("click", () => {
-      routeLine = null; from = null; to = null;
+      routeLine = null; from = null; to = null; fromIsCurrent = false;
       fromEl.value = ""; toEl.value = "";
       info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
     });
