@@ -100,6 +100,10 @@
     #routeFollowRow:has(#routeFollow:disabled){opacity:.45;cursor:default}
     #routeFollow{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
     #routeFollow:disabled{cursor:default}
+    #routeWhole{margin-top:8px;width:100%;cursor:pointer;background:rgba(28,34,48,.9);border:1px solid var(--line);
+      color:#cdd5e6;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600}
+    #routeWhole:disabled{opacity:.45;cursor:default}
+    #routeWhole.on{background:var(--accent);color:#06203f;border-color:var(--accent);font-weight:800}
 
     /* minimap — top right, under the location label (2× size, msg 2691) */
     #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
@@ -195,6 +199,7 @@
     <label id="routeFollowRow" title="Auto-jízda po trase: řízení automatické, plyn/brzda na tobě">
       <input type="checkbox" id="routeFollow" disabled> 🚗 Automatické sledování trasy
     </label>
+    <button id="routeWhole" disabled title="Zobrazit celou trasu v minimapě">🗺️ Zobrazit celou trasu</button>
   </div>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>

@@ -89,7 +89,8 @@ async function boot() {
   let routeLine = null;   // server-computed route polyline (world coords), drawn over the asphalt when set
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
-  let routeBox = null;         // routeLine bbox {cx,cy,w,h} → route-overview fit while following (msg 2768)
+  let routeBox = null;         // routeLine bbox {cx,cy,w,h} → fits the whole route into the minimap (msg 2777)
+  let miniWhole = false;       // minimap shows the WHOLE route (not the car-centred view) — toggled by the panel button
   let saveTick = 0;            // throttles persisting the car position to localStorage (msg 2775)
   const savePos = () => { try { localStorage.setItem(POS_KEY, JSON.stringify({ x: +car.x.toFixed(1), y: +car.y.toFixed(1), h: +car.h.toFixed(3) })); } catch { /* quota */ } };
   window.addEventListener("beforeunload", savePos);   // also save on close/reload
@@ -181,9 +182,16 @@ async function boot() {
     const goBtn = document.getElementById("routeGo");
     const info = document.getElementById("routeInfo");
     const followEl = document.getElementById("routeFollow");
+    const wholeEl = document.getElementById("routeWhole");
     let from = null, to = null, fromIsCurrent = false;   // fromIsCurrent → "From" = the car's live position
     // auto-pilot toggle: only meaningful with a route; throttle/brake stay manual (msg 2759 #3)
     followEl.addEventListener("change", () => { routeFollowOn = followEl.checked && !!routeLine; routeI = 0; });
+    // "show whole route" — fits the full route into the MINIMAP with basic context (msg 2777). Toggle.
+    wholeEl.addEventListener("click", () => {
+      if (!routeLine) return;
+      miniWhole = !miniWhole;
+      wholeEl.classList.toggle("on", miniWhole);
+    });
     const syncGo = () => { goBtn.disabled = !(from && to); };
     // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords). Picking a
     // street explicitly clears the "current position" default.
@@ -215,6 +223,7 @@ async function boot() {
         if (res.polyline && res.polyline.length > 1) {
           routeLine = res.polyline; routeI = 0; routeBox = bboxOf(routeLine);
           followEl.disabled = false;                    // auto-pilot now available
+          wholeEl.disabled = false;                     // "show whole route" now available
           routeFollowOn = followEl.checked;             // honour a pre-ticked toggle
           info.textContent = `trasa ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
           goTo(routeLine[0][0], routeLine[0][1]);       // drop the car at the route's start, on the road
@@ -228,6 +237,7 @@ async function boot() {
     document.getElementById("routeClear").addEventListener("click", () => {
       routeLine = null; routeBox = null; from = null; to = null; fromIsCurrent = false;
       routeFollowOn = false; followEl.checked = false; followEl.disabled = true;
+      miniWhole = false; wholeEl.disabled = true; wholeEl.classList.remove("on");
       fromEl.value = ""; toEl.value = "";
       info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
     });
@@ -327,27 +337,19 @@ async function boot() {
 
   const zoomEl = document.getElementById("zoomind");
   function render() {
-    const overview = routeFollowOn && routeLine && routeBox;
-    if (overview) {
-      // route-traversal view (msg 2768): north-up, centred on the route, zoomed to fit the WHOLE
-      // route start→end (may go below ZMIN). The car drives along it as an arrow; the blue ribbon
-      // shows the full route regardless of which road tiles have streamed in.
-      const fit = Math.min(view.w / (routeBox.w + 80), view.h / (routeBox.h + 80)) * 0.92;
-      const target = Math.max(ZMIN_FIT, Math.min(ZMAX, fit));
-      view.zoom += (target - view.zoom) * 0.1;
-      view.cx = routeBox.cx; view.cy = routeBox.cy; view.rot = 0;
-      map.update(routeBox.cx, routeBox.cy, Math.max(view.visR(), 480), 0, 0);
-    } else {
-      const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
-      view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
-      view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
-      // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
-      map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
-    }
+    // main window always follows the car heading-up — route auto-follow must NOT zoom it out (msg 2777
+    // reverted the route-overview camera; the whole route is shown in the MINIMAP instead, on demand).
+    const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
+    view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
+    view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
+    // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
+    map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
     draw(ctx, view, map, car, rules, routeLine, districts);
-    // hide violation warnings in bird's-eye (incl. route-overview) — only when the car shows (msg 2768)
+    // hide violation warnings in bird's-eye — only when the car shows (msg 2768)
     hud.update(rules, view.zoom < OVERVIEW_Z);
-    if (!miniCollapsed) minimap.draw(map, car, rules.street);
+    // minimap: normal car-centred view, OR the whole route (msg 2777) when "show route" is toggled on
+    const whole = miniWhole && routeLine && routeBox ? { line: routeLine, box: routeBox, districts } : null;
+    if (!miniCollapsed) minimap.draw(map, car, rules.street, whole);
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
     if (zoomEl) zoomEl.textContent = `zoom ${view.zoom < 1 ? view.zoom.toFixed(1) : Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
     // persist the car position ~every 1.5 s so a reload resumes where you were (msg 2775)
