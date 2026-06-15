@@ -27,7 +27,9 @@ function path(ctx, view, geom) {
   }
 }
 
-export function draw(ctx, view, map, car, rules, route) {
+const OVERVIEW_LABEL_Z = 5;   // below this px/m (bird's-eye): show district + major-street names (msg 2763)
+
+export function draw(ctx, view, map, car, rules, route, districts) {
   const { w, h, dpr, zoom } = view;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = BG;
@@ -112,6 +114,10 @@ export function draw(ctx, view, map, car, rules, route) {
   // 4) street-name labels ON the connecting roads at intersections (NOT the current
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
   drawStreetLabels(ctx, view, vis, rules && rules.street);
+
+  // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
+  //     so you can orient while zoomed right out (msg 2763).
+  if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, vis, districts);
 
   // 5) the car — sprite (heading-up) or a heading-pointing arrow (north-up overview)
   drawCar(ctx, view, car);
@@ -357,6 +363,55 @@ function drawStreetLabels(ctx, view, vis, currentStreet) {
     ctx.strokeText(L.name, 0, 0);             // halo for legibility on asphalt
     ctx.fillStyle = "rgba(210,220,236,.82)";
     ctx.fillText(L.name, 0, 0);
+    ctx.restore();
+  }
+}
+
+// Overview labels (bird's-eye): translucent DISTRICT/quarter names for orientation, plus the
+// names of the MAJOR nearby streets (wide roads), so you know where you are when zoomed right out.
+function drawOverviewLabels(ctx, view, vis, districts) {
+  const R = view.visR();
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+
+  // 1) district names — large, translucent, billboarded (axis-aligned, always upright)
+  if (districts && districts.length) {
+    ctx.font = "700 16px ui-sans-serif,system-ui,sans-serif";
+    for (const d of districts) {
+      if (!view.near(d.x, d.y, R * 1.25)) continue;
+      const [X, Y] = view.project(d.x, d.y);
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.45)"; ctx.strokeText(d.name, X, Y);
+      ctx.fillStyle = "rgba(206,216,232,.34)"; ctx.fillText(d.name, X, Y);   // полупрозрачно (msg 2763)
+    }
+  }
+
+  // 2) major nearby streets — the wide roads (primary/secondary/trunk ≈ width ≥ 9 m), one label per
+  //    name at the point nearest the camera, oriented along the road. Brighter than districts so the
+  //    names read; keeps the overview legible without the full at-zoom label set.
+  const byName = new Map();
+  for (const e of vis) {
+    if (!e.name || e.width < 9) continue;
+    const g = e.geom;
+    let bd = Infinity, bi = 0;
+    for (let i = 0; i < g.length; i++) {
+      const dd = (g[i][0] - view.cx) ** 2 + (g[i][1] - view.cy) ** 2;
+      if (dd < bd) { bd = dd; bi = i; }
+    }
+    if (bd > (R * 1.1) ** 2) continue;
+    const prev = byName.get(e.name);
+    if (!prev || bd < prev.bd) byName.set(e.name, { g, bi, bd });
+  }
+  ctx.font = "600 13px ui-sans-serif,system-ui,sans-serif";
+  const a = view.rot, c = Math.cos(a), s = Math.sin(a);
+  for (const L of byName.values()) {
+    const g = L.g, i = L.bi, j = i < g.length - 1 ? i + 1 : i - 1;   // local road direction
+    const dx = g[j][0] - g[i][0], dy = g[j][1] - g[i][1];
+    let ang = Math.atan2(-(dx * s + dy * c), dx * c - dy * s);
+    if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI;     // keep upright
+    const [X, Y] = view.project(g[i][0], g[i][1]);
+    ctx.save();
+    ctx.translate(X, Y); ctx.rotate(ang);
+    ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(8,10,15,.8)"; ctx.strokeText(L.name, 0, 0);
+    ctx.fillStyle = "rgba(226,233,245,.92)"; ctx.fillText(L.name, 0, 0);
     ctx.restore();
   }
 }

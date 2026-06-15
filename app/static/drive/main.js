@@ -68,6 +68,7 @@ async function boot() {
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
   let dbgFollow = null;        // last auto-pilot target+index (headless debug hook)
+  let districts = [];          // {name,x,y} district/quarter labels for overview mode (msg 2763)
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -141,6 +142,7 @@ async function boot() {
   loadSearchIndex(window.CARSIM.dataBase).then((items) => {
     makeSearchBox(document.getElementById("searchInput"), document.getElementById("searchResults"), items, goTo);
     setupRoute(items);
+    districts = items.filter((i) => i.kind === "district");   // overview-mode district labels (msg 2763)
   });
 
   // Route panel: pick two streets, ask the server for the shortest drivable path (one-ways honoured),
@@ -304,7 +306,7 @@ async function boot() {
     view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
     // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
     map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
-    draw(ctx, view, map, car, rules, routeLine);
+    draw(ctx, view, map, car, rules, routeLine, districts);
     hud.update(rules);
     if (!miniCollapsed) minimap.draw(map, car, rules.street);
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
