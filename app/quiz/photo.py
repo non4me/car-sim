@@ -23,7 +23,7 @@ BASE = Path(__file__).resolve().parent                       # app/quiz
 QUIZ_DATA = Path(os.environ.get("QUIZ_DATA_DIR", BASE.parents[1] / "data" / "quiz"))
 PHOTOS = Path(os.environ.get("QUIZ_PHOTOS_DIR", QUIZ_DATA / "photos"))
 
-QUESTION_SECONDS = 20          # countdown per question
+QUESTION_SECONDS = 30          # countdown per question (msg 2812: 20 → 30 s)
 QUICK_LEN = 10                 # Quick game
 EXAM_LEN = 25                  # Exam (real test simulation)
 EXAM_PASS_PCT = 86             # Czech theory exam ≈ 43/50 points
@@ -59,6 +59,26 @@ def topic_pool(topic: str) -> list[str]:
         return [q["id"] for q in QUESTIONS]
     ids = [q["id"] for q in QUESTIONS if q.get("type") in types]
     return ids or [q["id"] for q in QUESTIONS]
+
+
+def interleave_by_type(ids: list[str]) -> list[str]:
+    """Order a pool so consecutive questions are different in essence (msg 2812): bucket by question
+    type, shuffle each bucket, then round-robin across buckets. A 10-question game then spans signs /
+    priority / situations / speed instead of serving six near-identical pedestrian-crossing questions."""
+    buckets: dict[str, list[str]] = {}
+    for qid in ids:
+        buckets.setdefault(QUESTION_BY_ID[qid].get("type", "?"), []).append(qid)
+    bl = list(buckets.values())
+    for b in bl:
+        random.shuffle(b)
+    random.shuffle(bl)                       # vary which type leads each game
+    order: list[str] = []
+    while bl:
+        for b in list(bl):                  # one from every non-empty bucket per pass = round-robin
+            order.append(b.pop())
+            if not b:
+                bl.remove(b)
+    return order
 
 
 # ---- in-memory state ----
@@ -160,14 +180,16 @@ def new_session(lang: str, mode: str, topic: str) -> str:
     if topic not in TOPIC_TYPES:
         topic = "all"
     total = {"quick": QUICK_LEN, "exam": EXAM_LEN, "survival": None}[mode]
+    pool = topic_pool(topic)
     sid = secrets.token_urlsafe(12)
     SESSIONS[sid] = {
         "lang": lang, "mode": mode, "topic": topic,
-        "pool": topic_pool(topic), "total": total,
+        "pool": pool, "total": total,
+        "seq": interleave_by_type(pool), "seq_i": 0,   # type-spread serving order (msg 2812)
         "served": 0, "correct": 0, "score": 0, "xp": 0,
         "streak": 0, "best_streak": 0,
         "lives": SURVIVAL_LIVES if mode == "survival" else None,
-        "recent": [], "cur_qid": None, "q_served_at": 0.0,
+        "cur_qid": None, "q_served_at": 0.0,
         "answered": False, "finished": False,
     }
     if len(SESSIONS) > 5000:
@@ -176,19 +198,13 @@ def new_session(lang: str, mode: str, topic: str) -> str:
     return sid
 
 
-def pick_qid(s: dict) -> str:
-    pool, recent = s["pool"], s["recent"]
-    choices = [q for q in pool if q not in recent] or pool
-    qid = random.choice(choices)
-    recent.append(qid)
-    cap = min(6, max(1, len(pool) - 1))
-    while len(recent) > cap:
-        recent.pop(0)
-    return qid
-
-
 def serve_next(s: dict) -> dict:
-    s["cur_qid"] = pick_qid(s)
+    seq = s["seq"]
+    if s["seq_i"] >= len(seq):                         # survival ran past the pool → fresh interleaved pass
+        seq = s["seq"] = interleave_by_type(s["pool"])
+        s["seq_i"] = 0
+    s["cur_qid"] = seq[s["seq_i"]]
+    s["seq_i"] += 1
     s["served"] += 1
     s["q_served_at"] = time.time()
     s["answered"] = False
