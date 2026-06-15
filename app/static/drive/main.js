@@ -38,6 +38,14 @@ function pickSpawn(map) {
 // on-screen number). At speed it eases out a touch for look-ahead, never below ZMIN.
 const speedEase = (speed) => 1 - 0.2 * Math.min(1, speed / 16);   // 1.0 at rest → 0.8 at ~58 km/h
 
+function readSavedPos(key) {
+  try {
+    const s = JSON.parse(localStorage.getItem(key) || "null");
+    if (s && Number.isFinite(s.x) && Number.isFinite(s.y) && Number.isFinite(s.h)) return s;
+  } catch { /* ignore corrupt value */ }
+  return null;
+}
+
 function bboxOf(poly) {
   let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
   for (const p of poly) {
@@ -55,7 +63,11 @@ async function boot() {
   window.addEventListener("resize", view.resize);
 
   const map = await loadMap(window.CARSIM.dataBase);
-  const sp = pickSpawn(map);
+  // restore the last car position (msg 2775) — per-district key in localStorage; falls back to a
+  // road near the city centre on first visit. (Server-side persistence will hook in here once the
+  // accounts system lands.)
+  const POS_KEY = `carsim_pos_${window.CARSIM.district}`;
+  const sp = readSavedPos(POS_KEY) || pickSpawn(map);
   const car = new Car(sp.x, sp.y, sp.h);
   // metres the car's centre is past the road edge (0 = on the drivable surface)
   const offroadPen = (x, y) => {
@@ -78,6 +90,9 @@ async function boot() {
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
   let routeBox = null;         // routeLine bbox {cx,cy,w,h} → route-overview fit while following (msg 2768)
+  let saveTick = 0;            // throttles persisting the car position to localStorage (msg 2775)
+  const savePos = () => { try { localStorage.setItem(POS_KEY, JSON.stringify({ x: +car.x.toFixed(1), y: +car.y.toFixed(1), h: +car.h.toFixed(3) })); } catch { /* quota */ } };
+  window.addEventListener("beforeunload", savePos);   // also save on close/reload
   let dbgFollow = null;        // last auto-pilot target+index (headless debug hook)
   let districts = [];          // {name,x,y} district/quarter labels for overview mode (msg 2763)
 
@@ -335,6 +350,8 @@ async function boot() {
     if (!miniCollapsed) minimap.draw(map, car, rules.street);
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
     if (zoomEl) zoomEl.textContent = `zoom ${view.zoom < 1 ? view.zoom.toFixed(1) : Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
+    // persist the car position ~every 1.5 s so a reload resumes where you were (msg 2775)
+    if (++saveTick % 90 === 0) savePos();
   }
 
   window.__drive = {
