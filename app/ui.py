@@ -9,7 +9,7 @@ Expose the module as the Jinja global `hdr` (not `ui` — the docs templates alr
 localized-strings dict). Pages put `{{ hdr.header(lang, user) }}` at the top of <body>; /drive pulls the
 pieces (`hdr.assets()`, `hdr.logo()`, `hdr.lang_dropdown(lang)`, `hdr.user_menu(lang, user)`) into its HUD.
 """
-from markupsafe import Markup
+from markupsafe import Markup, escape
 
 # (code, endonym, flag-cc) — same language set as the photo quiz; cs first (the home country).
 LANGS = [
@@ -139,7 +139,9 @@ def lang_dropdown(lang: str) -> Markup:
 def user_menu(lang: str, user) -> Markup:
     s = HSTR.get(lang, HSTR["en"])
     if user:
-        name = (user.get("display_name") or user.get("email") or "").split("@")[0]
+        # display_name/email are user-controlled (set at registration) and this string is wrapped in
+        # Markup() below, which bypasses Jinja auto-escaping — escape it to prevent stored XSS.
+        name = escape((user.get("display_name") or user.get("email") or "").split("@")[0])
         out = f'<a class="ah-link" href="/me">👤 {name}</a>'
         if user.get("role") == "admin":
             out += f'<a class="ah-link ah-hide-sm" href="/admin">🛠️ {s[4]}</a>'
