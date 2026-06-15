@@ -87,9 +87,11 @@ app.mount("/static", RevalidatingStatic(directory=str(STATIC)), name="static")  
 if CITIES.exists():
     app.mount("/citydata", RevalidatingStatic(directory=str(CITIES)), name="citydata")
 
-# photo quiz — migrated from the standalone "ulice" game (msg 2802), mounted as a sub-app under /quiz/photo
-from .quiz.photo import photo_app  # noqa: E402  (after app/mounts so its import side-effects are last)
+# quizzes — migrated from the standalone "ulice" apps (msg 2802), each mounted as a sub-app under /quiz
+from .quiz.photo import photo_app          # noqa: E402  (after app/mounts so import side-effects are last)
+from .quiz.situations import sim_app       # noqa: E402
 app.mount("/quiz/photo", photo_app)
+app.mount("/quiz/situations", sim_app)
 
 DEFAULT_CITY = ("cz", "praha", "vinohrady")
 PRAHA = CITIES / "cz" / "praha"

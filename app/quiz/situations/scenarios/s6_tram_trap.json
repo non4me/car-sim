@@ -1,0 +1,12 @@
+{
+  "id": "s6_tram_trap", "order": 6, "rule": "tram_straight_yields",
+  "title": { "cs": "Hlavní vs. tramvaj (chyták)", "en": "Priority road vs tram (trap)" },
+  "hint": { "cs": "Jsi na hlavní a tramvaj jede přímo — přednost máš TY, neboj se jet.", "en": "You're on the priority road and the tram goes straight — YOU have right of way." },
+  "world": { "w": 80, "h": 80 },
+  "control": "priority",
+  "signs": [ { "arm": "S", "code": "P2" }, { "arm": "N", "code": "P2" } ],
+  "tram": { "arms": ["E", "W"] },
+  "player": { "from": "S", "turn": "straight" },
+  "agents": [ { "kind": "tram", "from": "E", "to": "W", "spawn_t": 1.2, "cruise_v": 7 } ],
+  "citation": "§ 21 / § 22 z. 361/2000 Sb."
+}

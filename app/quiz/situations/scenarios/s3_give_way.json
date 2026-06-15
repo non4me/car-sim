@@ -1,0 +1,46 @@
+{
+  "id": "s3_give_way",
+  "order": 3,
+  "rule": "give_way",
+  "title": {
+    "cs": "Dej přednost v jízdě",
+    "en": "Give way (P4)"
+  },
+  "hint": {
+    "cs": "Máš značku „Dej přednost“ — i autu zleva musíš dát přednost.",
+    "en": "You have the give-way sign — yield even to a car from the left."
+  },
+  "world": {
+    "w": 80,
+    "h": 80
+  },
+  "control": "give_way",
+  "signs": [
+    {
+      "arm": "S",
+      "code": "P4"
+    },
+    {
+      "arm": "E",
+      "code": "P2"
+    },
+    {
+      "arm": "W",
+      "code": "P2"
+    }
+  ],
+  "player": {
+    "from": "S",
+    "turn": "straight"
+  },
+  "agents": [
+    {
+      "kind": "car",
+      "from": "W",
+      "to": "E",
+      "spawn_t": 0.2,
+      "cruise_v": 9
+    }
+  ],
+  "citation": "značka P4, § 22 z. 361/2000 Sb."
+}

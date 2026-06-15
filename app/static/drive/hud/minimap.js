@@ -5,9 +5,12 @@
 //              (adjacent = full, next ring = semi-transparent, third ring = 20%, farther = hidden).
 const RADII = [110, 240, 430];   // world metres shown each way (local mode), for levels +1, +2, +3
 
-// district size ranking (OSM place kind) — smaller rank = more important = bigger/brighter label
-const PLACE_RANK = { city: 0, town: 1, suburb: 2, quarter: 3, neighbourhood: 4, village: 5 };
-const PLACE_FONT = { city: 12, town: 11, suburb: 10, quarter: 9, neighbourhood: 8, village: 8 };
+// district ranking (OSM place kind) — smaller rank = more important = bigger/brighter label.
+// The city's OWN districts (suburb/quarter — Vinohrady, Smíchov, Karlín…) outrank the surrounding
+// independent towns/villages that fall inside the baked bbox but lie OUTSIDE Prague (Říčany, Jesenice…),
+// so the City overview shows the main districts Vlad asked for, not a scatter of peripheral villages (msg 2811).
+const PLACE_RANK = { city: 0, suburb: 1, quarter: 2, town: 3, neighbourhood: 4, village: 5 };
+const PLACE_FONT = { city: 12, suburb: 11, quarter: 10, town: 9, neighbourhood: 8, village: 8 };
 // landmark significance (msg 2784) — what's worth showing at a whole-city scale
 const LM_RANK = { airport: 0, castle: 1, stadium: 2, station: 3, university: 4, hospital: 5, museum: 6, theatre: 7 };
 // route-distance tiers (metres): adjacent / next / third — beyond the last is hidden (msg 2784)
@@ -111,7 +114,10 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
   function draw(map, car, currentStreet, ov) {
     ov = ov || {};
     const route = ov.route && ov.route.line && ov.route.line.length > 1 && ov.route.box ? ov.route : null;
-    if (routeBtn) routeBtn.disabled = !route;
+    if (routeBtn) {
+      routeBtn.disabled = !route;
+      routeBtn.style.display = route ? "" : "none";        // hide the Trasa button entirely with no route (msg 2811)
+    }
     if (mode === "route" && !route) setMode("local");      // route cleared while shown → fall back
     bg();
     if (mode === "city") return drawCity(map, car, ov);
@@ -149,6 +155,7 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
     if (!b) return drawLocal(map, car, "");
     const box = { cx: (b.minx + b.maxx) / 2, cy: (b.miny + b.maxy) / 2, w: b.maxx - b.minx, h: b.maxy - b.miny };
     const { toM } = fitToBox(box, 10);
+    const cxw = box.cx, cyw = box.cy;
 
     // faint resident streets (only near the car — a hint of where you are in the city)
     ctx.strokeStyle = "rgba(120,135,160,.16)"; ctx.lineWidth = 1;
@@ -157,15 +164,22 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
       for (let i = 0; i < e.geom.length; i++) { const [X, Y] = toM(e.geom[i][0], e.geom[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
       ctx.stroke();
     }
+    // every district as a faint dot — the spread of dots gives the city its body & full extent, so the
+    // overview reads as a map of all Prague rather than a few labels floating in black (msg 2811)
+    ctx.fillStyle = "rgba(140,160,190,.45)";
+    for (const d of (ov.districts || [])) { const [X, Y] = toM(d.x, d.y); ctx.beginPath(); ctx.arc(X, Y, 1.3, 0, 7); ctx.fill(); }
 
     const place = makePlacer();
-    // main districts first, ranked by size (de-overlap → only the prominent ones survive at this scale)
-    const districts = (ov.districts || []).slice().sort((a, b2) => (PLACE_RANK[a.kind] ?? 9) - (PLACE_RANK[b2.kind] ?? 9));
+    // label the MAIN districts: by rank (city's own suburbs/quarters first), then central-first within a
+    // rank so the well-known inner districts win the de-overlap over far-out ones.
+    const districts = (ov.districts || []).slice().sort((a, b2) =>
+      ((PLACE_RANK[a.kind] ?? 9) - (PLACE_RANK[b2.kind] ?? 9))
+      || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
     for (const d of districts) {
       const [X, Y] = toM(d.x, d.y);
       const fp = PLACE_FONT[d.kind] ?? 8;
-      const alpha = (PLACE_RANK[d.kind] ?? 9) <= 2 ? 0.95 : 0.6;
-      place(X, Y, d.name, "rgba(218,226,240,1)", alpha, fp);
+      const alpha = (PLACE_RANK[d.kind] ?? 9) <= 2 ? 0.97 : 0.66;
+      place(X, Y, d.name, "rgba(224,231,243,1)", alpha, fp);
     }
     // then major objects, by significance, lower priority than districts
     const lms = (ov.landmarks || []).slice().sort((a, b2) => (LM_RANK[a.kind] ?? 9) - (LM_RANK[b2.kind] ?? 9));

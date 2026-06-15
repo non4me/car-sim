@@ -1,0 +1,14 @@
+{
+  "id": "s7_priority_road", "order": 7, "rule": "priority_road",
+  "title": { "cs": "Hlavní silnice", "en": "Priority road" },
+  "hint": { "cs": "Jsi na hlavní. Auta z vedlejších ti dají přednost — drž se.", "en": "You're on the priority road. Side-road cars yield to you — hold your line." },
+  "world": { "w": 80, "h": 80 },
+  "control": "priority",
+  "signs": [ { "arm": "S", "code": "P2" }, { "arm": "N", "code": "P2" }, { "arm": "E", "code": "P4" }, { "arm": "W", "code": "P4" } ],
+  "player": { "from": "S", "turn": "straight" },
+  "agents": [
+    { "kind": "car", "from": "E", "to": "W", "spawn_t": 0.8, "cruise_v": 6 },
+    { "kind": "car", "from": "W", "to": "E", "spawn_t": 2.2, "cruise_v": 6 }
+  ],
+  "citation": "§ 22 z. 361/2000 Sb."
+}

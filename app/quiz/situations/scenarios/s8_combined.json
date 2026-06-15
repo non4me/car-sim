@@ -1,0 +1,13 @@
+{
+  "id": "s8_combined", "order": 8, "rule": "give_way",
+  "title": { "cs": "Kombinace pravidel", "en": "Combined rules" },
+  "hint": { "cs": "Dej přednost autu na hlavní i chodci na přechodu.", "en": "Give way to the main-road car and to the pedestrian on the crossing." },
+  "world": { "w": 80, "h": 80 },
+  "control": "give_way",
+  "signs": [ { "arm": "S", "code": "P4" }, { "arm": "E", "code": "P2" }, { "arm": "W", "code": "P2" } ],
+  "crossings": [ { "arm": "N" } ],
+  "player": { "from": "S", "turn": "straight" },
+  "agents": [ { "kind": "car", "from": "E", "to": "W", "spawn_t": 0.5, "cruise_v": 7 } ],
+  "pedestrians": [ { "arm": "N", "spawn_t": 2.6, "side": "R", "v": 1.3 } ],
+  "citation": "§ 22 / § 54 z. 361/2000 Sb."
+}
