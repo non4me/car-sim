@@ -398,7 +398,7 @@ function drawOverviewLabels(ctx, view, vis, districts) {
     }
     if (bd > (R * 1.1) ** 2) continue;
     const prev = byName.get(e.name);
-    if (!prev || bd < prev.bd) byName.set(e.name, { g, bi, bd });
+    if (!prev || bd < prev.bd) byName.set(e.name, { g, bi, bd, name: e.name });
   }
   ctx.font = "600 13px ui-sans-serif,system-ui,sans-serif";
   const a = view.rot, c = Math.cos(a), s = Math.sin(a);
@@ -441,7 +441,9 @@ function walkAlong(geom, fromStart, dist) {
 // Stylized top-down car (nose-up: forward = −y). Below ~5 px/m it becomes a fixed-size
 // arrow for the bird's-eye overview mode (otherwise the real-scale car is a sub-pixel dot).
 function drawCar(ctx, view, car) {
-  const [X, Y] = view.anchor();
+  // project the car's WORLD position (equals the screen anchor when the camera is car-centred, but
+  // correct in route-overview where the camera is centred on the route, not the car — msg 2768)
+  const [X, Y] = view.project(car.x, car.y);
   if (view.zoom < 5) {
     // arrow pointing along the heading in the current camera frame (north-up in overview)
     const c = Math.cos(view.rot), s = Math.sin(view.rot);

@@ -17,7 +17,7 @@ export function makeHud() {
   let lastKmh = null, changedAt = 0;
 
   return {
-    update(r) {
+    update(r, hideWarn) {
       speed.textContent = r.kmh;
       speedo.classList.toggle("over", r.over);
 
@@ -41,8 +41,11 @@ export function makeHud() {
 
       // warnings/violations block (above the street) — shown only when something is active, so
       // it never covers the street name. Priority: boundary > off-road > oncoming > over-limit.
+      // Hidden entirely in bird's-eye/overview (hideWarn) — violations only matter when you can
+      // actually see the car as a vehicle (msg 2768).
       let wtext = null, wcls = "bad";
-      if (r.boundary) wtext = STR.boundary;
+      if (hideWarn) wtext = null;
+      else if (r.boundary) wtext = STR.boundary;
       else if (r.offRoad) { wtext = STR.offroad; wcls = "warnY"; }
       else if (r.oncoming) wtext = STR.oncoming;
       else if (r.over) wtext = `${STR.over} — ${r.limit} km/h`;

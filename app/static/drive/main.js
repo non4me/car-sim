@@ -10,7 +10,8 @@ import { makeMinimap } from "./hud/minimap.js";
 import { loadSearchIndex, makeSearchBox } from "./hud/search.js";
 import { runLoop } from "./engine/loop.js";
 
-const ZMIN = 2, ZMAX = 25;      // absolute zoom bounds in px/metre (Vlad msg 2691: min 2 = overview)
+const ZMIN = 1, ZMAX = 25;      // absolute zoom bounds in px/metre (msg 2768 halved min 2→1 for a wider overview)
+const ZMIN_FIT = 0.25;          // route-overview may zoom out further so the whole route fits (msg 2768)
 const ZOOM_DEFAULT = 16;        // starting zoom (px/m), wheel-adjustable, persisted
 const OVERVIEW_Z = 5;           // below this px/m → bird's-eye overview (car drawn as an arrow)
 const OFFROAD_WALL = 4.3;       // metres the car may sink off-road before a wall blocks going deeper
@@ -36,6 +37,15 @@ function pickSpawn(map) {
 // Zoom is now an absolute px/metre the user controls with the wheel (Vlad directs by the
 // on-screen number). At speed it eases out a touch for look-ahead, never below ZMIN.
 const speedEase = (speed) => 1 - 0.2 * Math.min(1, speed / 16);   // 1.0 at rest → 0.8 at ~58 km/h
+
+function bboxOf(poly) {
+  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+  for (const p of poly) {
+    if (p[0] < minx) minx = p[0]; if (p[0] > maxx) maxx = p[0];
+    if (p[1] < miny) miny = p[1]; if (p[1] > maxy) maxy = p[1];
+  }
+  return { cx: (minx + maxx) / 2, cy: (miny + maxy) / 2, w: maxx - minx, h: maxy - miny };
+}
 
 async function boot() {
   const canvas = document.getElementById("game");
@@ -67,6 +77,7 @@ async function boot() {
   let routeLine = null;   // server-computed route polyline (world coords), drawn over the asphalt when set
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
+  let routeBox = null;         // routeLine bbox {cx,cy,w,h} → route-overview fit while following (msg 2768)
   let dbgFollow = null;        // last auto-pilot target+index (headless debug hook)
   let districts = [];          // {name,x,y} district/quarter labels for overview mode (msg 2763)
 
@@ -187,7 +198,7 @@ async function boot() {
           + `&fx=${from.x}&fy=${from.y}&tx=${to.x}&ty=${to.y}`;
         const res = await fetch(u).then((r) => r.json());
         if (res.polyline && res.polyline.length > 1) {
-          routeLine = res.polyline; routeI = 0;
+          routeLine = res.polyline; routeI = 0; routeBox = bboxOf(routeLine);
           followEl.disabled = false;                    // auto-pilot now available
           routeFollowOn = followEl.checked;             // honour a pre-ticked toggle
           info.textContent = `trasa ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
@@ -200,7 +211,7 @@ async function boot() {
       }
     });
     document.getElementById("routeClear").addEventListener("click", () => {
-      routeLine = null; from = null; to = null; fromIsCurrent = false;
+      routeLine = null; routeBox = null; from = null; to = null; fromIsCurrent = false;
       routeFollowOn = false; followEl.checked = false; followEl.disabled = true;
       fromEl.value = ""; toEl.value = "";
       info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
@@ -301,16 +312,29 @@ async function boot() {
 
   const zoomEl = document.getElementById("zoomind");
   function render() {
-    const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
-    view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
-    view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
-    // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
-    map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
+    const overview = routeFollowOn && routeLine && routeBox;
+    if (overview) {
+      // route-traversal view (msg 2768): north-up, centred on the route, zoomed to fit the WHOLE
+      // route start→end (may go below ZMIN). The car drives along it as an arrow; the blue ribbon
+      // shows the full route regardless of which road tiles have streamed in.
+      const fit = Math.min(view.w / (routeBox.w + 80), view.h / (routeBox.h + 80)) * 0.92;
+      const target = Math.max(ZMIN_FIT, Math.min(ZMAX, fit));
+      view.zoom += (target - view.zoom) * 0.1;
+      view.cx = routeBox.cx; view.cy = routeBox.cy; view.rot = 0;
+      map.update(routeBox.cx, routeBox.cy, Math.max(view.visR(), 480), 0, 0);
+    } else {
+      const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
+      view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
+      view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
+      // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
+      map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
+    }
     draw(ctx, view, map, car, rules, routeLine, districts);
-    hud.update(rules);
+    // hide violation warnings in bird's-eye (incl. route-overview) — only when the car shows (msg 2768)
+    hud.update(rules, view.zoom < OVERVIEW_Z);
     if (!miniCollapsed) minimap.draw(map, car, rules.street);
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
-    if (zoomEl) zoomEl.textContent = `zoom ${Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
+    if (zoomEl) zoomEl.textContent = `zoom ${view.zoom < 1 ? view.zoom.toFixed(1) : Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
   }
 
   window.__drive = {
