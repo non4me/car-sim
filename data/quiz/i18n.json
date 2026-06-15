@@ -3,7 +3,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Learn Czech road signs and rules on the real streets of Prague.",
-      "intro": "Real photos of Prague streets. Race the clock, build streaks, level up — and learn why right away.",
+      "intro": "Real photos of Prague streets. 3 lives, build streaks, level up — and learn why right away.",
       "play": "Play",
       "play_again": "Play again",
       "next": "Next",
@@ -69,7 +69,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Nauč se dopravní značky a pravidla na skutečných ulicích Prahy.",
-      "intro": "Reálné fotky pražských ulic. Závod s časem, série, úrovně — a hned se dozvíš proč.",
+      "intro": "Reálné fotky pražských ulic. 3 životy, série, úrovně — a hned se dozvíš proč.",
       "play": "Hrát",
       "play_again": "Hrát znovu",
       "next": "Další",
@@ -135,7 +135,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Учи дорожные знаки и правила Чехии на реальных улицах Праги.",
-      "intro": "Реальные фото пражских улиц. Гонка со временем, серии, уровни — и сразу узнаёшь почему.",
+      "intro": "Реальные фото пражских улиц. 3 жизни, серии, уровни — и сразу узнаёшь почему.",
       "play": "Играть",
       "play_again": "Играть снова",
       "next": "Дальше",
@@ -201,7 +201,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Вивчай чеські дорожні знаки та правила на справжніх вулицях Праги.",
-      "intro": "Справжні фото вулиць Праги. Змагайся з часом, збирай серії, підвищуй рівень — і одразу дізнавайся чому.",
+      "intro": "Справжні фото вулиць Праги. 3 життя, збирай серії, підвищуй рівень — і одразу дізнавайся чому.",
       "play": "Грати",
       "play_again": "Грати ще",
       "next": "Далі",
@@ -267,7 +267,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Nauč sa dopravné značky a pravidlá na skutočných uliciach Prahy.",
-      "intro": "Skutočné fotky pražských ulíc. Pretekaj s časom, zbieraj série, postupuj na vyššie úrovne — a hneď sa dozvieš prečo.",
+      "intro": "Skutočné fotky pražských ulíc. 3 životy, zbieraj série, postupuj na vyššie úrovne — a hneď sa dozvieš prečo.",
       "play": "Hrať",
       "play_again": "Hrať znova",
       "next": "Ďalej",
@@ -333,7 +333,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Học biển báo và luật giao thông Séc trên những con phố thật ở Praha.",
-      "intro": "Ảnh thật của các con phố Praha. Đua với thời gian, lập chuỗi đúng, lên cấp — và hiểu lý do ngay lập tức.",
+      "intro": "Ảnh thật của các con phố Praha. 3 mạng, lập chuỗi đúng, lên cấp — và hiểu lý do ngay lập tức.",
       "play": "Chơi",
       "play_again": "Chơi lại",
       "next": "Tiếp",
@@ -399,7 +399,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Lerne tschechische Verkehrszeichen und Regeln auf echten Straßen in Prag.",
-      "intro": "Echte Fotos von Prager Straßen. Wettlauf mit der Zeit, Serien sammeln, aufsteigen — und sofort erfahren, warum.",
+      "intro": "Echte Fotos von Prager Straßen. 3 Leben, Serien sammeln, aufsteigen — und sofort erfahren, warum.",
       "play": "Spielen",
       "play_again": "Nochmal spielen",
       "next": "Weiter",
@@ -465,7 +465,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Poznaj czeskie znaki i przepisy drogowe na prawdziwych ulicach Pragi.",
-      "intro": "Prawdziwe zdjęcia ulic Pragi. Ścigaj się z czasem, buduj serie, awansuj — i od razu poznaj dlaczego.",
+      "intro": "Prawdziwe zdjęcia ulic Pragi. 3 życia, buduj serie, awansuj — i od razu poznaj dlaczego.",
       "play": "Graj",
       "play_again": "Zagraj ponownie",
       "next": "Dalej",
@@ -531,7 +531,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Прага көшелерінде чех жол белгілері мен ережелерін үйреніңіз.",
-      "intro": "Прага көшелерінің нақты фотолары. Уақытпен жарысыңыз, серия жинаңыз, деңгей көтеріңіз — әрі бірден себебін біліңіз.",
+      "intro": "Прага көшелерінің нақты фотолары. 3 өмір, серия жинаңыз, деңгей көтеріңіз — әрі бірден себебін біліңіз.",
       "play": "Ойнау",
       "play_again": "Қайта ойнау",
       "next": "Келесі",
@@ -597,7 +597,7 @@
     "ui": {
       "title": "Ulice",
       "tagline": "Învață semnele și regulile rutiere cehești pe străzile reale din Praga.",
-      "intro": "Fotografii reale ale străzilor din Praga. Întrece cronometrul, fă serii, urcă în niveluri — și află imediat de ce.",
+      "intro": "Fotografii reale ale străzilor din Praga. 3 vieți, fă serii, urcă în niveluri — și află imediat de ce.",
       "play": "Joacă",
       "play_again": "Joacă din nou",
       "next": "Următoarea",
