@@ -37,6 +37,27 @@ services:
       - "traefik.http.routers.carsim.tls.certresolver=cloudflare"
       - "traefik.http.routers.carsim.priority=100"
       - "traefik.http.services.carsim.loadbalancer.server.port=8080"
+      # Retire the migrated standalone ulice apps (msg 2823): 301-redirect the old hosts to their new
+      # /quiz/* homes so existing links keep working. Routers reuse car-sim's service; the redirect
+      # middleware answers first. priority=110 cleanly takes the host over from the old containers.
+      - "traefik.http.routers.uliceredir.entrypoints=websecure"
+      - "traefik.http.routers.uliceredir.rule=Host(`ulice.troyanenko.com`)"
+      - "traefik.http.routers.uliceredir.tls.certresolver=cloudflare"
+      - "traefik.http.routers.uliceredir.priority=110"
+      - "traefik.http.routers.uliceredir.service=carsim"
+      - "traefik.http.routers.uliceredir.middlewares=uliceredir"
+      - "traefik.http.middlewares.uliceredir.redirectregex.regex=^https?://[^/]+/.*"
+      - "traefik.http.middlewares.uliceredir.redirectregex.replacement=https://car-sim.troyanenko.com/quiz/photo"
+      - "traefik.http.middlewares.uliceredir.redirectregex.permanent=true"
+      - "traefik.http.routers.ulicesimredir.entrypoints=websecure"
+      - "traefik.http.routers.ulicesimredir.rule=Host(`ulice-sim.troyanenko.com`)"
+      - "traefik.http.routers.ulicesimredir.tls.certresolver=cloudflare"
+      - "traefik.http.routers.ulicesimredir.priority=110"
+      - "traefik.http.routers.ulicesimredir.service=carsim"
+      - "traefik.http.routers.ulicesimredir.middlewares=ulicesimredir"
+      - "traefik.http.middlewares.ulicesimredir.redirectregex.regex=^https?://[^/]+/.*"
+      - "traefik.http.middlewares.ulicesimredir.redirectregex.replacement=https://car-sim.troyanenko.com/quiz/situations"
+      - "traefik.http.middlewares.ulicesimredir.redirectregex.permanent=true"
 
 networks:
   web:
