@@ -6,8 +6,8 @@ const BG = "#0e1118";
 const ASPHALT = "#2c333f";   // single road-surface colour (uniform → no seams where roads cross)
 // schematic backdrop fills (drawn behind the roads). Buildings get a brighter edge so
 // the block structure reads like a city map; roads stay the lightest (drivable) layer.
-const AREA_FILL = { building: "#232a3a", green: "#1f3327", water: "#173757" };
-const AREA_STROKE = { building: "#46526b", green: "#335039", water: "#2c577a" };
+const AREA_FILL = { building: "#232a3a", green: "#1f3327", water: "#1b517f" };   // water = clear river blue
+const AREA_STROKE = { building: "#46526b", green: "#335039", water: "#3f82bd" };
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -128,19 +128,24 @@ function drawAreas(ctx, view, map) {
     ctx.fillStyle = AREA_FILL[kind];
     ctx.strokeStyle = AREA_STROKE[kind];
     ctx.lineWidth = 1;
-    const stroke = kind === "building" && view.zoom > 6;
+    const stroke = (kind === "building" && view.zoom > 6) || kind === "water";   // water always gets a shore line
     for (const a of areas) {
       if (a.kind !== kind || !view.boxVisible(a.bb)) continue;
       ctx.beginPath();
-      for (let i = 0; i < a.poly.length; i++) {
-        const [X, Y] = view.project(a.poly[i][0], a.poly[i][1]);
-        i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
-      }
-      ctx.closePath();
-      ctx.fill();
-      if (stroke) ctx.stroke();   // crisp building outlines when zoomed in
+      ringPath(ctx, view, a.poly);
+      if (a.holes) for (const h of a.holes) ringPath(ctx, view, h);   // islands (e.g. Vltava) cut out via even-odd
+      a.holes ? ctx.fill("evenodd") : ctx.fill();
+      if (stroke) ctx.stroke();   // building outlines (zoomed in) + water shoreline
     }
   }
+}
+
+function ringPath(ctx, view, poly) {
+  for (let i = 0; i < poly.length; i++) {
+    const [X, Y] = view.project(poly[i][0], poly[i][1]);
+    i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
+  }
+  ctx.closePath();
 }
 
 // Route ribbon: two passes — a soft wide glow then a solid core — so the path reads on any

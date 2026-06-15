@@ -86,6 +86,33 @@ def read_pbf(path: str):
     return nodes, all_ways, places
 
 
+def read_water_areas(path: str) -> list:
+    """Assemble water bodies as lat/lon rings, INCLUDING multipolygon relations (big rivers like the
+    Vltava are a relation: one outer riverbank ring + many island holes). pyosmium's area builder
+    stitches closed ways AND multipolygons; we keep the outer ring + inner rings (holes). Restricted
+    to natural/water/waterway-keyed input so the 246k building areas aren't assembled."""
+    s, w, n, e = PRAGUE_BBOX
+    out = []
+    fp = osmium.FileProcessor(path).with_areas(osmium.filter.KeyFilter("natural", "water", "waterway"))
+    for o in fp:
+        if not o.is_area():
+            continue
+        t = o.tags
+        if not (t.get("natural") == "water" or "water" in t or t.get("waterway") == "riverbank"):
+            continue
+        for ring in o.outer_rings():
+            outer = [(nd.lat, nd.lon) for nd in ring]
+            if len(outer) < 4:
+                continue
+            cy = sum(p[0] for p in outer) / len(outer)
+            cx = sum(p[1] for p in outer) / len(outer)
+            if not (s - 0.02 <= cy <= n + 0.02 and w - 0.02 <= cx <= e + 0.02):
+                continue                                   # ring centroid outside Prague bbox
+            holes = [[(nd.lat, nd.lon) for nd in ir] for ir in o.inner_rings(ring)]
+            out.append({"outer": outer, "holes": holes})
+    return out
+
+
 def _snapshot_from_header(path: str):
     try:
         ts = osmium.FileProcessor(path).header.get("osmosis_replication_timestamp")
@@ -106,9 +133,11 @@ def main():
     print(f"[{args.name}] reading {args.pbf} (snapshot {snapshot})…")
     nodes, all_ways, places = read_pbf(args.pbf)
     print(f"[{args.name}] parsed {len(all_ways)} ways, {len(nodes)} nodes, {len(places)} places → processing…")
+    water = read_water_areas(args.pbf)
+    print(f"[{args.name}] assembled {len(water)} water areas (incl. multipolygon rivers)")
     out = ROOT / "data" / "cities" / args.country / "praha" / args.name
     build_artifact(nodes, all_ways, PRAGUE_BBOX, args.country, args.name, out,
-                   snapshot=snapshot, debug_png=False, place_nodes=places)
+                   snapshot=snapshot, debug_png=False, place_nodes=places, water_areas=water)
 
 
 if __name__ == "__main__":

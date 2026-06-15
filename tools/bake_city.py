@@ -80,12 +80,14 @@ def classify_area(tags: dict) -> str | None:
     return None
 
 
-def build_areas(osm_ways, nodes, to_xy) -> list[dict]:
-    """Closed backdrop ways → projected polygons {kind, poly}, lightly simplified."""
+def build_areas(osm_ways, nodes, to_xy, include_water=True) -> list[dict]:
+    """Closed backdrop ways → projected polygons {kind, poly}, lightly simplified. When water is
+    supplied pre-assembled (multipolygon-aware, see water_areas), skip natural=water ways here so
+    they aren't drawn twice."""
     areas = []
     for wy in osm_ways:
         kind = classify_area(wy.get("tags", {}))
-        if not kind:
+        if not kind or (kind == "water" and not include_water):
             continue
         nl = wy["nodes"]
         if len(nl) < 4 or nl[0] != nl[-1]:   # need a closed ring
@@ -142,15 +144,44 @@ def bake(district: str, country: str, debug_only: bool):
     build_artifact(nodes, all_ways, bbox, country, district, out, debug_only)
 
 
+def _project_water(water_areas, to_xy, tol=4.0) -> list[dict]:
+    """Pre-assembled water rings (lat/lon, multipolygon-aware) → {kind:water, poly, holes?} in metres.
+    Coarser simplify than ways (water bodies are large + schematic); islands kept as `holes`."""
+    def ring(latlon):
+        pts = [to_xy(lat, lon) for lat, lon in latlon]
+        if len(pts) < 4:
+            return None
+        out = [pts[0]]
+        for p in pts[1:]:
+            if math.hypot(p[0] - out[-1][0], p[1] - out[-1][1]) >= tol:
+                out.append(p)
+        return [[round(x, 1), round(y, 1)] for x, y in out] if len(out) >= 3 else None
+    areas = []
+    for wa in water_areas:
+        outer = ring(wa["outer"])
+        if not outer:
+            continue
+        holes = [h for h in (ring(hr) for hr in wa.get("holes", [])) if h]
+        a = {"kind": "water", "poly": outer}
+        if holes:
+            a["holes"] = holes
+        areas.append(a)
+    return areas
+
+
 def build_artifact(nodes, all_ways, bbox, country, name, out,
-                   debug_only=False, snapshot=None, debug_png=True, place_nodes=None):
+                   debug_only=False, snapshot=None, debug_png=True, place_nodes=None, water_areas=None):
     """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
-    junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`)."""
+    junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`).
+    `water_areas` (optional) = pre-assembled multipolygon-aware water rings — used for all-Prague so
+    rivers (Vltava: one outer ring + island holes) render, which closed natural=water ways miss."""
     profile = yaml.safe_load((ROOT / "countries" / f"{country}.yaml").read_text(encoding="utf-8"))
     classes = profile["road_classes"]
     to_xy, proj = make_proj(bbox)
     ways = [w for w in all_ways if w.get("tags", {}).get("highway") in classes]
-    areas = build_areas(all_ways, nodes, to_xy)
+    areas = build_areas(all_ways, nodes, to_xy, include_water=(water_areas is None))
+    if water_areas:
+        areas += _project_water(water_areas, to_xy)
     akinds = Counter(a["kind"] for a in areas)
     print(f"  [{name}] drivable ways: {len(ways)}  nodes: {len(nodes)}  "
           f"backdrop: {akinds.get('building',0)} buildings, {akinds.get('green',0)} green, {akinds.get('water',0)} water")
