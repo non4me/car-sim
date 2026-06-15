@@ -114,21 +114,27 @@ export function draw(ctx, view, map, car, rules, route, districts) {
     }
   }
 
+  // ONE shared label guard so map text never overprints (msg 2786): each layer reserves the screen
+  // box of every label it draws; later/lower-priority labels that would collide are skipped. Filled in
+  // call order = priority: street names → landmark names → POI names → house numbers (least important).
+  const guard = makeLabelGuard();
+
   // 4) street-name labels ON the connecting roads at intersections (NOT the current
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
-  drawStreetLabels(ctx, view, vis, rules && rules.street);
+  drawStreetLabels(ctx, view, vis, rules && rules.street, guard);
 
   // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
   //     so you can orient while zoomed right out (msg 2763).
   if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, vis, districts);
 
   // 4c) stations + major-landmark labels (marker + name), for orientation at most zooms (msg 2771)
-  drawLabels(ctx, view, map, zoom);
+  drawLabels(ctx, view, map, zoom, guard);
 
   // 4d) close-up street detail (msg 2771 phase 2): POIs (pharmacy/ATM/food/shop…) when zoomed in,
   //     and house numbers when very close — so the street you're on shows its full info.
-  if (zoom >= 13) drawPois(ctx, view, map, zoom);
-  if (zoom >= 15) drawHouseNumbers(ctx, view, map);
+  if (zoom >= 13) drawPois(ctx, view, map, zoom, guard);
+  if (zoom >= 15) drawHouseNumbers(ctx, view, map, guard);
+  view._labelStats = guard.stats();          // {kept, dropped} — headless de-overlap diagnostic (msg 2786)
 
   // 5) the car — sprite (heading-up) or a heading-pointing arrow (north-up overview)
   drawCar(ctx, view, car);
@@ -208,7 +214,7 @@ const LABEL_COLOR = {
 };
 // zoomed right out, show only the biggest landmarks (the rest would crowd the overview)
 const OVERVIEW_MAJOR = new Set(["station", "castle", "museum", "university", "hospital", "stadium", "airport"]);
-function drawLabels(ctx, view, map, zoom) {
+function drawLabels(ctx, view, map, zoom, guard) {
   const labels = map.labels;
   if (!labels || !labels.length || zoom < 3) return;
   const R = view.visR();
@@ -220,12 +226,13 @@ function drawLabels(ctx, view, map, zoom) {
     const [X, Y] = view.project(L.x, L.y);
     const col = LABEL_COLOR[L.kind] || "#cfd6e2";
     ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(8,10,15,.85)";
-    if (L.kind === "station") {                        // rail station = filled square
+    if (L.kind === "station") {                        // rail station = filled square (marker always shows)
       ctx.fillStyle = col; ctx.fillRect(X - 4, Y - 4, 8, 8); ctx.strokeRect(X - 4, Y - 4, 8, 8);
     } else {                                            // landmark = filled dot
       ctx.beginPath(); ctx.arc(X, Y, 4, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke();
     }
-    const tx = X + 7;
+    const tx = X + 7;                                   // name yields to higher-priority labels (msg 2786)
+    if (guard && !guard.tryPlace(tx, Y - 7, tx + ctx.measureText(L.name).width, Y + 7)) continue;
     ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(L.name, tx, Y);
     ctx.fillStyle = "rgba(233,239,249,.96)"; ctx.fillText(L.name, tx, Y);
   }
@@ -241,7 +248,7 @@ const POI_COLOR = {
 const POI_GLYPH = {
   pharmacy: "+", atm: "$", bank: "$", food: "F", fuel: "G", police: "P", fire: "!", post: "@", shop: "S",
 };
-function drawPois(ctx, view, map, zoom) {
+function drawPois(ctx, view, map, zoom, guard) {
   const pois = map.pois;
   if (!pois || !pois.length) return;
   const R = view.visR();
@@ -255,8 +262,10 @@ function drawPois(ctx, view, map, zoom) {
     ctx.fillStyle = "#0b0e14"; ctx.font = "800 8px ui-sans-serif,system-ui,sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(POI_GLYPH[po.kind] || "", X, Y + 0.5);
-    if (showName && po.name) {
-      ctx.textAlign = "left"; ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";
+    if (showName && po.name) {                          // name yields to street/landmark labels (msg 2786)
+      ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";
+      if (guard && !guard.tryPlace(X + 8, Y - 6, X + 8 + ctx.measureText(po.name).width, Y + 6)) continue;
+      ctx.textAlign = "left";
       ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(po.name, X + 8, Y);
       ctx.fillStyle = "rgba(228,235,246,.96)"; ctx.fillText(po.name, X + 8, Y);
     }
@@ -266,7 +275,7 @@ function drawPois(ctx, view, map, zoom) {
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close
 // (so the street you're driving shows its addresses without flooding the whole map).
-function drawHouseNumbers(ctx, view, map) {
+function drawHouseNumbers(ctx, view, map, guard) {
   const addrs = map.addrs;
   if (!addrs || !addrs.length) return;
   const R = view.visR();
@@ -276,6 +285,9 @@ function drawHouseNumbers(ctx, view, map) {
   for (const a of addrs) {
     if (!view.near(a.x, a.y, R)) continue;
     const [X, Y] = view.project(a.x, a.y);
+    // house numbers are the lowest priority — they yield to every other label (msg 2786)
+    const hw = ctx.measureText(a.n).width / 2;
+    if (guard && !guard.tryPlace(X - hw, Y - 6, X + hw, Y + 6)) continue;
     ctx.fillText(a.n, X, Y);
   }
 }
@@ -456,7 +468,26 @@ function drawSignal(ctx, X, Y, s) {
 // Labels for the ADJOINING streets — placed AT THE START of each cross street (a short way
 // into the street itself, running along it), not across the current road. The current street's
 // name lives in the HUD info block. One label per name, nearest junction wins.
-function drawStreetLabels(ctx, view, vis, currentStreet) {
+// Shared label-collision guard (msg 2786): reserves axis-aligned screen boxes; tryPlace() returns
+// false when a candidate overlaps an already-placed label, so callers can skip it. PAD keeps a small
+// gap between labels. Rebuilt every frame (label positions move with the camera).
+function makeLabelGuard() {
+  const placed = [];
+  const PAD = 1.5;
+  let kept = 0, dropped = 0;
+  return {
+    tryPlace(x0, y0, x1, y1) {
+      const a = [x0 - PAD, y0 - PAD, x1 + PAD, y1 + PAD];
+      for (const b of placed)
+        if (!(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3])) { dropped++; return false; }
+      placed.push(a); kept++;
+      return true;
+    },
+    stats: () => ({ kept, dropped }),       // de-overlap diagnostic (dropped>0 ⇒ overlaps were prevented)
+  };
+}
+
+function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
   if (view.zoom < 8) return;                  // too zoomed out to be legible/useful
   const cx = view.cx, cy = view.cy;           // camera centre = car, in world metres
   const NEAR = 55 * 55;                        // the cross street's junction with us must be within ~55 m
@@ -475,13 +506,20 @@ function drawStreetLabels(ctx, view, vis, currentStreet) {
   }
   ctx.font = "600 12px ui-sans-serif,system-ui,sans-serif";
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  for (const L of byName.values()) {
+  // closest-junction labels first → the most relevant ones win the de-overlap (msg 2786)
+  const HH = 8;                               // half text height incl. halo
+  for (const L of [...byName.values()].sort((a, b) => a.nearD - b.nearD)) {
     const [sx, sy] = view.project(L.x, L.y);
     // direction in screen space so text runs along the cross street. project() rotates by
     // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
     const a = view.rot, c = Math.cos(a), s = Math.sin(a);
     let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
+    // axis-aligned bounding box of the rotated label (conservative) → reserve it or skip
+    const hw = ctx.measureText(L.name).width / 2;
+    const ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
+    const ex = hw * ca + HH * sa, ey = hw * sa + HH * ca;
+    if (guard && !guard.tryPlace(sx - ex, sy - ey, sx + ex, sy + ey)) continue;
     ctx.save();
     ctx.translate(sx, sy);
     ctx.rotate(ang);
