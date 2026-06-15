@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="{{ lang }}" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — {% if lang == 'en' %}Official documents{% else %}Oficiální dokumenty{% endif %}</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:760px;margin:0 auto;padding:28px 20px 64px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    a.back{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+    .lang a{color:#8a93a6;text-decoration:none;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--line);border-radius:7px}
+    .lang a.on{color:#06203f;background:var(--accent);border-color:transparent}
+    h1{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:.5em 0 .1em}
+    .accent{color:var(--accent)}
+    .sub{color:#8a93a6;margin-top:6px;font-size:14px}
+    .docs{display:grid;gap:10px;margin:18px 0 8px;grid-template-columns:1fr 1fr}
+    .doc{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;text-decoration:none;color:inherit;transition:border-color .15s}
+    .doc:hover{border-color:rgba(91,156,255,.6)}
+    .doc .dt{font-weight:800;font-size:14px}
+    .doc .ds{color:#8a93a6;font-size:12px;margin-top:3px;line-height:1.35}
+    .doc .ext{color:var(--accent);font-size:11px;margin-top:6px}
+    .search{width:100%;box-sizing:border-box;margin:16px 0 6px;background:var(--panel);border:1px solid var(--line);
+      border-radius:10px;padding:11px 13px;color:#e6e9f0;font-size:15px;outline:none}
+    .search:focus{border-color:var(--accent)}
+    .count{color:#6b7385;font-size:12px;margin:2px 0 14px}
+    .grp{margin-top:18px}
+    .grp h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385;margin:0 0 8px;font-weight:700}
+    .rule{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+    .rule .rh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+    .rule .rt{font-weight:700;font-size:15px}
+    .rule .ref{color:var(--accent);font-size:12px;font-weight:700;white-space:nowrap}
+    .rule .rs{color:#c2c9d6;font-size:14px;line-height:1.5;margin-top:6px}
+    .rule .src{display:inline-block;margin-top:8px;color:#8a93a6;text-decoration:none;font-size:12px}
+    .rule .src:hover{color:var(--accent)}
+    .nores{color:#6b7385;text-align:center;padding:24px;display:none}
+    footer{color:#5b6477;font-size:12px;margin-top:28px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="/">← car-sim</a>
+      <div class="lang">
+        <a href="/docs?lang=cs" class="{{ 'on' if lang == 'cs' }}">CZ</a>
+        <a href="/docs?lang=en" class="{{ 'on' if lang == 'en' }}">EN</a>
+      </div>
+    </div>
+    <h1>📖 {% if lang == 'en' %}Official <span class="accent">documents</span>{% else %}Oficiální <span class="accent">dokumenty</span>{% endif %}</h1>
+    <div class="sub">{% if lang == 'en' %}Czech rules of the road — the key rules in plain language, each linked to the always-current law. The quiz tests exactly these.{% else %}Česká pravidla provozu — klíčová pravidla srozumitelně, každé s odkazem na vždy aktuální zákon. Přesně na ně se ptá kvíz.{% endif %}</div>
+
+    <div class="docs">
+      {% for d in documents %}
+      <a class="doc" href="{{ d.url }}" target="_blank" rel="noopener">
+        <div class="dt">{{ d['title_' + lang] }}</div>
+        <div class="ds">{{ d['subtitle_' + lang] }}</div>
+        <div class="ext">{% if lang == 'en' %}full text ↗{% else %}úplné znění ↗{% endif %}</div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <input id="q" class="search" type="search" autocomplete="off"
+      placeholder="{% if lang == 'en' %}Search the rules…{% else %}Hledat v pravidlech…{% endif %}">
+    <div class="count" id="count"></div>
+
+    <div id="list">
+      {% set seen = [] %}
+      {% for r in rules %}
+        {% set th = r['theme_' + lang] %}
+        {% if th not in seen %}
+          {% if seen.append(th) %}{% endif %}
+          <div class="grp" data-theme>
+            <h2>{{ th }}</h2>
+            {% for r2 in rules if r2['theme_' + lang] == th %}
+            <div class="rule" data-text="{{ (r2['title_' + lang] ~ ' ' ~ r2['summary_' + lang] ~ ' ' ~ r2.ref ~ ' ' ~ th) | lower }}">
+              <div class="rh">
+                <div class="rt">{{ r2['title_' + lang] }}</div>
+                <div class="ref">{{ r2.ref }}</div>
+              </div>
+              <div class="rs">{{ r2['summary_' + lang] }}</div>
+              <a class="src" href="{{ r2.url }}" target="_blank" rel="noopener">{% if lang == 'en' %}source ↗{% else %}zdroj ↗{% endif %}</a>
+            </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="nores" id="nores">{% if lang == 'en' %}Nothing found.{% else %}Nic nenalezeno.{% endif %}</div>
+
+    <footer>{% if lang == 'en' %}Summaries are guidance; the linked acts (zakonyprolidi.cz) are the binding, current text.{% else %}Shrnutí jsou orientační; závazné a aktuální je znění zákonů na zakonyprolidi.cz.{% endif %} © OpenStreetMap · Educational project.</footer>
+  </div>
+
+  <script>
+  (function(){
+    var q=document.getElementById('q'), count=document.getElementById('count'), nores=document.getElementById('nores');
+    var rules=[].slice.call(document.querySelectorAll('.rule'));
+    var groups=[].slice.call(document.querySelectorAll('[data-theme]'));
+    var total=rules.length;
+    function norm(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+    function apply(){
+      var term=norm(q.value.trim()); var shown=0;
+      rules.forEach(function(r){
+        var hit=!term || norm(r.getAttribute('data-text')).indexOf(term)>=0;
+        r.style.display=hit?'':'none'; if(hit) shown++;
+      });
+      groups.forEach(function(g){
+        var any=[].slice.call(g.querySelectorAll('.rule')).some(function(r){return r.style.display!=='none';});
+        g.style.display=any?'':'none';
+      });
+      nores.style.display=shown?'none':'block';
+      count.textContent = term ? (shown+(shown===1?' rule':' rules')) : (total+(total===1?' rule':' rules'));
+    }
+    q.addEventListener('input', apply); apply();
+  })();
+  </script>
+</body>
+</html>

@@ -21,6 +21,7 @@ from . import auth, db
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parent
 CITIES = Path(os.environ.get("CITIES_DIR", ROOT / "data" / "cities"))
+DOCS = Path(os.environ.get("DOCS_DIR", ROOT / "data" / "docs"))
 STATIC = BASE / "static"
 
 
@@ -158,6 +159,28 @@ def intro(request: Request):
 def quiz_hub(request: Request):
     """Quizzes hub — indexes the sub-quizzes (photo quiz live; situations/signs/rules soon)."""
     return templates.TemplateResponse(request, "quiz.html", {
+        "user": auth.current_user(request),
+    }, headers=HTML_HEADERS)
+
+
+def _road_rules() -> dict:
+    """Curated official road-rule documents + searchable rule summaries (msg 2802c). Read each render so
+    edits show without a restart; an empty dict keeps /docs alive if the file is missing/broken."""
+    f = DOCS / "road_rules.json"
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return {"documents": [], "rules": []}
+
+
+@app.get("/docs", response_class=HTMLResponse)
+def docs(request: Request, lang: str = "cs"):
+    """Official documents — Czech road-rule laws, searchable, each deep-linked to the always-current
+    authoritative source (zakonyprolidi / e-Sbírka)."""
+    lang = "en" if lang == "en" else "cs"
+    data = _road_rules()
+    return templates.TemplateResponse(request, "docs.html", {
+        "lang": lang, "documents": data.get("documents", []), "rules": data.get("rules", []),
         "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 

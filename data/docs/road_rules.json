@@ -1,0 +1,158 @@
+{
+  "documents": [
+    {
+      "id": "act-361",
+      "title_cs": "Zákon č. 361/2000 Sb.",
+      "title_en": "Act No. 361/2000 Coll.",
+      "subtitle_cs": "o provozu na pozemních komunikacích (zákon o silničním provozu)",
+      "subtitle_en": "on road traffic (the Road Traffic Act)",
+      "url": "https://www.zakonyprolidi.cz/cs/2000-361"
+    },
+    {
+      "id": "act-294",
+      "title_cs": "Vyhláška č. 294/2015 Sb.",
+      "title_en": "Decree No. 294/2015 Coll.",
+      "subtitle_cs": "kterou se provádějí pravidla provozu — dopravní značky a zařízení",
+      "subtitle_en": "implementing the traffic rules — road signs and devices",
+      "url": "https://www.zakonyprolidi.cz/cs/2015-294"
+    }
+  ],
+  "rules": [
+    {
+      "theme_cs": "Základní povinnosti", "theme_en": "Basic duties",
+      "ref": "§ 4–5", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p4",
+      "title_cs": "Povinnosti řidiče a účastníka provozu",
+      "title_en": "Duties of the driver and road user",
+      "summary_cs": "Chovej se ohleduplně a ukázněně, neohrožuj život, zdraví ani majetek. Řiď se pravidly, dopravními značkami, světelnými signály a pokyny policisty. Řidič smí řídit jen vozidlo, které je k provozu způsobilé, a sám musí být plně způsobilý k jízdě.",
+      "summary_en": "Behave considerately and in a disciplined way; do not endanger life, health or property. Follow the rules, road signs, light signals and police instructions. A driver may only drive a roadworthy vehicle and must be fully fit to drive."
+    },
+    {
+      "theme_cs": "Alkohol", "theme_en": "Alcohol",
+      "ref": "§ 5", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p5",
+      "title_cs": "Nulová tolerance alkoholu",
+      "title_en": "Zero alcohol tolerance",
+      "summary_cs": "Řidič nesmí požít alkoholický nápoj ani jinou návykovou látku během jízdy a nesmí řídit, je-li pod jejich vlivem. V Česku platí nulová tolerance — 0,0 ‰.",
+      "summary_en": "A driver must not consume alcohol or other addictive substances while driving and must not drive under their influence. The Czech Republic has zero tolerance — 0.0 ‰."
+    },
+    {
+      "theme_cs": "Rychlost", "theme_en": "Speed",
+      "ref": "§ 18", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p18",
+      "title_cs": "Nejvyšší dovolená rychlost",
+      "title_en": "Maximum permitted speed",
+      "summary_cs": "V obci 50 km/h, mimo obec 90 km/h, na dálnici 130 km/h — pokud značka neurčí jinak. Rychlost vždy přizpůsob svým schopnostem, vozidlu, stavu vozovky, počasí a provozu.",
+      "summary_en": "50 km/h in a built-up area, 90 km/h outside, 130 km/h on a motorway — unless a sign says otherwise. Always adapt your speed to your ability, the vehicle, road condition, weather and traffic."
+    },
+    {
+      "theme_cs": "Předjíždění", "theme_en": "Overtaking",
+      "ref": "§ 17", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p17",
+      "title_cs": "Předjíždění",
+      "title_en": "Overtaking",
+      "summary_cs": "Předjíždí se vlevo. Nesmíš předjíždět, nedáš-li jasně najevo úmysl, na přechodu pro chodce a těsně před ním, v nepřehledné zatáčce, před vrcholem stoupání a tam, kde to zakazuje značka.",
+      "summary_en": "Overtake on the left. Do not overtake without clearly signalling intent, on or just before a pedestrian crossing, in a blind bend, before the crest of a hill, or where a sign forbids it."
+    },
+    {
+      "theme_cs": "Odbočování", "theme_en": "Turning",
+      "ref": "§ 21", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p21",
+      "title_cs": "Odbočování",
+      "title_en": "Turning",
+      "summary_cs": "Před odbočením dej znamení a zařaď se. Při odbočování vlevo dej přednost protijedoucím vozidlům a tramvaji (v obou směrech). Při odbočování neohroz chodce přecházející vozovku, do níž odbočuješ.",
+      "summary_en": "Signal before turning and get into the correct lane. When turning left, give way to oncoming vehicles and to trams (in both directions). When turning, do not endanger pedestrians crossing the road you are turning into."
+    },
+    {
+      "theme_cs": "Přednost", "theme_en": "Right of way",
+      "ref": "§ 22", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p22",
+      "title_cs": "Jízda křižovatkou — přednost zprava",
+      "title_en": "Junctions — priority from the right",
+      "summary_cs": "Na křižovatce neoznačené značkami platí přednost zprava — dej přednost vozidlu přijíždějícímu zprava. Značky „Dej přednost v jízdě“, „Stůj, dej přednost“ a „Hlavní pozemní komunikace“ určují přednost jinak a mají před pravidlem pravé ruky přednost.",
+      "summary_en": "At a junction with no signs, priority is from the right — give way to a vehicle approaching from your right. The signs 'Give way', 'Stop, give way' and 'Priority road' set priority differently and override the right-hand rule."
+    },
+    {
+      "theme_cs": "Přednost", "theme_en": "Right of way",
+      "ref": "§ 21–22", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p22",
+      "title_cs": "Tramvaj",
+      "title_en": "Trams",
+      "summary_cs": "Tramvaj, která odbočuje křižující tvůj směr jízdy, má přednost. Dej přednost tramvaji i tam, kde to ukládá značka. Tramvaj měň/objížděj jen vpravo (není-li to možné, vlevo) a nikdy neohroz cestující nastupující/vystupující.",
+      "summary_en": "A tram turning across your direction has priority. Give way to a tram also where a sign requires it. Pass a tram on the right (on the left only if the right is impossible) and never endanger boarding or alighting passengers."
+    },
+    {
+      "theme_cs": "Chodci", "theme_en": "Pedestrians",
+      "ref": "§ 5 / § 54", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p54",
+      "title_cs": "Přechod pro chodce",
+      "title_en": "Pedestrian crossing",
+      "summary_cs": "Před přechodem nesmíš předjíždět ani na něm zastavit. Blížíš-li se k přechodu, jeď tak, abys mohl zastavit; chodci, který je na přechodu nebo na něj vstupuje, musíš dát přednost. Nesmíš ho ohrozit ani omezit.",
+      "summary_en": "Do not overtake before a crossing or stop on it. When approaching a crossing, drive so you can stop; you must give way to a pedestrian who is on the crossing or stepping onto it, and must not endanger or obstruct them."
+    },
+    {
+      "theme_cs": "Zastavení a stání", "theme_en": "Stopping & parking",
+      "ref": "§ 25", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p25",
+      "title_cs": "Zastavení a stání",
+      "title_en": "Stopping and standing",
+      "summary_cs": "Stůj a zastavuj vpravo ve směru jízdy, co nejblíže k okraji a souběžně s ním. „Zastavení“ je krátké přerušení jízdy (nástup/výstup, náklad), „stání“ je delší. Značka B28 zakazuje zastavení, B29 zakazuje stání.",
+      "summary_en": "Stop and park on the right in the direction of travel, as close to the edge as possible and parallel to it. 'Stopping' is a brief halt (boarding, loading); 'standing' is longer. Sign B28 forbids stopping, B29 forbids standing."
+    },
+    {
+      "theme_cs": "Zastavení a stání", "theme_en": "Stopping & parking",
+      "ref": "§ 27", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p27",
+      "title_cs": "Kde nelze zastavit a stát",
+      "title_en": "Where you may not stop or park",
+      "summary_cs": "Nezastavuj a nestůj např. na přechodu a 5 m před ním, na křižovatce a blíže než 5 m od ní, na zastávce, na chodníku (mimo povolené případy), na železničním přejezdu, v tunelu a tam, kde bys bránil ostatním.",
+      "summary_en": "Do not stop or park e.g. on a crossing and within 5 m before it, at or within 5 m of a junction, at a stop, on the pavement (except where allowed), on a level crossing, in a tunnel, or where you would obstruct others."
+    },
+    {
+      "theme_cs": "Světelné signály", "theme_en": "Light signals",
+      "ref": "§ 70", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p70",
+      "title_cs": "Světelné signály",
+      "title_en": "Traffic lights",
+      "summary_cs": "Červená „Stůj!“ — zastav před příčnou čarou souvislou (před signálem). Zelená „Volno“ — smíš jet, neohrozíš-li nikoho. Svítící žlutá — zastav, můžeš-li bezpečně. Pokyny policisty a světelné signály mají přednost před značkami.",
+      "summary_en": "Red 'Stop!' — stop before the solid stop line (before the signal). Green 'Go' — you may proceed if you endanger no one. Steady amber — stop if you can do so safely. Police instructions and light signals take precedence over signs."
+    },
+    {
+      "theme_cs": "Zóny", "theme_en": "Zones",
+      "ref": "§ 39 / IP", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p39",
+      "title_cs": "Obytná a pěší zóna, Zóna 30",
+      "title_en": "Residential & pedestrian zone, Zone 30",
+      "summary_cs": "V obytné zóně smíš jet jen rychlostí chůze (max 20 km/h), chodci mají přednost a smějí užívat celou ulici; parkuj jen na vyznačených místech. „Zóna 30“ omezuje rychlost na 30 km/h až do značky „Konec zóny“.",
+      "summary_en": "In a residential zone you may drive only at walking pace (max 20 km/h); pedestrians have priority and may use the whole street; park only in marked spaces. 'Zone 30' limits speed to 30 km/h until the 'End of zone' sign."
+    },
+    {
+      "theme_cs": "Cyklisté", "theme_en": "Cyclists",
+      "ref": "§ 57", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p57",
+      "title_cs": "Jízda na jízdním kole",
+      "title_en": "Cycling",
+      "summary_cs": "Cyklista jede při pravém okraji vozovky, jednotlivě za sebou. Je-li zřízen jízdní pruh pro cyklisty, stezka nebo vyznačená trasa, použij je. Na stezce pro chodce a cyklisty neohrožuj chodce.",
+      "summary_en": "A cyclist rides near the right edge of the road, single file. Where a cycle lane, cycle path or marked route exists, use it. On a shared pedestrian-and-cycle path, do not endanger pedestrians."
+    },
+    {
+      "theme_cs": "Vodorovné značení", "theme_en": "Road markings",
+      "ref": "Vyhl. 294/2015", "url": "https://www.zakonyprolidi.cz/cs/2015-294",
+      "title_cs": "Podélné čáry",
+      "title_en": "Longitudinal lines",
+      "summary_cs": "Přerušovanou podélnou čáru smíš přejíždět, je-li to bezpečné (např. při předjíždění). Souvislou čáru přejíždět nesmíš. Šikmé rovnoběžné čáry (V13) vyznačují plochu, na kterou je vjezd zakázán.",
+      "summary_en": "You may cross a broken longitudinal line when it is safe (e.g. when overtaking). You must not cross a solid line. Oblique parallel lines (V13) mark an area you may not drive onto."
+    },
+    {
+      "theme_cs": "Dopravní značky", "theme_en": "Road signs",
+      "ref": "Vyhl. 294/2015", "url": "https://www.zakonyprolidi.cz/cs/2015-294",
+      "title_cs": "Skupiny dopravních značek",
+      "title_en": "Categories of road signs",
+      "summary_cs": "Svislé značky se dělí na výstražné (trojúhelník), zákazové a příkazové (kruh), informativní (čtverec/obdélník) a dodatkové tabulky. Příkazové (modrý kruh) přikazují směr či způsob jízdy; zákazové (bílý/modrý kruh s červeným lemem) něco zakazují.",
+      "summary_en": "Vertical signs are split into warning (triangle), prohibitory and mandatory (circle), informative (square/rectangle) and supplementary plates. Mandatory signs (blue circle) order a direction or manner of driving; prohibitory signs (white/blue circle with a red rim) forbid something."
+    },
+    {
+      "theme_cs": "Dopravní značky", "theme_en": "Road signs",
+      "ref": "Vyhl. 294/2015", "url": "https://www.zakonyprolidi.cz/cs/2015-294",
+      "title_cs": "Přednost — značky",
+      "title_en": "Priority signs",
+      "summary_cs": "„Dej přednost v jízdě“ (obrácený trojúhelník) — dej přednost. „Stůj, dej přednost v jízdě“ (osmiúhelník STOP) — zastav a dej přednost. „Hlavní pozemní komunikace“ (žlutý kosočtverec) — máš přednost. V kruhovém objezdu se značkou „Dej přednost“ dej přednost vozidlům už v objezdu.",
+      "summary_en": "'Give way' (inverted triangle) — give way. 'Stop, give way' (STOP octagon) — stop and give way. 'Priority road' (yellow diamond) — you have priority. At a roundabout with a 'Give way' sign, give way to vehicles already on the roundabout."
+    },
+    {
+      "theme_cs": "Výbava a doklady", "theme_en": "Equipment & documents",
+      "ref": "§ 6", "url": "https://www.zakonyprolidi.cz/cs/2000-361#p6",
+      "title_cs": "Pásy, dětské sedačky, doklady",
+      "title_en": "Seatbelts, child seats, documents",
+      "summary_cs": "Za jízdy musí být všichni připoutáni bezpečnostními pásy; dítě do 150 cm a 36 kg jen v zádržném systému (autosedačce). Řidič musí mít u sebe řidičský průkaz, osvědčení o registraci vozidla a doklad o pojištění.",
+      "summary_en": "Everyone must wear seatbelts while driving; a child under 150 cm and 36 kg only in a restraint system (child seat). The driver must carry a driving licence, vehicle registration certificate and proof of insurance."
+    }
+  ]
+}
