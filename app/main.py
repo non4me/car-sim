@@ -84,6 +84,18 @@ def healthz():
     return {"ok": True, "districts": _districts()}
 
 
+@app.get("/route")
+def route(district: str = "prague", fx: float = 0, fy: float = 0, tx: float = 0, ty: float = 0):
+    """Shortest drivable path (one-ways honoured) between two map points, as a polyline."""
+    from .routing import get_router
+    graph = CITIES / "cz" / "praha" / district / "graph.json"
+    r = get_router(graph)
+    if r is None:
+        return JSONResponse({"polyline": [], "length_m": 0, "error": "no graph"}, status_code=404)
+    res = r.route(fx, fy, tx, ty)
+    return JSONResponse(res or {"polyline": [], "length_m": 0})
+
+
 HTML_HEADERS = {"Cache-Control": "no-cache"}  # never cache the HTML that names the asset build token
 
 

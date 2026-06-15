@@ -61,22 +61,41 @@
       font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
     #helpBtn:hover{color:#fff;border-color:var(--accent)}
 
-    /* street / district search */
+    /* street / district search + route inputs (shared autocomplete dropdown) */
     #searchWrap{position:relative;pointer-events:auto}
-    #searchInput{width:210px;max-width:44vw;background:rgba(20,25,37,.92);border:1px solid var(--line);
+    #searchInput,.rp-in{width:210px;max-width:44vw;background:rgba(20,25,37,.92);border:1px solid var(--line);
       border-radius:9px;color:#e6e9f0;font:inherit;font-size:13px;padding:6px 11px;outline:none}
-    #searchInput:focus{border-color:var(--accent)}
-    #searchInput::placeholder{color:#7c8699}
-    #searchResults{position:absolute;top:36px;left:0;width:270px;max-width:74vw;max-height:48vh;overflow-y:auto;
+    #searchInput:focus,.rp-in:focus{border-color:var(--accent)}
+    #searchInput::placeholder,.rp-in::placeholder{color:#7c8699}
+    .sr-results{position:absolute;top:36px;left:0;width:270px;max-width:74vw;max-height:42vh;overflow-y:auto;
       background:rgba(16,20,30,.97);border:1px solid var(--line);border-radius:10px;
-      box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:40}
-    #searchResults.hidden{display:none}
+      box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:41}
+    .sr-results.hidden{display:none}
     .sr-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 11px;
       cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04)}
     .sr-item:last-child{border-bottom:none}
     .sr-item:hover,.sr-item.hi{background:rgba(91,156,255,.16)}
     .sr-name{font-size:13px;color:#e6e9f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .sr-kind{font-size:10px;color:#8a93a6;text-transform:uppercase;letter-spacing:.05em;flex:none}
+
+    /* route panel */
+    #routeBtn{pointer-events:auto;cursor:pointer;height:30px;padding:0 10px;border-radius:9px;
+      background:rgba(20,25,37,.92);border:1px solid var(--line);color:#aab2c4;font-weight:700;font-size:12px}
+    #routeBtn:hover,#routeBtn.on{color:#fff;border-color:var(--accent)}
+    #routePanel{position:fixed;top:54px;left:16px;z-index:35;pointer-events:auto;background:rgba(14,18,28,.96);
+      border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;
+      box-shadow:0 12px 36px rgba(0,0,0,.5)}
+    #routePanel.hidden{display:none}
+    .rp-row{position:relative}
+    .rp-actions{display:flex;align-items:center;gap:10px}
+    #routeGo{cursor:pointer;background:var(--accent);border:none;color:#06203f;font-weight:800;font-size:13px;
+      padding:7px 16px;border-radius:8px}
+    #routeGo:disabled{opacity:.45;cursor:default}
+    #routeClear{cursor:pointer;background:rgba(28,34,48,.9);border:1px solid var(--line);color:#cdd5e6;
+      width:28px;height:28px;border-radius:7px;font-size:13px}
+    #routeInfo{font-size:12px;color:#8a93a6;flex:1}
+    #routeInfo.ok{color:var(--good)}
+    #routeInfo.err{color:var(--bad)}
 
     /* minimap — top right, under the location label (2× size, msg 2691) */
     #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
@@ -130,8 +149,9 @@
       <button id="helpBtn" title="Ovládání">?</button>
       <div id="searchWrap">
         <input id="searchInput" type="text" placeholder="Hledat ulici / čtvrť…" autocomplete="off" spellcheck="false">
-        <div id="searchResults" class="hidden"></div>
+        <div id="searchResults" class="sr-results hidden"></div>
       </div>
+      <button id="routeBtn" title="Trasa mezi ulicemi">🛣 Trasa</button>
     </div>
     <div class="meta">Praha{% if snapshot %} · data OSM {{ snapshot }}{% endif %}</div>
   </div>
@@ -153,6 +173,22 @@
     </div>
   </div>
   <button id="miniRestore" class="hud hidden" title="Zobrazit mapu">🗺</button>
+
+  <div id="routePanel" class="hidden">
+    <div class="rp-row">
+      <input id="routeFrom" class="rp-in" type="text" placeholder="Odkud (ulice)…" autocomplete="off" spellcheck="false">
+      <div id="routeFromRes" class="sr-results hidden"></div>
+    </div>
+    <div class="rp-row">
+      <input id="routeTo" class="rp-in" type="text" placeholder="Kam (ulice)…" autocomplete="off" spellcheck="false">
+      <div id="routeToRes" class="sr-results hidden"></div>
+    </div>
+    <div class="rp-actions">
+      <button id="routeGo" disabled>Najít trasu</button>
+      <span id="routeInfo">vyber dvě ulice</span>
+      <button id="routeClear" title="Zrušit trasu">✕</button>
+    </div>
+  </div>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>
   <div class="hud" id="zoomind">zoom —</div>

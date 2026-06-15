@@ -27,7 +27,7 @@ function path(ctx, view, geom) {
   }
 }
 
-export function draw(ctx, view, map, car, rules) {
+export function draw(ctx, view, map, car, rules, route) {
   const { w, h, dpr, zoom } = view;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = BG;
@@ -56,6 +56,10 @@ export function draw(ctx, view, map, car, rules) {
     ctx.lineWidth = Math.max(2, e.width * zoom);
     ctx.stroke();
   }
+
+  // 1b) computed route — a glowing blue ribbon laid over the asphalt (under markings/signs/car),
+  //     so the suggested path reads clearly while the lane markings still show through at the edges.
+  if (route && route.length > 1) drawRoute(ctx, view, route, zoom);
 
   // 2) dashed centre line on two-way roads
   ctx.setLineDash([zoom * 1.4, zoom * 1.6]);
@@ -134,6 +138,22 @@ function drawAreas(ctx, view, map) {
       if (stroke) ctx.stroke();   // crisp building outlines when zoomed in
     }
   }
+}
+
+// Route ribbon: two passes — a soft wide glow then a solid core — so the path reads on any
+// background. Width is in metres (scales with zoom) but floored so it stays visible when far out.
+function drawRoute(ctx, view, route, zoom) {
+  ctx.save();
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  path(ctx, view, route);
+  ctx.strokeStyle = "rgba(90,156,255,.28)";
+  ctx.lineWidth = Math.max(7, zoom * 3.2);          // wide translucent glow
+  ctx.stroke();
+  path(ctx, view, route);
+  ctx.strokeStyle = "rgba(96,165,255,.95)";
+  ctx.lineWidth = Math.max(3, zoom * 1.1);          // bright solid core
+  ctx.stroke();
+  ctx.restore();
 }
 
 // One-way arrows: chevrons every ~STEP metres along the flow (geometry order = travel direction).

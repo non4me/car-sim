@@ -62,6 +62,7 @@ async function boot() {
   let dbg = null;
   let paused = false;
   let miniCollapsed = false;
+  let routeLine = null;   // server-computed route polyline (world coords), drawn over the asphalt when set
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -134,7 +135,54 @@ async function boot() {
   }
   loadSearchIndex(window.CARSIM.dataBase).then((items) => {
     makeSearchBox(document.getElementById("searchInput"), document.getElementById("searchResults"), items, goTo);
+    setupRoute(items);
   });
+
+  // Route panel: pick two streets, ask the server for the shortest drivable path (one-ways honoured),
+  // draw it as a ribbon and teleport the car to its start so you can drive the route yourself.
+  function setupRoute(items) {
+    const panel = document.getElementById("routePanel");
+    const btn = document.getElementById("routeBtn");
+    const fromEl = document.getElementById("routeFrom");
+    const toEl = document.getElementById("routeTo");
+    const goBtn = document.getElementById("routeGo");
+    const info = document.getElementById("routeInfo");
+    let from = null, to = null;
+    const syncGo = () => { goBtn.disabled = !(from && to); };
+    // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords)
+    makeSearchBox(fromEl, document.getElementById("routeFromRes"), items,
+      (x, y) => { from = { x, y }; info.textContent = to ? "připraveno" : "vyber cíl"; info.className = ""; syncGo(); });
+    makeSearchBox(toEl, document.getElementById("routeToRes"), items,
+      (x, y) => { to = { x, y }; info.textContent = from ? "připraveno" : "vyber start"; info.className = ""; syncGo(); });
+    btn.addEventListener("click", () => {
+      panel.classList.toggle("hidden");
+      btn.classList.toggle("on", !panel.classList.contains("hidden"));
+      if (!panel.classList.contains("hidden")) fromEl.focus();
+    });
+    goBtn.addEventListener("click", async () => {
+      if (!from || !to) return;
+      info.textContent = "hledám trasu…"; info.className = "";
+      try {
+        const u = `/route?district=${encodeURIComponent(window.CARSIM.district)}`
+          + `&fx=${from.x}&fy=${from.y}&tx=${to.x}&ty=${to.y}`;
+        const res = await fetch(u).then((r) => r.json());
+        if (res.polyline && res.polyline.length > 1) {
+          routeLine = res.polyline;
+          info.textContent = `trasa ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
+          goTo(routeLine[0][0], routeLine[0][1]);       // drop the car at the route's start, on the road
+        } else {
+          routeLine = null; info.textContent = "trasa nenalezena"; info.className = "err";
+        }
+      } catch (err) {
+        routeLine = null; info.textContent = "chyba spojení"; info.className = "err";
+      }
+    });
+    document.getElementById("routeClear").addEventListener("click", () => {
+      routeLine = null; from = null; to = null;
+      fromEl.value = ""; toEl.value = "";
+      info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
+    });
+  }
 
   function update(dt) {
     if (paused) return;                               // Esc / lost focus freezes the sim
@@ -165,7 +213,7 @@ async function boot() {
     view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
     // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
     map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
-    draw(ctx, view, map, car, rules);
+    draw(ctx, view, map, car, rules, routeLine);
     hud.update(rules);
     if (!miniCollapsed) minimap.draw(map, car, rules.street);
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)

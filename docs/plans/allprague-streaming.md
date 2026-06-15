@@ -27,8 +27,12 @@ Czech extract snapshot **2026-06-13** (answered to Vlad).
 - [x] P2. Streaming runtime: `loadMap` rewritten as a tile store — resident set near camera, velocity-
       biased prefetch, evict-behind, incremental grid rebuilt on resident change, MAX_RESIDENT=80.
       `main.js` calls `map.update()` each frame; spawn at bounds centre; app default district=prague.
-- [ ] P3. Deploy + verify: drive across districts, tiles stream in/out, memory stays flat, perf OK,
-      snapshot date visible.
+- [x] P3. Deployed + browser-verified: spawn on a road ("Na Bohdalci"), only ~1917/113593 edges
+      resident; teleported across Prague (Žitná, Oravská…) → tiles stream in (resident stays
+      1000–2200 edges), return-to-spawn re-streams (1912/1917 overlap); snapshot "data OSM 2026-06-13"
+      shown; central-Prague bird's-eye is dense. LIVE at car-sim.troyanenko.com/drive.
+
+## DONE 2026-06-15 — shipped commit 310391c. Remaining follow-up: LOD pyramid for whole-city zoom-out.
 
 ## Decisions / notes
 - Prague tiles gitignored (103 MB, regenerable); shipped to Castle via rsync, NOT git.

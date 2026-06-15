@@ -320,6 +320,11 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         json.dumps({"streets": street_list, "places": places}, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8")
     print(f"  [{name}] search index: {len(street_list)} streets, {len(places)} places")
+
+    # routing graph (for server-side shortest-path): one row per edge [a, b, oneway, geom].
+    # Directedness (one-ways) is applied at route time; geom lets the route follow real roads.
+    graph = [[ed["a"], ed["b"], 1 if ed["oneway"] else 0, ed["geom"]] for ed in edges]
+    (out / "graph.json").write_text(json.dumps(graph, separators=(",", ":")), encoding="utf-8")
     sk = Counter(s["kind"] for s in signs)
     print(f"[{name}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "
           f"{len(junctions)} junctions, {len(areas)} areas, {len(signs)} signs {dict(sk)})")
