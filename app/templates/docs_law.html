@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="{{ lang }}" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>car-sim — {{ law.code }}</title>
+  <style>
+    :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--mut:#8a93a6}
+    html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    .wrap{max-width:820px;margin:0 auto;padding:24px 20px 80px}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    a.back{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
+    .lang a{color:var(--mut);text-decoration:none;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--line);border-radius:7px}
+    .lang a.on{color:#06203f;background:var(--accent);border-color:transparent}
+    .code{color:var(--accent);font-weight:800;font-size:14px;margin-top:14px}
+    h1{font-size:23px;font-weight:800;letter-spacing:-.01em;margin:.2em 0 .2em;line-height:1.25}
+    .meta{color:var(--mut);font-size:12.5px;line-height:1.6}
+    .meta a{color:var(--accent);text-decoration:none}
+    .filter{width:100%;box-sizing:border-box;margin:16px 0 4px;background:var(--panel);border:1px solid var(--line);
+      border-radius:10px;padding:11px 13px;color:#e6e9f0;font-size:15px;outline:none}
+    .filter:focus{border-color:var(--accent)}
+    .fcount{color:#6b7385;font-size:12px;margin:2px 0 10px}
+    details.toc{margin:10px 0 6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 12px}
+    details.toc summary{cursor:pointer;color:var(--mut);font-size:13px;font-weight:700;padding:5px 0}
+    .toc .tlist{columns:2;column-gap:18px;padding:6px 0 2px}
+    .toc a{display:block;color:#b9c2d2;text-decoration:none;font-size:12.5px;padding:2px 0;break-inside:avoid}
+    .toc a:hover{color:var(--accent)}
+    .chap{color:#6b7385;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin:22px 0 0;font-weight:700}
+    .sec{border-top:1px solid var(--line);padding:14px 0 4px;scroll-margin-top:14px}
+    .sec h3{font-size:15.5px;margin:0 0 8px;font-weight:700}
+    .sec h3 .r{color:var(--accent)}
+    .sec .body{color:#cfd6e2;font-size:14px;line-height:1.62;white-space:pre-wrap;word-wrap:break-word}
+    .nores{display:none;color:#6b7385;text-align:center;padding:24px}
+    footer{color:#5b6477;font-size:12px;margin-top:30px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="/docs?lang={{ lang }}">← {% if lang == 'en' %}all laws{% else %}všechny zákony{% endif %}</a>
+      <div class="lang">
+        <a href="/docs/{{ law.id }}?lang=cs" class="{{ 'on' if lang == 'cs' }}">CZ</a>
+        <a href="/docs/{{ law.id }}?lang=en" class="{{ 'on' if lang == 'en' }}">EN</a>
+      </div>
+    </div>
+    <div class="code">{{ law.code }}</div>
+    <h1>{{ law.title }}</h1>
+    <div class="meta">
+      {{ law.n_sections }} §{% if law.status == 'in_force' %} · {% if lang == 'en' %}in force{% else %}účinný{% endif %}{% endif %}{% if law.updated %} · {% if lang == 'en' %}current as of{% else %}znění k{% endif %} {{ law.updated }}{% endif %}<br>
+      {% if law.amendments %}{% if lang == 'en' %}amendments{% else %}novely{% endif %}: {{ law.amendments }}<br>{% endif %}
+      {% if law.source %}<a href="{{ law.source }}" target="_blank" rel="noopener">{% if lang == 'en' %}binding text — e-Sbírka ↗{% else %}závazné znění — e-Sbírka ↗{% endif %}</a>{% endif %}
+    </div>
+
+    <input id="filter" class="filter" type="search" autocomplete="off"
+      placeholder="{% if lang == 'en' %}Filter within this law…{% else %}Filtrovat v tomto zákoně…{% endif %}">
+    <div class="fcount" id="fcount"></div>
+
+    <details class="toc">
+      <summary>{% if lang == 'en' %}Contents{% else %}Obsah{% endif %} ({{ law.n_sections }} §)</summary>
+      <div class="tlist">
+        {% for s in law.sections %}<a href="#{{ s.anchor }}">{{ s.ref }}{% if s.heading %} — {{ s.heading }}{% endif %}</a>{% endfor %}
+      </div>
+    </details>
+
+    <div id="secs">
+      {% set ns = namespace(chap='') %}
+      {% for s in law.sections %}
+        {% if s.chapter and s.chapter != ns.chap %}{% set ns.chap = s.chapter %}<div class="chap">{{ s.chapter }}</div>{% endif %}
+        <section class="sec" id="{{ s.anchor }}">
+          <h3><span class="r">{{ s.ref }}</span>{% if s.heading %} — {{ s.heading }}{% endif %}</h3>
+          <div class="body">{{ s.text }}</div>
+        </section>
+      {% endfor %}
+    </div>
+    <div class="nores" id="nores">{% if lang == 'en' %}No section matches.{% else %}Žádný paragraf neodpovídá.{% endif %}</div>
+
+    <footer>{% if lang == 'en' %}Text: legalize-cz (MIT). Binding & current version: e-Sbírka (link above).{% else %}Text: legalize-cz (MIT). Závazné a aktuální znění: e-Sbírka (odkaz výše).{% endif %}</footer>
+  </div>
+
+  <script>
+  (function(){
+    var f=document.getElementById('filter'), secs=[].slice.call(document.querySelectorAll('.sec')),
+        chaps=[].slice.call(document.querySelectorAll('.chap')), nores=document.getElementById('nores'),
+        fcount=document.getElementById('fcount'), total=secs.length;
+    function fold(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+    var hay=secs.map(function(s){return fold(s.textContent);});
+    function apply(){
+      var t=fold(f.value.trim()), shown=0;
+      secs.forEach(function(s,i){var hit=!t||hay[i].indexOf(t)>=0;s.style.display=hit?'':'none';if(hit)shown++;});
+      chaps.forEach(function(c){var n=c.nextElementSibling, any=false;
+        while(n&&!n.classList.contains('chap')){if(n.classList.contains('sec')&&n.style.display!=='none'){any=true;break;}n=n.nextElementSibling;}
+        c.style.display=any?'':'none';});
+      nores.style.display=shown?'none':'block';
+      fcount.textContent = t ? (shown+' / '+total+' §') : '';
+    }
+    f.addEventListener('input', apply);
+  })();
+  </script>
+</body>
+</html>

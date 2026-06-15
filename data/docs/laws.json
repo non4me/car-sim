@@ -1,0 +1,74 @@
+[
+ {
+  "id": "SB-2000-361",
+  "mode": "road",
+  "label": "Zákon o silničním provozu",
+  "file": "SB-2000-361.md"
+ },
+ {
+  "id": "SB-2015-294",
+  "mode": "road",
+  "label": "Vyhláška o dopravních značkách a zařízeních",
+  "file": "SB-2015-294.md"
+ },
+ {
+  "id": "SB-1997-13",
+  "mode": "road",
+  "label": "Zákon o pozemních komunikacích",
+  "file": "SB-1997-13.md"
+ },
+ {
+  "id": "SB-1997-104",
+  "mode": "road",
+  "label": "Vyhláška k zákonu o pozemních komunikacích",
+  "file": "SB-1997-104.md"
+ },
+ {
+  "id": "SB-2001-56",
+  "mode": "road",
+  "label": "Zákon o podmínkách provozu vozidel na pozemních komunikacích",
+  "file": "SB-2001-56.md"
+ },
+ {
+  "id": "SB-2014-341",
+  "mode": "road",
+  "label": "Vyhláška o schvalování technické způsobilosti vozidel",
+  "file": "SB-2014-341.md"
+ },
+ {
+  "id": "SB-2000-247",
+  "mode": "road",
+  "label": "Zákon o získávání a zdokonalování odborné způsobilosti k řízení (autoškoly)",
+  "file": "SB-2000-247.md"
+ },
+ {
+  "id": "SB-1994-111",
+  "mode": "road",
+  "label": "Zákon o silniční dopravě",
+  "file": "SB-1994-111.md"
+ },
+ {
+  "id": "SB-1999-168",
+  "mode": "road",
+  "label": "Zákon o pojištění odpovědnosti z provozu vozidla",
+  "file": "SB-1999-168.md"
+ },
+ {
+  "id": "SB-1994-266",
+  "mode": "rail",
+  "label": "Zákon o dráhách",
+  "file": "SB-1994-266.md"
+ },
+ {
+  "id": "SB-1997-49",
+  "mode": "air",
+  "label": "Zákon o civilním letectví",
+  "file": "SB-1997-49.md"
+ },
+ {
+  "id": "SB-1995-114",
+  "mode": "water",
+  "label": "Zákon o vnitrozemské plavbě",
+  "file": "SB-1995-114.md"
+ }
+]

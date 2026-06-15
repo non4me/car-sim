@@ -16,7 +16,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import Response
 
-from . import auth, db
+from . import auth, db, docs_laws
 
 BASE = Path(__file__).resolve().parent
 ROOT = BASE.parent
@@ -165,24 +165,28 @@ def quiz_hub(request: Request):
     }, headers=HTML_HEADERS)
 
 
-def _road_rules() -> dict:
-    """Curated official road-rule documents + searchable rule summaries (msg 2802c). Read each render so
-    edits show without a restart; an empty dict keeps /docs alive if the file is missing/broken."""
-    f = DOCS / "road_rules.json"
-    try:
-        return json.loads(f.read_text(encoding="utf-8"))
-    except (ValueError, OSError):
-        return {"documents": [], "rules": []}
-
-
 @app.get("/docs", response_class=HTMLResponse)
-def docs(request: Request, lang: str = "cs"):
-    """Official documents — Czech road-rule laws, searchable, each deep-linked to the always-current
-    authoritative source (zakonyprolidi / e-Sbírka)."""
+def docs(request: Request, q: str = "", lang: str = "cs"):
+    """Official documents — the FULL texts of the Czech transport laws (road/rail/air/water, from the
+    legalize-cz source), with diacritics-insensitive full-text search across every § (msg 2820)."""
     lang = "en" if lang == "en" else "cs"
-    data = _road_rules()
+    query = (q or "").strip()
+    results = docs_laws.search(query) if query else None
     return templates.TemplateResponse(request, "docs.html", {
-        "lang": lang, "documents": data.get("documents", []), "rules": data.get("rules", []),
+        "lang": lang, "q": query, "results": results,
+        "groups": docs_laws.laws_by_mode(), "mode_label": docs_laws.MODE_LABEL,
+        "user": auth.current_user(request),
+    }, headers=HTML_HEADERS)
+
+
+@app.get("/docs/{law_id}", response_class=HTMLResponse)
+def docs_law(request: Request, law_id: str, lang: str = "cs"):
+    """Full text of one law, §-by-§, with an in-page filter and a link to the authoritative e-Sbírka."""
+    law = docs_laws.LAW_BY_ID.get(law_id)
+    if law is None:
+        raise HTTPException(status_code=404, detail="unknown law")
+    return templates.TemplateResponse(request, "docs_law.html", {
+        "lang": "en" if lang == "en" else "cs", "law": law,
         "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 
