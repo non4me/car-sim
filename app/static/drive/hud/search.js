@@ -10,9 +10,13 @@ export async function loadSearchIndex(base) {
     for (const p of idx.places || []) items.push({ name: p.name, x: p.x, y: p.y, kind: "district" });
     for (const s of idx.streets || []) items.push({ name: s.name, x: s.x, y: s.y, kind: "street" });
     for (const it of items) it.q = it.name.toLowerCase();
-    return items;
+    // places keep their OSM place-kind (city/town/suburb/quarter/…) for City/Trasa minimap ranking;
+    // landmarks = the major city-wide objects (station/castle/…) baked into search.json (msg 2784).
+    const places = (idx.places || []).map((p) => ({ name: p.name, x: p.x, y: p.y, kind: p.kind }));
+    const landmarks = (idx.landmarks || []).map((l) => ({ name: l.name, x: l.x, y: l.y, kind: l.kind }));
+    return { items, places, landmarks };
   } catch {
-    return [];
+    return { items: [], places: [], landmarks: [] };
   }
 }
 

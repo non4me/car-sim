@@ -100,10 +100,6 @@
     #routeFollowRow:has(#routeFollow:disabled){opacity:.45;cursor:default}
     #routeFollow{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
     #routeFollow:disabled{cursor:default}
-    #routeWhole{margin-top:8px;width:100%;cursor:pointer;background:rgba(28,34,48,.9);border:1px solid var(--line);
-      color:#cdd5e6;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600}
-    #routeWhole:disabled{opacity:.45;cursor:default}
-    #routeWhole.on{background:var(--accent);color:#06203f;border-color:var(--accent);font-weight:800}
 
     /* minimap — top right, under the location label (2× size, msg 2691) */
     #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
@@ -114,7 +110,7 @@
     .mini-top .lvl{font-size:11px;color:#8a93a6;font-weight:700;padding-left:4px}
     .mini-tools{display:flex;align-items:center;gap:8px}
     #miniOpacity{width:78px;accent-color:var(--accent);cursor:pointer}
-    .mini-bar{display:flex;align-items:center;justify-content:flex-end;margin-top:6px}
+    .mini-bar{display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:6px}
     .mini-z{display:flex;gap:6px}
     .mini-z button,#miniCollapse{cursor:pointer;width:24px;height:24px;border-radius:7px;
       background:rgba(28,34,48,.95);border:1px solid var(--line);color:#cdd5e6;font-weight:800;line-height:1;
@@ -122,6 +118,13 @@
     .mini-z button{font-size:15px}
     #miniCollapse{font-size:11px}
     .mini-z button:hover,#miniCollapse:hover{color:#fff;border-color:var(--accent)}
+    .mini-modes{display:flex;gap:6px}
+    .mini-modes button{cursor:pointer;height:24px;padding:0 9px;border-radius:7px;font-size:11px;font-weight:700;
+      background:rgba(28,34,48,.95);border:1px solid var(--line);color:#cdd5e6;line-height:1}
+    .mini-modes button:hover{color:#fff;border-color:var(--accent)}
+    .mini-modes button.on{background:var(--accent);color:#06203f;border-color:var(--accent)}
+    .mini-modes button:disabled{opacity:.4;cursor:default}
+    .route-hint{font-size:11px;color:#6b7385;margin-top:2px}
     #miniRestore{right:14px;top:44px;pointer-events:auto;cursor:pointer;width:40px;height:40px;border-radius:10px;
       background:rgba(12,16,24,.9);border:1px solid var(--line);font-size:18px;
       display:flex;align-items:center;justify-content:center}
@@ -181,6 +184,10 @@
         <button id="miniMinus" title="Oddálit">−</button>
         <button id="miniPlus" title="Přiblížit">+</button>
       </span>
+      <span class="mini-modes">
+        <button id="miniCity" title="Celé město: hlavní čtvrti a objekty">City</button>
+        <button id="miniRoute" title="Celá trasa na minimapě" disabled>Trasa</button>
+      </span>
     </div>
   </div>
   <button id="miniRestore" class="hud hidden" title="Zobrazit mapu">🗺</button>
@@ -202,7 +209,7 @@
     <label id="routeFollowRow" title="Auto-jízda po trase: řízení automatické, plyn/brzda na tobě">
       <input type="checkbox" id="routeFollow" disabled> 🚗 Automatické sledování trasy
     </label>
-    <button id="routeWhole" disabled title="Zobrazit celou trasu v minimapě">🗺️ Zobrazit celou trasu</button>
+    <div class="route-hint">Celou trasu zobrazíš tlačítkem <b>Trasa</b> na minimapě →</div>
   </div>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>

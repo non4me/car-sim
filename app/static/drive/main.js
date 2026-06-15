@@ -81,6 +81,8 @@ async function boot() {
     document.getElementById("miniPlus"),
     document.getElementById("miniMinus"),
     document.getElementById("miniLevel"),
+    document.getElementById("miniCity"),
+    document.getElementById("miniRoute"),
   );
   let rules = evalRules(map, car);
   let dbg = null;
@@ -89,13 +91,13 @@ async function boot() {
   let routeLine = null;   // server-computed route polyline (world coords), drawn over the asphalt when set
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
-  let routeBox = null;         // routeLine bbox {cx,cy,w,h} → fits the whole route into the minimap (msg 2777)
-  let miniWhole = false;       // minimap shows the WHOLE route (not the car-centred view) — toggled by the panel button
+  let routeBox = null;         // routeLine bbox {cx,cy,w,h} → fits the whole route into the minimap (msg 2777/2784)
   let saveTick = 0;            // throttles persisting the car position to localStorage (msg 2775)
   const savePos = () => { try { localStorage.setItem(POS_KEY, JSON.stringify({ x: +car.x.toFixed(1), y: +car.y.toFixed(1), h: +car.h.toFixed(3) })); } catch { /* quota */ } };
   window.addEventListener("beforeunload", savePos);   // also save on close/reload
   let dbgFollow = null;        // last auto-pilot target+index (headless debug hook)
-  let districts = [];          // {name,x,y} district/quarter labels for overview mode (msg 2763)
+  let districts = [];          // {name,x,y,kind} district/quarter labels (overview mode 2763 + City/Trasa minimap 2784)
+  let landmarks = [];          // {name,x,y,kind} major city-wide objects for the City/Trasa minimap (msg 2784)
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -166,10 +168,11 @@ async function boot() {
       await new Promise((r) => setTimeout(r, 80));    // wait for the destination tiles to stream in
     }
   }
-  loadSearchIndex(window.CARSIM.dataBase).then((items) => {
+  loadSearchIndex(window.CARSIM.dataBase).then(({ items, places, landmarks: lms }) => {
     makeSearchBox(document.getElementById("searchInput"), document.getElementById("searchResults"), items, goTo);
     setupRoute(items);
-    districts = items.filter((i) => i.kind === "district");   // overview-mode district labels (msg 2763)
+    districts = places.length ? places : items.filter((i) => i.kind === "district");  // keep place-kind for City/Trasa (msg 2784)
+    landmarks = lms;                                          // major city-wide objects for the City/Trasa minimap
   });
 
   // Route panel: pick two streets, ask the server for the shortest drivable path (one-ways honoured),
@@ -182,16 +185,10 @@ async function boot() {
     const goBtn = document.getElementById("routeGo");
     const info = document.getElementById("routeInfo");
     const followEl = document.getElementById("routeFollow");
-    const wholeEl = document.getElementById("routeWhole");
     let from = null, to = null, fromIsCurrent = false;   // fromIsCurrent → "From" = the car's live position
     // auto-pilot toggle: only meaningful with a route; throttle/brake stay manual (msg 2759 #3)
     followEl.addEventListener("change", () => { routeFollowOn = followEl.checked && !!routeLine; routeI = 0; });
-    // "show whole route" — fits the full route into the MINIMAP with basic context (msg 2777). Toggle.
-    wholeEl.addEventListener("click", () => {
-      if (!routeLine) return;
-      miniWhole = !miniWhole;
-      wholeEl.classList.toggle("on", miniWhole);
-    });
+    // (the whole-route view moved to the minimap "Trasa" button — msg 2784)
     const syncGo = () => { goBtn.disabled = !(from && to); };
     // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords). Picking a
     // street explicitly clears the "current position" default.
@@ -223,8 +220,7 @@ async function boot() {
         if (res.polyline && res.polyline.length > 1) {
           routeLine = res.polyline; routeI = 0; routeBox = bboxOf(routeLine);
           followEl.disabled = false;                    // auto-pilot now available
-          wholeEl.disabled = false;                     // "show whole route" now available
-          routeFollowOn = followEl.checked;             // honour a pre-ticked toggle
+          routeFollowOn = followEl.checked;             // honour a pre-ticked toggle (minimap "Trasa" auto-enables)
           info.textContent = `trasa ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
           goTo(routeLine[0][0], routeLine[0][1]);       // drop the car at the route's start, on the road
         } else {
@@ -237,7 +233,6 @@ async function boot() {
     document.getElementById("routeClear").addEventListener("click", () => {
       routeLine = null; routeBox = null; from = null; to = null; fromIsCurrent = false;
       routeFollowOn = false; followEl.checked = false; followEl.disabled = true;
-      miniWhole = false; wholeEl.disabled = true; wholeEl.classList.remove("on");
       fromEl.value = ""; toEl.value = "";
       info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
     });
@@ -347,9 +342,12 @@ async function boot() {
     draw(ctx, view, map, car, rules, routeLine, districts);
     // hide violation warnings in bird's-eye — only when the car shows (msg 2768)
     hud.update(rules, view.zoom < OVERVIEW_Z);
-    // minimap: normal car-centred view, OR the whole route (msg 2777) when "show route" is toggled on
-    const whole = miniWhole && routeLine && routeBox ? { line: routeLine, box: routeBox, districts } : null;
-    if (!miniCollapsed) minimap.draw(map, car, rules.street, whole);
+    // minimap modes (City / Trasa buttons on the minimap, msg 2784) — pass the city-wide overview data;
+    // the minimap itself decides local vs city vs route based on its buttons.
+    if (!miniCollapsed) minimap.draw(map, car, rules.street, {
+      districts, landmarks,
+      route: routeLine && routeBox ? { line: routeLine, box: routeBox } : null,
+    });
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)
     if (zoomEl) zoomEl.textContent = `zoom ${view.zoom < 1 ? view.zoom.toFixed(1) : Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
     // persist the car position ~every 1.5 s so a reload resumes where you were (msg 2775)
