@@ -23,6 +23,7 @@
     .card .t{font-weight:800;font-size:18px}
     .card .d{color:#8a93a6;font-size:13px;margin-top:4px}
     .card.soon{opacity:.55}
+    .card-main{display:block;text-decoration:none;color:inherit}
     .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385;border:1px solid var(--line);
       border-radius:999px;padding:2px 8px;margin-left:8px}
     .dist a{color:var(--accent);text-decoration:none;margin-right:12px;font-size:13px}
@@ -56,13 +57,15 @@
     </div>
 
     <div class="cards">
-      <a class="card" href="/drive">
-        <div class="t">🚗 Drive <span class="tag">primary</span></div>
-        <div class="d">Free-roam the real streets of Prague. Arrows to drive, space to brake.</div>
+      <div class="card">
+        <a class="card-main" href="/drive">
+          <div class="t">🚗 Drive <span class="tag">primary</span></div>
+          <div class="d">Free-roam the real streets of Prague. Arrows to drive, space to brake.</div>
+        </a>
         <div class="dist" style="margin-top:10px">
           {% for d in districts %}<a href="/drive?district={{ d.district }}">{{ d.district }} ({{ d.n_edges }})</a>{% endfor %}
         </div>
-      </a>
+      </div>
       <div class="card soon"><div class="t">🧠 Quizzes <span class="tag">soon</span></div>
         <div class="d">Photo quiz · situation simulator · sign trainer · rules flashcards.</div></div>
       <div class="card soon"><div class="t">📖 Official documents <span class="tag">soon</span></div>
