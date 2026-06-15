@@ -42,6 +42,9 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 0) schematic backdrop — buildings, greens, water (behind the roads)
   drawAreas(ctx, view, map);
 
+  // 0b) railway tracks — under the roads (roads cross over), track symbol (msg 2771)
+  drawRails(ctx, view, map, zoom);
+
   // 1) asphalt: ALL casings first, then ALL surfaces in ONE uniform colour. Per-class tints made
   //    crossing roads show a visible seam where two different shades overlapped (Vlad's screenshot);
   //    a single surface colour blends seamlessly, and road hierarchy still reads through width.
@@ -119,6 +122,9 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   //     so you can orient while zoomed right out (msg 2763).
   if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, vis, districts);
 
+  // 4c) stations + major-landmark labels (marker + name), for orientation at most zooms (msg 2771)
+  drawLabels(ctx, view, map, zoom);
+
   // 5) the car — sprite (heading-up) or a heading-pointing arrow (north-up overview)
   drawCar(ctx, view, car);
 }
@@ -152,6 +158,71 @@ function ringPath(ctx, view, poly) {
     i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
   }
   ctx.closePath();
+}
+
+// Railway tracks: heavy/light rail = gray base + a light dashed overlay (the classic track
+// symbol); tram = a thin faint line (it runs in the street). Drawn under the roads (msg 2771).
+function drawRails(ctx, view, map, zoom) {
+  const rails = map.rails;
+  if (!rails || !rails.length) return;
+  ctx.save();
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (const r of rails) {
+    if (r.bb && !view.boxVisible(r.bb)) continue;
+    if (r.kind === "tram") {
+      ctx.setLineDash([]);
+      ctx.strokeStyle = "rgba(150,160,182,.5)";
+      ctx.lineWidth = Math.max(1, zoom * 0.10);
+      path(ctx, view, r.geom); ctx.stroke();
+    } else {
+      ctx.setLineDash([]);
+      ctx.strokeStyle = "#7b8498";
+      ctx.lineWidth = Math.max(1.5, zoom * 0.16);
+      path(ctx, view, r.geom); ctx.stroke();
+      if (zoom >= 4) {                                  // ties/sleepers read as a dashed light overlay
+        ctx.setLineDash([Math.max(2, zoom * 0.6), Math.max(2, zoom * 0.6)]);
+        ctx.strokeStyle = "#d3d9e4";
+        ctx.lineWidth = Math.max(1, zoom * 0.09);
+        path(ctx, view, r.geom); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+  }
+  ctx.restore();
+}
+
+// Station + major-landmark labels (msg 2771): a category-coloured marker (square for rail
+// stations, dot for landmarks) + the name. Shown at most zooms (≥3) so they aid orientation
+// in the overview too; only those within view are drawn.
+const LABEL_COLOR = {
+  station: "#f6c453", museum: "#4cc2c4", attraction: "#4cc2c4", castle: "#d08bdc",
+  monument: "#c0a16b", theatre: "#e0788f", university: "#7aa7ff", hospital: "#ef6a6a",
+  townhall: "#9aa6bd", stadium: "#5fbf7f", airport: "#7aa7ff", church: "#c7b27a",
+};
+// zoomed right out, show only the biggest landmarks (the rest would crowd the overview)
+const OVERVIEW_MAJOR = new Set(["station", "castle", "museum", "university", "hospital", "stadium", "airport"]);
+function drawLabels(ctx, view, map, zoom) {
+  const labels = map.labels;
+  if (!labels || !labels.length || zoom < 3) return;
+  const R = view.visR();
+  ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.font = "600 12px ui-sans-serif,system-ui,sans-serif";
+  for (const L of labels) {
+    if (zoom < 4 && !OVERVIEW_MAJOR.has(L.kind)) continue;   // declutter the overview
+    if (!view.near(L.x, L.y, R)) continue;
+    const [X, Y] = view.project(L.x, L.y);
+    const col = LABEL_COLOR[L.kind] || "#cfd6e2";
+    ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(8,10,15,.85)";
+    if (L.kind === "station") {                        // rail station = filled square
+      ctx.fillStyle = col; ctx.fillRect(X - 4, Y - 4, 8, 8); ctx.strokeRect(X - 4, Y - 4, 8, 8);
+    } else {                                            // landmark = filled dot
+      ctx.beginPath(); ctx.arc(X, Y, 4, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke();
+    }
+    const tx = X + 7;
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(L.name, tx, Y);
+    ctx.fillStyle = "rgba(233,239,249,.96)"; ctx.fillText(L.name, tx, Y);
+  }
+  ctx.textAlign = "center";   // restore default for subsequent text
 }
 
 // Route ribbon: two passes — a soft wide glow then a solid core — so the path reads on any

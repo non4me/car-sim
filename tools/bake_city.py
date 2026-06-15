@@ -67,6 +67,56 @@ def fetch_osm(bbox) -> dict:
     return get(OVERPASS, data=q.encode("utf-8"))
 
 
+RAILWAY_KINDS = {"rail", "light_rail", "narrow_gauge", "tram"}
+
+
+def railway_kind(tags: dict) -> str | None:
+    """Surface railway line → 'rail' (heavy/light) or 'tram'. Underground (subway/tunnel) skipped."""
+    rw = tags.get("railway")
+    if rw not in RAILWAY_KINDS:
+        return None
+    if tags.get("tunnel") in ("yes", "building_passage") or tags.get("location") == "underground":
+        return None
+    return "tram" if rw == "tram" else "rail"
+
+
+def landmark_kind(tags: dict) -> str | None:
+    """Curated 'major city object' classifier (msg 2771): a NAMED feature with a significant tag.
+    The NOISY classes (monument/memorial, generic attraction, place_of_worship) are gated on
+    wikidata/wikipedia notability — that's the "понять сам как определять" filter that keeps the
+    map to genuinely major objects rather than every statue/plaque/chapel."""
+    if not tags.get("name"):
+        return None
+    notable = bool(tags.get("wikidata") or tags.get("wikipedia"))
+    tour, hist = tags.get("tourism"), tags.get("historic")
+    am, leis = tags.get("amenity"), tags.get("leisure")
+    if tour in ("museum", "gallery"):
+        return "museum"
+    if tour in ("zoo", "theme_park", "aquarium"):
+        return "attraction"
+    if tour in ("attraction", "viewpoint") and notable:
+        return "attraction"
+    if hist in ("castle", "palace", "fort"):
+        return "castle"
+    if hist in ("monument", "memorial") and notable:
+        return "monument"
+    if am == "theatre":
+        return "theatre"
+    if am in ("university", "college"):
+        return "university"
+    if am == "hospital":
+        return "hospital"
+    if am == "townhall":
+        return "townhall"
+    if leis == "stadium":
+        return "stadium"
+    if tags.get("aeroway") == "aerodrome":
+        return "airport"
+    if am == "place_of_worship" and notable:
+        return "church"
+    return None
+
+
 def classify_area(tags: dict) -> str | None:
     """Map an OSM closed way to a schematic backdrop kind, or None if not backdrop."""
     if tags.get("building"):
@@ -170,7 +220,8 @@ def _project_water(water_areas, to_xy, tol=4.0) -> list[dict]:
 
 
 def build_artifact(nodes, all_ways, bbox, country, name, out,
-                   debug_only=False, snapshot=None, debug_png=True, place_nodes=None, water_areas=None):
+                   debug_only=False, snapshot=None, debug_png=True, place_nodes=None, water_areas=None,
+                   label_nodes=None):
     """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
     junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`).
     `water_areas` (optional) = pre-assembled multipolygon-aware water rings — used for all-Prague so
@@ -310,6 +361,34 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
                               "tx": round(dx / L, 3), "ty": round(dy / L, 3), "w": width})
     print(f"  pedestrian crossings: {len(crossings)}")
 
+    # railway tracks (msg 2771): surface rail/tram lines as simplified polylines (own corridor or
+    # in-street); subway/tunnel skipped in railway_kind. Rendered with a track symbol.
+    rails = []
+    for wy in all_ways:
+        rk = railway_kind(wy.get("tags", {}))
+        if not rk:
+            continue
+        pts = [to_xy(nodes[x]["lat"], nodes[x]["lon"]) for x in wy["nodes"] if x in nodes]
+        if len(pts) < 2:
+            continue
+        simp = [pts[0]]
+        for p in pts[1:]:
+            if math.hypot(p[0] - simp[-1][0], p[1] - simp[-1][1]) >= 3.0:
+                simp.append(p)
+        if len(simp) < 2:
+            continue
+        rails.append({"kind": rk, "geom": [[round(x, 1), round(y, 1)] for x, y in simp]})
+    print(f"  railway lines: {len(rails)}")
+
+    # named labels (stations + major landmarks, msg 2771) — pre-collected by the front-end as
+    # {lat,lon,kind,name}; project to metres.
+    labels = []
+    for ln in (label_nodes or []):
+        x, y = to_xy(ln["lat"], ln["lon"])
+        labels.append({"x": round(x, 1), "y": round(y, 1), "kind": ln["kind"], "name": ln["name"]})
+    lk = Counter(l["kind"] for l in labels)
+    print(f"  labels (stations/landmarks): {len(labels)} {dict(lk)}")
+
     # bounds (metres)
     xs = [p[0] for ed in edges for p in ed["geom"]]
     ys = [p[1] for ed in edges for p in ed["geom"]]
@@ -327,11 +406,19 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         return
 
     # tile by grid
-    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": [], "signs": [], "crossings": []})
+    tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": [], "signs": [],
+                                 "crossings": [], "rails": [], "labels": []})
     for ed in edges:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ed["geom"]}
         for k in keys:
             tiles[f"{k[0]}_{k[1]}"]["edges"].append(ed)
+    for rl in rails:
+        keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in rl["geom"]}
+        for k in keys:
+            tiles[f"{k[0]}_{k[1]}"]["rails"].append(rl)
+    for lb in labels:
+        k = f"{int(lb['x']//TILE_M)}_{int(lb['y']//TILE_M)}"
+        tiles[k]["labels"].append(lb)
     for jc in junctions:
         k = f"{int(jc['x']//TILE_M)}_{int(jc['y']//TILE_M)}"
         tiles[k]["junctions"].append(jc)
@@ -356,6 +443,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
         "n_areas": len(areas), "n_signs": len(signs), "n_crossings": len(crossings),
+        "n_rails": len(rails), "n_labels": len(labels),
         "version": 2, "profile": country,
         "snapshot": snapshot,   # OSM data date (pbf timestamp) — shown in-app
         "attribution": "© OpenStreetMap contributors (ODbL)",
