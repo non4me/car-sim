@@ -14,7 +14,7 @@
 <figure class="rounded-xl overflow-hidden border border-line photo">
   <img src="{{ base }}{{ q.photo }}" alt="Praha" class="w-full aspect-[4/3] object-cover" loading="eager">
   <figcaption class="px-2.5 py-1 text-[10px] text-slate-500 flex justify-between">
-    <span>📍 Praha</span><span>{{ t.photo_by }}: {{ q.photographer }} · {{ q.license }}</span>
+    <span>📍 {{ q.locality }}</span><span>{{ t.photo_by }}: {{ q.photographer }} · {{ q.license }}</span>
   </figcaption>
 </figure>
 

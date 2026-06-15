@@ -170,6 +170,7 @@ def localized(q: dict, lang: str) -> dict:
         "photographer": q.get("photographer", "Panoramax"),
         "license": q.get("license", "CC-BY-SA 4.0"),
         "difficulty": q.get("difficulty", 1),
+        "locality": q.get("locality") or "Praha",   # photo city — new questions are from Plzeň/HK/ČB, not Praha
     }
 
 
