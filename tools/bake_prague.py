@@ -18,7 +18,7 @@ from pathlib import Path
 import osmium
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from bake_city import ROOT, build_artifact, railway_kind, landmark_kind, RAILWAY_KINDS  # shared
+from bake_city import ROOT, build_artifact, railway_kind, landmark_kind, poi_kind, RAILWAY_KINDS  # shared
 
 # Prague bbox (S, W, N, E) — same convention as DISTRICTS in bake_city.py
 PRAGUE_BBOX = (49.941, 14.224, 50.177, 14.707)
@@ -55,12 +55,15 @@ def _want_way(tags) -> bool:
 
 
 def read_pbf(path: str):
-    """pbf → (nodes, all_ways, places, labels) matching the Overpass element shapes build_artifact expects."""
+    """pbf → (nodes, all_ways, places, labels, pois, addrs) in the Overpass element shapes build_artifact expects."""
     nodes: dict = {}      # id -> {"lat","lon","tags"}
     all_ways: list = []   # {"id","nodes":[ids],"tags":{}}
     places: list = []     # {"name","lat","lon","kind"} — districts/quarters for search
     labels: list = []     # {"lat","lon","kind","name"} — stations + major landmarks (msg 2771)
+    pois: list = []       # {"lat","lon","kind","name"?} — pharmacies/ATMs/food/shops… (phase 2)
+    addrs: list = []      # {"lat","lon","n"} — house numbers (phase 2)
     s, w, n, e = PRAGUE_BBOX
+    inbb = lambda la, lo: s <= la <= n and w <= lo <= e
     # with_locations() caches every node's coord in C++; EmptyTagFilter means Python only sees
     # TAGGED objects (all our ways + the control nodes) — untagged nodes are still cached for geometry.
     fp = osmium.FileProcessor(path).with_locations().with_filter(osmium.filter.EmptyTagFilter())
@@ -77,14 +80,27 @@ def read_pbf(path: str):
             place, nm = o.tags.get("place"), o.tags.get("name")
             if place in PLACE_KINDS and nm and s <= o.location.lat <= n and w <= o.location.lon <= e:
                 places.append({"name": nm, "lat": o.location.lat, "lon": o.location.lon, "kind": place})
+            la, lo = o.location.lat, o.location.lon
             ntags = {t.k: t.v for t in o.tags}
             lab = label_for(ntags)                        # station / landmark POINT node
-            if lab and s <= o.location.lat <= n and w <= o.location.lon <= e:
-                labels.append({"lat": o.location.lat, "lon": o.location.lon, "kind": lab[0], "name": lab[1]})
+            if lab and inbb(la, lo):
+                labels.append({"lat": la, "lon": lo, "kind": lab[0], "name": lab[1]})
+            pk = poi_kind(ntags)                          # everyday POI node (phase 2)
+            if pk and inbb(la, lo):
+                d = {"lat": la, "lon": lo, "kind": pk}
+                if ntags.get("name"):
+                    d["name"] = ntags["name"]
+                pois.append(d)
+            hn = ntags.get("addr:housenumber")            # house number node (phase 2)
+            if hn and inbb(la, lo):
+                addrs.append({"lat": la, "lon": lo, "n": hn})
         elif o.is_way():
             tags = {t.k: t.v for t in o.tags}
-            lab = label_for(tags)                         # station / landmark as a building/way → centroid
-            if not (_want_way(tags) or lab):
+            lab = label_for(tags)                         # station/landmark/POI as a building/way → centroid
+            pk = poi_kind(tags)
+            hn = tags.get("addr:housenumber")
+            want = _want_way(tags)
+            if not (want or lab or pk or hn):
                 continue
             nids, clat, clon = [], 0.0, 0.0
             for nr in o.nodes:
@@ -95,16 +111,25 @@ def read_pbf(path: str):
                 clat += nr.location.lat; clon += nr.location.lon
                 if nid not in nodes:
                     nodes[nid] = {"lat": nr.location.lat, "lon": nr.location.lon, "tags": {}}
-            if nids and lab:
-                cy, cx = clat / len(nids), clon / len(nids)
-                if s <= cy <= n and w <= cx <= e:
-                    labels.append({"lat": cy, "lon": cx, "kind": lab[0], "name": lab[1]})
-            if len(nids) >= 2 and _want_way(tags):
+            if not nids:
+                continue
+            cy, cx = clat / len(nids), clon / len(nids)   # way centroid for point features
+            here = inbb(cy, cx)
+            if lab and here:
+                labels.append({"lat": cy, "lon": cx, "kind": lab[0], "name": lab[1]})
+            if pk and here:
+                d = {"lat": cy, "lon": cx, "kind": pk}
+                if tags.get("name"):
+                    d["name"] = tags["name"]
+                pois.append(d)
+            if hn and here:
+                addrs.append({"lat": cy, "lon": cx, "n": hn})
+            if len(nids) >= 2 and want:
                 all_ways.append({"id": o.id, "nodes": nids, "tags": tags})
                 n_ways += 1
                 if n_ways % 50000 == 0:
                     print(f"  …{n_ways} ways, {len(nodes)} nodes")
-    return nodes, all_ways, places, labels
+    return nodes, all_ways, places, labels, pois, addrs
 
 
 def read_water_areas(path: str) -> list:
@@ -152,23 +177,26 @@ def main():
 
     snapshot = args.snapshot or _snapshot_from_header(args.pbf)
     print(f"[{args.name}] reading {args.pbf} (snapshot {snapshot})…")
-    nodes, all_ways, places, labels = read_pbf(args.pbf)
-    # dedup labels co-located under the same name (a landmark mapped as both a node and a building)
-    seen, uniq = set(), []
-    for lb in labels:
-        key = (lb["kind"], lb["name"], round(lb["lat"], 3), round(lb["lon"], 3))
-        if key in seen:
-            continue
-        seen.add(key); uniq.append(lb)
-    labels = uniq
+    nodes, all_ways, places, labels, pois, addrs = read_pbf(args.pbf)
+    # dedup labels/POIs co-located under the same name (mapped as both a node and a building)
+    def dedup(items, keyfn):
+        seen, uniq = set(), []
+        for it in items:
+            k = keyfn(it)
+            if k in seen:
+                continue
+            seen.add(k); uniq.append(it)
+        return uniq
+    labels = dedup(labels, lambda l: (l["kind"], l["name"], round(l["lat"], 3), round(l["lon"], 3)))
+    pois = dedup(pois, lambda p: (p["kind"], p.get("name", ""), round(p["lat"], 4), round(p["lon"], 4)))
     print(f"[{args.name}] parsed {len(all_ways)} ways, {len(nodes)} nodes, {len(places)} places, "
-          f"{len(labels)} labels → processing…")
+          f"{len(labels)} labels, {len(pois)} pois, {len(addrs)} house-numbers → processing…")
     water = read_water_areas(args.pbf)
     print(f"[{args.name}] assembled {len(water)} water areas (incl. multipolygon rivers)")
     out = ROOT / "data" / "cities" / args.country / "praha" / args.name
     build_artifact(nodes, all_ways, PRAGUE_BBOX, args.country, args.name, out,
                    snapshot=snapshot, debug_png=False, place_nodes=places, water_areas=water,
-                   label_nodes=labels)
+                   label_nodes=labels, poi_nodes=pois, addr_nodes=addrs)
 
 
 if __name__ == "__main__":

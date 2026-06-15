@@ -117,6 +117,31 @@ def landmark_kind(tags: dict) -> str | None:
     return None
 
 
+def poi_kind(tags: dict) -> str | None:
+    """Everyday POIs to show along the street you're driving (msg 2771): pharmacies, ATMs, banks,
+    eateries, fuel, shops, emergency/post. Distinct from the big landmarks in landmark_kind()."""
+    am, shop = tags.get("amenity"), tags.get("shop")
+    if am == "pharmacy":
+        return "pharmacy"
+    if am == "atm":
+        return "atm"
+    if am in ("bank", "bureau_de_change"):
+        return "bank"
+    if am in ("restaurant", "cafe", "fast_food", "bar", "pub", "biergarten", "food_court"):
+        return "food"
+    if am == "fuel":
+        return "fuel"
+    if am == "police":
+        return "police"
+    if am == "fire_station":
+        return "fire"
+    if am == "post_office":
+        return "post"
+    if shop in ("supermarket", "convenience", "bakery", "mall", "greengrocer", "butcher", "kiosk"):
+        return "shop"
+    return None
+
+
 def classify_area(tags: dict) -> str | None:
     """Map an OSM closed way to a schematic backdrop kind, or None if not backdrop."""
     if tags.get("building"):
@@ -221,7 +246,7 @@ def _project_water(water_areas, to_xy, tol=4.0) -> list[dict]:
 
 def build_artifact(nodes, all_ways, bbox, country, name, out,
                    debug_only=False, snapshot=None, debug_png=True, place_nodes=None, water_areas=None,
-                   label_nodes=None):
+                   label_nodes=None, poi_nodes=None, addr_nodes=None):
     """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
     junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`).
     `water_areas` (optional) = pre-assembled multipolygon-aware water rings — used for all-Prague so
@@ -389,6 +414,22 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
     lk = Counter(l["kind"] for l in labels)
     print(f"  labels (stations/landmarks): {len(labels)} {dict(lk)}")
 
+    # everyday POIs + house numbers (msg 2771 phase 2) — pre-collected {lat,lon,...}; project to
+    # metres. Rendered only when zoomed in close, so the street you're on shows its full detail.
+    pois = []
+    for pn in (poi_nodes or []):
+        x, y = to_xy(pn["lat"], pn["lon"])
+        p = {"x": round(x, 1), "y": round(y, 1), "kind": pn["kind"]}
+        if pn.get("name"):
+            p["name"] = pn["name"]
+        pois.append(p)
+    addrs = []
+    for an in (addr_nodes or []):
+        x, y = to_xy(an["lat"], an["lon"])
+        addrs.append({"x": round(x, 1), "y": round(y, 1), "n": an["n"]})
+    pk = Counter(p["kind"] for p in pois)
+    print(f"  POIs: {len(pois)} {dict(pk)};  house numbers: {len(addrs)}")
+
     # bounds (metres)
     xs = [p[0] for ed in edges for p in ed["geom"]]
     ys = [p[1] for ed in edges for p in ed["geom"]]
@@ -407,7 +448,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
 
     # tile by grid
     tiles = defaultdict(lambda: {"edges": [], "junctions": [], "areas": [], "signs": [],
-                                 "crossings": [], "rails": [], "labels": []})
+                                 "crossings": [], "rails": [], "labels": [], "pois": [], "addrs": []})
     for ed in edges:
         keys = {(int(p[0] // TILE_M), int(p[1] // TILE_M)) for p in ed["geom"]}
         for k in keys:
@@ -419,6 +460,12 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
     for lb in labels:
         k = f"{int(lb['x']//TILE_M)}_{int(lb['y']//TILE_M)}"
         tiles[k]["labels"].append(lb)
+    for po in pois:
+        k = f"{int(po['x']//TILE_M)}_{int(po['y']//TILE_M)}"
+        tiles[k]["pois"].append(po)
+    for ad in addrs:
+        k = f"{int(ad['x']//TILE_M)}_{int(ad['y']//TILE_M)}"
+        tiles[k]["addrs"].append(ad)
     for jc in junctions:
         k = f"{int(jc['x']//TILE_M)}_{int(jc['y']//TILE_M)}"
         tiles[k]["junctions"].append(jc)
@@ -443,7 +490,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
         "n_areas": len(areas), "n_signs": len(signs), "n_crossings": len(crossings),
-        "n_rails": len(rails), "n_labels": len(labels),
+        "n_rails": len(rails), "n_labels": len(labels), "n_pois": len(pois), "n_addrs": len(addrs),
         "version": 2, "profile": country,
         "snapshot": snapshot,   # OSM data date (pbf timestamp) — shown in-app
         "attribution": "© OpenStreetMap contributors (ODbL)",

@@ -59,7 +59,7 @@ export async function loadMap(base) {
   const loading = new Set();                        // keys currently being fetched
 
   // merged, deduped view of the resident tiles (what the renderer + rules read)
-  const map = { meta, edges: [], junctions: [], areas: [], signs: [], crossings: [], rails: [], labels: [], nearestEdge, onSurface, update };
+  const map = { meta, edges: [], junctions: [], areas: [], signs: [], crossings: [], rails: [], labels: [], pois: [], addrs: [], nearestEdge, onSurface, update };
   let grid = new Map();
 
   function buildGrid(edges) {
@@ -84,7 +84,7 @@ export async function loadMap(base) {
   // tiles (dedupe by signature); junctions/signs are baked into exactly one tile (no dupes).
   function rebuild() {
     const seen = new Set(), seenA = new Set(), seenR = new Set(), seenL = new Set();
-    const edges = [], junctions = [], areas = [], signs = [], crossings = [], rails = [], labels = [];
+    const edges = [], junctions = [], areas = [], signs = [], crossings = [], rails = [], labels = [], pois = [], addrs = [];
     for (const t of resident.values()) {
       for (const e of t.edges) {
         const sig = `${e.a}_${e.b}_${e.cls}_${e.geom.length}`;
@@ -116,10 +116,12 @@ export async function loadMap(base) {
         seenL.add(sig);
         labels.push(l);
       }
+      for (const po of t.pois || []) pois.push(po);             // POIs + house numbers: 1 tile each, no dedupe
+      for (const ad of t.addrs || []) addrs.push(ad);
     }
     grid = buildGrid(edges);
     map.edges = edges; map.junctions = junctions; map.areas = areas; map.signs = signs; map.crossings = crossings;
-    map.rails = rails; map.labels = labels;
+    map.rails = rails; map.labels = labels; map.pois = pois; map.addrs = addrs;
   }
 
   function candidates(x, y) {
@@ -177,7 +179,7 @@ export async function loadMap(base) {
     loading.add(k);
     return fetch(`${base}/tiles/${k}.json`).then((r) => r.json()).then((t) => {
       loading.delete(k);
-      resident.set(k, { edges: t.edges || [], junctions: t.junctions || [], areas: t.areas || [], signs: t.signs || [], crossings: t.crossings || [], rails: t.rails || [], labels: t.labels || [] });
+      resident.set(k, { edges: t.edges || [], junctions: t.junctions || [], areas: t.areas || [], signs: t.signs || [], crossings: t.crossings || [], rails: t.rails || [], labels: t.labels || [], pois: t.pois || [], addrs: t.addrs || [] });
     }).catch(() => { loading.delete(k); });
   }
 

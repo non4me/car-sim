@@ -125,6 +125,11 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 4c) stations + major-landmark labels (marker + name), for orientation at most zooms (msg 2771)
   drawLabels(ctx, view, map, zoom);
 
+  // 4d) close-up street detail (msg 2771 phase 2): POIs (pharmacy/ATM/food/shop…) when zoomed in,
+  //     and house numbers when very close — so the street you're on shows its full info.
+  if (zoom >= 13) drawPois(ctx, view, map, zoom);
+  if (zoom >= 15) drawHouseNumbers(ctx, view, map);
+
   // 5) the car — sprite (heading-up) or a heading-pointing arrow (north-up overview)
   drawCar(ctx, view, car);
 }
@@ -223,6 +228,54 @@ function drawLabels(ctx, view, map, zoom) {
     ctx.fillStyle = "rgba(233,239,249,.96)"; ctx.fillText(L.name, tx, Y);
   }
   ctx.textAlign = "center";   // restore default for subsequent text
+}
+
+// Everyday POIs along the street (msg 2771 phase 2): a category-coloured dot with a small glyph,
+// plus the name once very zoomed in. Only those in view at close zoom are drawn.
+const POI_COLOR = {
+  pharmacy: "#36c46e", atm: "#f2b035", bank: "#f2b035", food: "#ec7a43",
+  fuel: "#5b9cff", police: "#5b9cff", fire: "#ef4444", post: "#f2b035", shop: "#c084fc",
+};
+const POI_GLYPH = {
+  pharmacy: "+", atm: "$", bank: "$", food: "F", fuel: "G", police: "P", fire: "!", post: "@", shop: "S",
+};
+function drawPois(ctx, view, map, zoom) {
+  const pois = map.pois;
+  if (!pois || !pois.length) return;
+  const R = view.visR();
+  const showName = zoom >= 15;
+  for (const po of pois) {
+    if (!view.near(po.x, po.y, R)) continue;
+    const [X, Y] = view.project(po.x, po.y);
+    ctx.beginPath(); ctx.arc(X, Y, 5, 0, 7);
+    ctx.fillStyle = POI_COLOR[po.kind] || "#cfd6e2"; ctx.fill();
+    ctx.lineWidth = 1.4; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.stroke();
+    ctx.fillStyle = "#0b0e14"; ctx.font = "800 8px ui-sans-serif,system-ui,sans-serif";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(POI_GLYPH[po.kind] || "", X, Y + 0.5);
+    if (showName && po.name) {
+      ctx.textAlign = "left"; ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(po.name, X + 8, Y);
+      ctx.fillStyle = "rgba(228,235,246,.96)"; ctx.fillText(po.name, X + 8, Y);
+    }
+  }
+  ctx.textAlign = "center";   // restore default
+}
+
+// House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close
+// (so the street you're driving shows its addresses without flooding the whole map).
+function drawHouseNumbers(ctx, view, map) {
+  const addrs = map.addrs;
+  if (!addrs || !addrs.length) return;
+  const R = view.visR();
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = "600 10px ui-sans-serif,system-ui,sans-serif";
+  ctx.fillStyle = "rgba(158,168,188,.9)";
+  for (const a of addrs) {
+    if (!view.near(a.x, a.y, R)) continue;
+    const [X, Y] = view.project(a.x, a.y);
+    ctx.fillText(a.n, X, Y);
+  }
 }
 
 // Route ribbon: two passes — a soft wide glow then a solid core — so the path reads on any
