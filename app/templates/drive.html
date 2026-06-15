@@ -96,6 +96,10 @@
     #routeInfo{font-size:12px;color:#8a93a6;flex:1}
     #routeInfo.ok{color:var(--good)}
     #routeInfo.err{color:var(--bad)}
+    #routeFollowRow{display:flex;align-items:center;gap:7px;font-size:12px;color:#cdd5e6;cursor:pointer;user-select:none}
+    #routeFollowRow:has(#routeFollow:disabled){opacity:.45;cursor:default}
+    #routeFollow{accent-color:var(--accent);width:15px;height:15px;cursor:pointer}
+    #routeFollow:disabled{cursor:default}
 
     /* minimap — top right, under the location label (2× size, msg 2691) */
     #minimap{right:14px;top:44px;pointer-events:auto;background:rgba(12,16,24,.9);
@@ -188,6 +192,9 @@
       <span id="routeInfo">vyber dvě ulice</span>
       <button id="routeClear" title="Zrušit trasu">✕</button>
     </div>
+    <label id="routeFollowRow" title="Auto-jízda po trase: řízení automatické, plyn/brzda na tobě">
+      <input type="checkbox" id="routeFollow" disabled> 🚗 Automatické sledování trasy
+    </label>
   </div>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>

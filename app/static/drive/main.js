@@ -14,6 +14,8 @@ const ZMIN = 2, ZMAX = 25;      // absolute zoom bounds in px/metre (Vlad msg 26
 const ZOOM_DEFAULT = 16;        // starting zoom (px/m), wheel-adjustable, persisted
 const OVERVIEW_Z = 5;           // below this px/m → bird's-eye overview (car drawn as an arrow)
 const OFFROAD_WALL = 4.3;       // metres the car may sink off-road before a wall blocks going deeper
+const FOLLOW_TURN = 1.85;       // rad/s — max auto-steer rate in route-follow (matches the car's turnRate)
+const FOLLOW_LOOKAHEAD = 14;    // metres ahead on the route the auto-pilot aims for (pure-pursuit)
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -63,6 +65,8 @@ async function boot() {
   let paused = false;
   let miniCollapsed = false;
   let routeLine = null;   // server-computed route polyline (world coords), drawn over the asphalt when set
+  let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
+  let routeI = 0;              // progress index along routeLine (segment the car is on)
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -147,7 +151,10 @@ async function boot() {
     const toEl = document.getElementById("routeTo");
     const goBtn = document.getElementById("routeGo");
     const info = document.getElementById("routeInfo");
+    const followEl = document.getElementById("routeFollow");
     let from = null, to = null, fromIsCurrent = false;   // fromIsCurrent → "From" = the car's live position
+    // auto-pilot toggle: only meaningful with a route; throttle/brake stay manual (msg 2759 #3)
+    followEl.addEventListener("change", () => { routeFollowOn = followEl.checked && !!routeLine; routeI = 0; });
     const syncGo = () => { goBtn.disabled = !(from && to); };
     // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords). Picking a
     // street explicitly clears the "current position" default.
@@ -177,11 +184,13 @@ async function boot() {
           + `&fx=${from.x}&fy=${from.y}&tx=${to.x}&ty=${to.y}`;
         const res = await fetch(u).then((r) => r.json());
         if (res.polyline && res.polyline.length > 1) {
-          routeLine = res.polyline;
+          routeLine = res.polyline; routeI = 0;
+          followEl.disabled = false;                    // auto-pilot now available
+          routeFollowOn = followEl.checked;             // honour a pre-ticked toggle
           info.textContent = `trasa ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
           goTo(routeLine[0][0], routeLine[0][1]);       // drop the car at the route's start, on the road
         } else {
-          routeLine = null; info.textContent = "trasa nenalezena"; info.className = "err";
+          routeLine = null; routeFollowOn = false; info.textContent = "trasa nenalezena"; info.className = "err";
         }
       } catch (err) {
         routeLine = null; info.textContent = "chyba spojení"; info.className = "err";
@@ -189,31 +198,98 @@ async function boot() {
     });
     document.getElementById("routeClear").addEventListener("click", () => {
       routeLine = null; from = null; to = null; fromIsCurrent = false;
+      routeFollowOn = false; followEl.checked = false; followEl.disabled = true;
       fromEl.value = ""; toEl.value = "";
       info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
     });
   }
 
+  // ROUTE AUTO-PILOT (msg 2759 #3): pure-pursuit a point FOLLOW_LOOKAHEAD m ahead on the route.
+  // Returns the world target, or {done:true} at the destination. Tracks routeI so it never walks
+  // backward (and only scans a forward window, so 600-point routes stay cheap per frame).
+  function routeTarget() {
+    const R = routeLine;
+    let bi = routeI, bd = Infinity, bt = 0;
+    for (let i = routeI; i < R.length - 1 && i < routeI + 40; i++) {
+      const ax = R[i][0], ay = R[i][1], dx = R[i + 1][0] - ax, dy = R[i + 1][1] - ay;
+      const l2 = dx * dx + dy * dy;
+      let t = l2 ? ((car.x - ax) * dx + (car.y - ay) * dy) / l2 : 0; t = Math.max(0, Math.min(1, t));
+      const cx = ax + t * dx, cy = ay + t * dy, d = (car.x - cx) ** 2 + (car.y - cy) ** 2;
+      if (d < bd) { bd = d; bi = i; bt = t; }
+    }
+    routeI = bi;
+    let look = FOLLOW_LOOKAHEAD, i = bi;
+    let px = R[i][0] + (R[i + 1][0] - R[i][0]) * bt, py = R[i][1] + (R[i + 1][1] - R[i][1]) * bt;
+    while (i < R.length - 1) {
+      const bx = R[i + 1][0], by = R[i + 1][1], seg = Math.hypot(bx - px, by - py);
+      if (seg >= look) { const t = look / seg; return { x: px + (bx - px) * t, y: py + (by - py) * t, done: false }; }
+      look -= seg; i++; px = R[i][0]; py = R[i][1];
+    }
+    const end = R[R.length - 1];
+    return { x: end[0], y: end[1], done: Math.hypot(car.x - end[0], car.y - end[1]) < 8 };
+  }
+
+  // Lane-keep (msg 2759 #2): when cruising straight (not steering), ease the heading onto the road
+  // tangent (in the travel direction) and the position toward the lane centre — the right half of a
+  // two-way carriageway (RHT), the centreline of a one-way. Gentle + only when already roughly
+  // aligned, so deliberate crossings/turns aren't fought.
+  function laneAlign(dt) {
+    const ne = map.nearestEdge(car.x, car.y);
+    if (!ne.edge) return;
+    let tx = ne.tx, ty = ne.ty;
+    if (Math.cos(car.h) * tx + Math.sin(car.h) * ty < 0) { tx = -tx; ty = -ty; }   // align to travel dir
+    let dh = Math.atan2(ty, tx) - car.h;
+    dh = Math.atan2(Math.sin(dh), Math.cos(dh));
+    if (Math.abs(dh) > 1.0) return;                              // >~57° off → a turn/crossing, don't fight
+    car.h += dh * Math.min(1, 3.0 * dt);                        // ease heading onto the road
+    const offset = ne.edge.oneway ? 0 : ne.edge.width / 4;      // lane centre: right of travel (RHT)
+    const cx = ne.px + ty * offset, cy = ne.py - tx * offset;
+    const kp = Math.min(1, 1.6 * dt);
+    car.x += (cx - car.x) * kp; car.y += (cy - car.y) * kp;
+  }
+
   function update(dt) {
     if (paused) return;                               // Esc / lost focus freezes the sim
     const controls = dbg || input.controls();
-    // ONE driving model everywhere (heading-up, rotate-in-place): the car always points up and
-    // turns the same way at every zoom. Overview (zoom < OVERVIEW_Z) only tightens the off-road
-    // wall so the car effectively can't leave the road network (msg 2691); at normal zoom the car
-    // may sink ~one body-length off-road before the wall blocks going deeper (msg 2694).
-    const wall = view.zoom < OVERVIEW_Z ? 0.2 : OFFROAD_WALL;
+    // ONE driving model everywhere (heading-up, rotate-in-place). Off-road: NEVER brake (msg 2759 #1) —
+    // overview (arrow) roams free; at normal zoom a soft wall only blocks going DEEPER past OFFROAD_WALL,
+    // keeping the car's speed so you can steer back out. Only the map boundary is a hard wall.
+    const wall = view.zoom < OVERVIEW_Z ? Infinity : OFFROAD_WALL;
     const px = car.x, py = car.y;
     car.blocked = false;
-    car.update(dt, controls);
-    rules = evalRules(map, car);
-    if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
-    else {
-      // off-road (sidewalk/"black zone"): no speed penalty — drive in/along/out freely, but once
-      // the car has sunk past `wall` metres, block going DEEPER like a wall. Off-road is flagged as
-      // a violation by the rules (HUD "Mimo vozovku").
-      const pen = offroadPen(car.x, car.y);
-      if (pen > wall && pen > offroadPen(px, py)) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }
+
+    const following = routeFollowOn && routeLine && routeLine.length > 1;
+    let handled = false;
+    if (following) {
+      const tgt = routeTarget();
+      if (tgt.done) { car.v = 0; finishRoute(); handled = true; }   // arrived → stop, hand back to manual
+      else {
+        const desired = Math.atan2(tgt.y - car.y, tgt.x - car.x);   // pure-pursuit: aim at the look-ahead
+        let dh = Math.atan2(Math.sin(desired - car.h), Math.cos(desired - car.h));
+        const mt = FOLLOW_TURN * dt;
+        car.h += Math.max(-mt, Math.min(mt, dh));                   // auto-steer (rate-limited)
+        car.update(dt, { throttle: controls.throttle, brake: controls.brake, hard: controls.hard, turn: 0 });
+        handled = true;
+      }
     }
+    if (!handled) car.update(dt, controls);
+
+    rules = evalRules(map, car);
+    if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }   // map edge = real wall
+    else {
+      const pen = offroadPen(car.x, car.y);
+      if (pen > wall && pen > offroadPen(px, py)) { car.x = px; car.y = py; car.blocked = true; }  // block deeper, DON'T brake
+    }
+    // auto-align onto the lane after a turn — not while steering / auto-following / off-road / crawling
+    if (!following && controls.turn === 0 && car.v > 1 && rules.onSurface) laneAlign(dt);
+  }
+
+  // route-follow finished/aborted: drop auto-pilot and reflect it in the panel toggle + info
+  function finishRoute() {
+    routeFollowOn = false;
+    const f = document.getElementById("routeFollow"); if (f) f.checked = false;
+    const info = document.getElementById("routeInfo");
+    if (info) { info.textContent = "cíl ✓"; info.className = "ok"; }
   }
 
   const zoomEl = document.getElementById("zoomind");
