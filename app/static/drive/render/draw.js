@@ -176,17 +176,19 @@ function drawRails(ctx, view, map, zoom) {
     if (r.bb && !view.boxVisible(r.bb)) continue;
     if (r.kind === "tram") {
       ctx.setLineDash([]);
-      ctx.strokeStyle = "rgba(150,160,182,.5)";
+      ctx.strokeStyle = "rgba(92,100,118,.4)";          // tram: very faint (secondary, runs in-street)
       ctx.lineWidth = Math.max(1, zoom * 0.10);
       path(ctx, view, r.geom); ctx.stroke();
     } else {
+      // rails are SECONDARY info (msg 2776) → dark gray, only a touch above the background, with a
+      // muted (not white) tie overlay so they read as track without competing with the roads.
       ctx.setLineDash([]);
-      ctx.strokeStyle = "#7b8498";
+      ctx.strokeStyle = "#363d4a";
       ctx.lineWidth = Math.max(1.5, zoom * 0.16);
       path(ctx, view, r.geom); ctx.stroke();
-      if (zoom >= 4) {                                  // ties/sleepers read as a dashed light overlay
+      if (zoom >= 4) {
         ctx.setLineDash([Math.max(2, zoom * 0.6), Math.max(2, zoom * 0.6)]);
-        ctx.strokeStyle = "#d3d9e4";
+        ctx.strokeStyle = "#4b5365";
         ctx.lineWidth = Math.max(1, zoom * 0.09);
         path(ctx, view, r.geom); ctx.stroke();
         ctx.setLineDash([]);
