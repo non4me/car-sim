@@ -31,6 +31,8 @@ SURVIVAL_LIVES = 3             # Survival
 
 photo_app = FastAPI(title="car-sim · photo quiz")
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+from .. import auth, ui as _ui                                # shared common header (msg 2837)
+templates.env.globals["hdr"] = _ui
 photo_app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 if PHOTOS.exists():
     photo_app.mount("/photos", StaticFiles(directory=str(PHOTOS)), name="photos")
@@ -236,6 +238,7 @@ def ctx(request: Request, lang: str, **kw):
         "request": request, "t": strings(lang), "lang": lang,
         "secs": QUESTION_SECONDS, "langs": LANGS_META, "lang_meta": lm,
         "base": request.scope.get("root_path", ""),   # mount prefix (/quiz/photo) for template URLs
+        "user": auth.current_user(request),            # for the shared header (msg 2837)
     }
     base.update(kw)
     return base
@@ -248,19 +251,22 @@ def healthz():
 
 
 @photo_app.get("/", response_class=HTMLResponse)
-def home(request: Request, lang: str | None = None, ui_lang: str | None = Cookie(default=None),
-         accept_language: str | None = Header(default=None)):
-    chosen = detect_lang(lang, ui_lang, accept_language)
+def home(request: Request, lang: str | None = None, carsim_lang: str | None = Cookie(default=None),
+         ui_lang: str | None = Cookie(default=None), accept_language: str | None = Header(default=None)):
+    # carsim_lang is the app-wide cookie set by the shared header (msg 2837); prefer it over the legacy ui_lang
+    chosen = detect_lang(lang, carsim_lang or ui_lang, accept_language)
     counts = {k: len(topic_pool(k)) for k in TOPIC_TYPES}
     resp = templates.TemplateResponse("index.html", ctx(request, chosen, count=len(QUESTIONS), counts=counts))
+    resp.set_cookie("carsim_lang", chosen, max_age=60 * 60 * 24 * 365, samesite="lax")
     resp.set_cookie("ui_lang", chosen, max_age=60 * 60 * 24 * 365, samesite="lax")
     return resp
 
 
 @photo_app.post("/start", response_class=HTMLResponse)
 def start(request: Request, mode: str = Form("quick"), topic: str = Form("all"),
-          ui_lang: str | None = Cookie(default=None), accept_language: str | None = Header(default=None)):
-    lang = detect_lang(None, ui_lang, accept_language)
+          carsim_lang: str | None = Cookie(default=None), ui_lang: str | None = Cookie(default=None),
+          accept_language: str | None = Header(default=None)):
+    lang = detect_lang(None, carsim_lang or ui_lang, accept_language)
     if not QUESTIONS:
         return templates.TemplateResponse("index.html", ctx(request, lang, count=0, counts={}))
     sid = new_session(lang, "survival", topic)   # one game type: lives, no timer (msg 2827)

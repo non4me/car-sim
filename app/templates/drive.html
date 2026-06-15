@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="{{ lang }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>car-sim — drive · {{ district }}</title>
+  {{ hdr.assets() }}
   <style>
     :root{ --panel:#141925; --line:#222a3a; --accent:#5b9cff; --bad:#f87171; --warn:#f6c453; --good:#34d399; }
     html,body{margin:0;height:100%;background:#0b0e14;color:#e6e9f0;
@@ -156,7 +157,7 @@
 
   <div class="hud" id="topbar">
     <div class="tb-left">
-      <a href="/">← car-sim</a>
+      {{ hdr.logo() }}
       <button id="helpBtn" title="Ovládání">?</button>
       <div id="searchWrap">
         <input id="searchInput" type="text" placeholder="Hledat ulici / čtvrť…" autocomplete="off" spellcheck="false">
@@ -164,9 +165,10 @@
       </div>
       <button id="routeBtn" title="Trasa mezi ulicemi">🛣 Trasa</button>
     </div>
-    <div class="meta">
-      Praha{% if snapshot %} · data OSM {{ snapshot }}{% endif %}
-      {% if user %}<a href="/me" style="margin-left:12px">👤 {{ (user.display_name or user.email).split('@')[0] }}</a>{% if user.role == 'admin' %} · <a href="/admin">🛠️</a>{% endif %}{% else %}<a href="/login" style="margin-left:12px">Přihlásit</a>{% endif %}
+    <div class="meta" style="display:flex;align-items:center;gap:12px">
+      <span class="ah-hide-sm">Praha{% if snapshot %} · OSM {{ snapshot }}{% endif %}</span>
+      {{ hdr.lang_dropdown(lang) }}
+      {{ hdr.user_menu(lang, user) }}
     </div>
   </div>
 

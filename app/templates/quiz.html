@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="{{ lang }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,15 +27,15 @@
   </style>
 </head>
 <body>
+  {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <a class="back" href="/">← car-sim</a>
     <h1>🧠 <span class="accent">Quizzes</span></h1>
     <div class="sub">Learn Czech road rules on real Prague street photos — free, no login.</div>
 
     <div class="cards">
       <a class="card" href="/quiz/photo">
         <div class="t">📷 Photo quiz <span class="tag live">live</span></div>
-        <div class="d">Real street photos, 10 languages. Quick · Exam · Survival modes, XP &amp; ranks, leaderboard.</div>
+        <div class="d">Real street photos, 10 languages. Lives game — 3 ❤, XP &amp; ranks, leaderboard.</div>
       </a>
       <a class="card" href="/quiz/situations">
         <div class="t">🚦 Situation simulator <span class="tag live">live</span></div>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" class="h-full">
+<html lang="{{ lang }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,8 +35,8 @@
   </style>
 </head>
 <body>
+  {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <a class="home" href="/">← <span style="color:#e6e9f0">car</span>-sim</a>
     <h1>{{ 'Vytvořit účet' if mode == 'register' else 'Přihlásit se' }}</h1>
     <div class="sub">Hraní je volné i bez účtu — účet jen ukládá tvé jízdy a statistiky.</div>
 

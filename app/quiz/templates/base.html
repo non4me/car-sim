@@ -28,35 +28,8 @@
   </style>
 </head>
 <body class="h-full min-h-full antialiased">
+  {{ hdr.header(lang, user) }}
   <div class="mx-auto max-w-xl min-h-full flex flex-col">
-    <header class="flex items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-3">
-        <a href="/" class="text-accent text-sm font-bold hover:opacity-80">← car-sim</a>
-        <a href="{{ base }}/" class="flex items-center gap-2 font-bold tracking-tight text-lg">
-          <span class="inline-grid place-items-center w-7 h-7 rounded-md bg-accent/20 text-accent">◉</span>
-          <span><span class="text-accent">U</span>lice</span>
-        </a>
-      </div>
-      <nav class="relative text-sm" id="langnav">
-        <button id="langbtn" type="button" aria-haspopup="listbox" aria-expanded="false"
-          class="flex items-center gap-2 bg-panel border border-line rounded-md pl-2 pr-2 py-1.5 text-slate-200 hover:border-accent/60">
-          {{ flag(lang_meta[2], base) }}
-          <span>{{ lang_meta[1] }}</span>
-          <span class="text-slate-500 text-[10px]">▾</span>
-        </button>
-        <ul id="langmenu" role="listbox"
-          class="hidden absolute right-0 mt-1 w-48 max-h-[28rem] overflow-auto bg-panel border border-line rounded-lg shadow-xl shadow-black/40 z-50 py-1">
-          {% for code, name, cc in langs %}
-          <li>
-            <a href="{{ base }}/?lang={{ code }}" role="option"
-               class="flex items-center gap-2.5 px-3 py-1.5 hover:bg-line {{ 'text-accent font-medium' if code == lang else 'text-slate-200' }}">
-              {{ flag(cc, base) }}<span>{{ name }}</span>
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </nav>
-    </header>
     <main class="flex-1 px-4 pb-6">
       {% block content %}{% endblock %}
     </main>

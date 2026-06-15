@@ -22,6 +22,8 @@ SC_DIR = Path(os.environ.get("SCENARIOS_DIR", BASE / "scenarios"))
 
 sim_app = FastAPI(title="car-sim · situation simulator")
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+from ... import auth, ui as _ui                               # shared common header (msg 2837)
+templates.env.globals["hdr"] = _ui
 sim_app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
 
@@ -52,6 +54,7 @@ def home(request: Request):
     return templates.TemplateResponse("index.html", {
         "request": request,
         "base": request.scope.get("root_path", ""),   # mount prefix (/quiz/situations) for template URLs
+        "lang": _ui.resolve_lang(request), "user": auth.current_user(request),  # shared header (msg 2837)
     })
 
 

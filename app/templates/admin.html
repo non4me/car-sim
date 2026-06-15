@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="cs" class="h-full">
+<html lang="{{ lang }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,15 +44,8 @@
   </style>
 </head>
 <body>
+  {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <div class="top">
-      <a class="home" href="/">← <span style="color:#e6e9f0">car</span>-sim</a>
-      <div class="menu">
-        <a href="/drive">🚗 Jezdit</a>
-        <a href="/me">👤 Profil</a>
-        <a href="/auth/logout">Odhlásit</a>
-      </div>
-    </div>
 
     <h1>🛠️ Admin</h1>
     <div class="sub">Správa uživatelů. Admin e-maily ({{ admin_emails|join(', ') }}) jsou povýšeny automaticky.</div>

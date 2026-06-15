@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="h-full">
+<html lang="{{ lang }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,48 +39,38 @@
   </style>
 </head>
 <body>
+  {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <div class="usermenu">
-      {% if user %}
-        <a href="/me">👤 {{ user.display_name or user.email }}</a>
-        {% if user.role == 'admin' %}<a href="/admin">🛠️ Admin</a>{% endif %}
-        <a href="/auth/logout">Odhlásit</a>
-      {% else %}
-        <a href="/login">Přihlásit se</a>
-        <a class="cta" href="/login?mode=register">Registrace</a>
-      {% endif %}
-    </div>
     <h1><span class="accent">car</span>-sim</h1>
-    <div class="sub">Learn to drive a real city — on its actual streets, with real signs and limits.</div>
+    <div class="sub">{{ t.sub }}</div>
 
     <div class="row">
-      <div class="pick"><label>Country</label><b>🇨🇿 Česko</b></div>
-      <div class="pick"><label>City</label><b>Praha</b></div>
-      <div class="pick"><label>Language</label><b>English</b></div>
+      <div class="pick"><label>{{ t.country }}</label><b>🇨🇿 Česko</b></div>
+      <div class="pick"><label>{{ t.city }}</label><b>Praha</b></div>
     </div>
 
     <div class="cards">
       <div class="card">
         <a class="card-main" href="/drive">
-          <div class="t">🚗 Drive <span class="tag">primary</span></div>
-          <div class="d">Free-roam the real streets of Prague. Arrows to drive, space to brake.</div>
+          <div class="t">🚗 {{ t.drive_t }} <span class="tag">{{ t.tag_primary }}</span></div>
+          <div class="d">{{ t.drive_d }}</div>
         </a>
         <div class="dist" style="margin-top:10px">
-          <span class="dist-lbl">Začít v:</span>
-          {% for d in districts %}<a href="/drive?district={{ d.district }}" title="{{ d.n_edges }} úseků silnic">{% if d.district == 'prague' %}🌍 Celá Praha{% else %}{{ d.district|capitalize }} <span class="dist-note">(malá ukázka)</span>{% endif %}</a>{% endfor %}
+          <span class="dist-lbl">{{ t.start_in }}</span>
+          {% for d in districts %}<a href="/drive?district={{ d.district }}" title="{{ d.n_edges }} úseků silnic">{% if d.district == 'prague' %}🌍 {{ t.all_prague }}{% else %}{{ d.district|capitalize }} <span class="dist-note">({{ t.small_demo }})</span>{% endif %}</a>{% endfor %}
         </div>
       </div>
       <a class="card" href="/quiz">
-        <div class="t">🧠 Quizzes <span class="tag">live</span></div>
-        <div class="d">Photo quiz on real Prague streets · situation simulator · sign trainer · rules flashcards.</div>
+        <div class="t">🧠 {{ t.quiz_t }} <span class="tag">{{ t.tag_live }}</span></div>
+        <div class="d">{{ t.quiz_d }}</div>
       </a>
       <a class="card" href="/docs">
-        <div class="t">📖 Official documents <span class="tag">live</span></div>
-        <div class="d">Laws & rules of the road, searchable, kept current — linked to the authoritative source.</div>
+        <div class="t">📖 {{ t.docs_t }} <span class="tag">{{ t.tag_live }}</span></div>
+        <div class="d">{{ t.docs_d }}</div>
       </a>
     </div>
 
-    <footer>Map data © OpenStreetMap contributors (ODbL). Educational project.</footer>
+    <footer>{{ t.footer }}</footer>
   </div>
 </body>
 </html>

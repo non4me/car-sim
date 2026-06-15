@@ -10,7 +10,7 @@ import secrets
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
-from . import db
+from . import db, ui
 
 ADMIN_EMAILS = {e.strip().lower() for e in
                 os.environ.get("ADMIN_EMAILS", "vladimir.troyanenko@gmail.com").split(",") if e.strip()}
@@ -122,7 +122,7 @@ def _render_login(request: Request, *, error: str | None = None, mode: str = "lo
         nxt = ""
     return templates.TemplateResponse(request, "login.html", {
         "google_enabled": GOOGLE_ENABLED, "error": error, "mode": mode, "next": nxt,
-        "user": current_user(request),
+        "user": current_user(request), "lang": ui.resolve_lang(request),
     }, status_code=status, headers={"Cache-Control": "no-cache"})
 
 

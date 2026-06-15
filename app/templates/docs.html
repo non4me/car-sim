@@ -46,13 +46,8 @@
   </style>
 </head>
 <body>
+  {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <div class="top">
-      <a class="back" href="/">← car-sim</a>
-      <select class="langsel" aria-label="language" onchange="location.href='/docs?lang='+this.value+'{% if q %}&q={{ q|urlencode }}{% endif %}'">
-        {% for code, name in langs %}<option value="{{ code }}" {{ 'selected' if code == lang }}>{{ name }}</option>{% endfor %}
-      </select>
-    </div>
     {% if lang != 'cs' %}<div class="disc">⚠️ {{ ui.disclaimer }}</div>{% endif %}
     <h1>📖 {{ ui.docs_title_a }} <span class="accent">{{ ui.docs_title_b }}</span></h1>
     <div class="sub">{{ ui.docs_sub }}</div>

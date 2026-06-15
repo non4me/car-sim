@@ -12,6 +12,7 @@
     .fade-in{animation:fi .2s ease}@keyframes fi{from{opacity:0}to{opacity:1}}
     .btn{transition:transform .06s, filter .15s}.btn:active{transform:scale(.97)}
   </style>
+  {{ hdr.assets() }}
 </head>
 <body class="h-full">
   <div class="relative w-full h-full mx-auto max-w-3xl">
@@ -42,7 +43,9 @@
 
     <!-- start / scenario menu -->
     <div id="menu" class="absolute inset-0 bg-ink/95 backdrop-blur flex flex-col items-center justify-center p-6 text-center fade-in">
-      <a href="/quiz" class="absolute top-4 left-4 text-accent text-sm font-bold hover:opacity-80">← car-sim</a>
+      <div class="absolute top-3 left-3">{{ hdr.logo() }}</div>
+      <div class="absolute top-3 right-3 flex items-center gap-2.5">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div>
+      <a href="/quiz" class="absolute top-16 left-4 text-accent text-sm font-bold hover:opacity-80">← {{ 'Quizzes' }}</a>
       <h1 class="text-3xl font-extrabold tracking-tight">Ulice <span class="text-accent">Sim</span></h1>
       <p class="mt-2 text-slate-400 text-sm max-w-sm">Dopravní situace z ptačí perspektivy. Projeď křižovatkou podle pravidel — a hned se dozvíš proč.</p>
       <div id="scenario-list" class="mt-6 w-full max-w-sm grid gap-2"></div>

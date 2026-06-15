@@ -12,6 +12,7 @@ COPY app/ ./app/
 COPY data/cities/ ./data/cities/
 COPY data/quiz/ ./data/quiz/
 COPY data/docs/ ./data/docs/
+COPY data/i18n/ ./data/i18n/
 
 EXPOSE 8080
 HEALTHCHECK --interval=15s --timeout=4s --start-period=10s --retries=5 \
