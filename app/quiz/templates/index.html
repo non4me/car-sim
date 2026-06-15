@@ -18,24 +18,11 @@
       {% endfor %}
     </div>
 
-    <div class="text-xs uppercase tracking-wide text-slate-500 mb-2">{{ t.choose_mode }}</div>
-    <div class="grid gap-3">
-      <button name="mode" value="quick" class="opt flex items-center gap-4 rounded-xl border border-line bg-panel p-4 text-left hover:border-accent/60">
-        <span class="text-2xl">⚡</span>
-        <span class="flex-1"><span class="font-bold block">{{ t.mode_quick }}</span><span class="text-xs text-slate-400">{{ t.mode_quick_d }}</span></span>
-        <span class="text-accent text-lg">▶</span>
-      </button>
-      <button name="mode" value="exam" class="opt flex items-center gap-4 rounded-xl border border-line bg-panel p-4 text-left hover:border-accent/60">
-        <span class="text-2xl">📋</span>
-        <span class="flex-1"><span class="font-bold block">{{ t.mode_exam }}</span><span class="text-xs text-slate-400">{{ t.mode_exam_d }}</span></span>
-        <span class="text-accent text-lg">▶</span>
-      </button>
-      <button name="mode" value="survival" class="opt flex items-center gap-4 rounded-xl border border-line bg-panel p-4 text-left hover:border-accent/60">
-        <span class="text-2xl">❤️</span>
-        <span class="flex-1"><span class="font-bold block">{{ t.mode_survival }}</span><span class="text-xs text-slate-400">{{ t.mode_survival_d }}</span></span>
-        <span class="text-accent text-lg">▶</span>
-      </button>
-    </div>
+    <button name="mode" value="survival" class="opt w-full flex items-center gap-4 rounded-xl bg-accent text-ink p-4 text-left hover:brightness-110">
+      <span class="text-2xl leading-none">❤️❤️❤️</span>
+      <span class="flex-1"><span class="font-extrabold block text-lg">{{ t.mode_survival }}</span><span class="text-xs opacity-80">{{ t.mode_survival_d }}</span></span>
+      <span class="text-xl">▶</span>
+    </button>
   </form>
 
   <div class="mt-5 text-center text-xs text-slate-500">📷 {{ t.real_photos }} · Praha · {{ count }} {{ t.questions_word }}</div>

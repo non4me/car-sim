@@ -1,15 +1,5 @@
 {% include "_hud.html" %}
 
-{# countdown timer #}
-<div id="qtimer" data-seconds="{{ secs }}" class="mb-3">
-  <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-    <span>⏱</span><span data-num class="tabular-nums">{{ secs }}</span>
-  </div>
-  <div class="h-1.5 w-full rounded-full bg-line overflow-hidden">
-    <div data-bar class="timerbar h-full bg-accent rounded-full" style="width:100%"></div>
-  </div>
-</div>
-
 {# real street photo #}
 <figure class="rounded-xl overflow-hidden border border-line photo">
   <img src="{{ base }}{{ q.photo }}" alt="Praha" class="w-full aspect-[4/3] object-cover" loading="eager">

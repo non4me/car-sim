@@ -25,7 +25,6 @@
     @keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
     @keyframes pop{0%{opacity:0;transform:translate(-50%,8px) scale(.8)}25%{opacity:1;transform:translate(-50%,0) scale(1.08)}70%{opacity:1;transform:translate(-50%,-10px) scale(1)}100%{opacity:0;transform:translate(-50%,-34px) scale(.95)}}
     .photo{background:#0c0f17}
-    .timerbar{transition:width .1s linear}
   </style>
 </head>
 <body class="h-full min-h-full antialiased">
@@ -83,25 +82,6 @@
   </script>
   <script>
   (function(){
-    var raf=null, answered=false;
-    function clearTimer(){ if(raf){cancelAnimationFrame(raf);raf=null;} }
-    function startTimer(el){
-      clearTimer(); answered=false;
-      var secs=parseFloat(el.getAttribute('data-seconds')||'20');
-      var bar=el.querySelector('[data-bar]'), num=el.querySelector('[data-num]');
-      var end=Date.now()+secs*1000;
-      (function tick(){
-        var left=Math.max(0,end-Date.now());
-        var pct=left/(secs*1000)*100;
-        if(bar){ bar.style.width=pct+'%';
-          if(pct<25){bar.classList.remove('bg-accent');bar.classList.add('bg-bad');}
-          else{bar.classList.add('bg-accent');bar.classList.remove('bg-bad');} }
-        if(num) num.textContent=Math.ceil(left/1000);
-        if(left<=0){ clearTimer(); if(!answered){answered=true;
-          htmx.ajax('POST','{{ base }}/answer',{target:'#game',swap:'innerHTML',values:{choice:-1}});} return; }
-        raf=requestAnimationFrame(tick);
-      })();
-    }
     function toast(html, cls){
       var d=document.createElement('div');
       d.className='pointer-events-none fixed left-1/2 z-50 font-extrabold text-center '+cls;
@@ -122,7 +102,6 @@
       }
     }
     function lockOpts(){
-      answered=true; clearTimer();
       var box=document.getElementById('options');
       if(box){ box.querySelectorAll('button').forEach(function(b){ b.disabled=true; b.classList.add('opacity-50','pointer-events-none'); }); }
     }
@@ -132,12 +111,8 @@
     });
     document.body.addEventListener('htmx:afterSwap', function(e){
       if(e.target && e.target.id==='game'){
-        var t=document.getElementById('qtimer'); if(t) startTimer(t);
         var c=document.getElementById('combo'); if(c) showCombo(c);
       }
-    });
-    document.addEventListener('DOMContentLoaded', function(){
-      var t=document.getElementById('qtimer'); if(t) startTimer(t);
     });
   })();
   </script>

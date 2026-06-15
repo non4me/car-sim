@@ -263,7 +263,7 @@ def start(request: Request, mode: str = Form("quick"), topic: str = Form("all"),
     lang = detect_lang(None, ui_lang, accept_language)
     if not QUESTIONS:
         return templates.TemplateResponse("index.html", ctx(request, lang, count=0, counts={}))
-    sid = new_session(lang, mode, topic)
+    sid = new_session(lang, "survival", topic)   # one game type: lives, no timer (msg 2827)
     s = SESSIONS[sid]
     q = serve_next(s)
     resp = templates.TemplateResponse("game.html", ctx(request, lang, q=q, hud=hud(s)))
@@ -285,9 +285,9 @@ def answer(request: Request, choice: int = Form(...), sid: str | None = Cookie(d
                 is_correct=(choice == q["correct_index"]), timed_out=False,
                 points=0, time_bonus=0, mult=1.0, level_up=False, over=is_over(s)))
 
-    elapsed = min(QUESTION_SECONDS, max(0.0, time.time() - s["q_served_at"]))
-    timed_out = (choice < 0)
-    is_correct = (not timed_out) and (choice == q["correct_index"])
+    # lives-only game (msg 2827): no timer, so no timeout and no time bonus — a wrong answer costs a life.
+    is_correct = (0 <= choice == q["correct_index"])
+    timed_out = False
     prev_level = rank_info(s["xp"], lang)["level"]
 
     points = time_bonus = 0
@@ -296,8 +296,7 @@ def answer(request: Request, choice: int = Form(...), sid: str | None = Cookie(d
     if is_correct:
         streak_now = s["streak"] + 1
         mult = 2.0 if streak_now >= 5 else 1.5 if streak_now >= 3 else 1.0
-        time_bonus = round(10 * (QUESTION_SECONDS - elapsed) / QUESTION_SECONDS)
-        points = round((10 + time_bonus) * mult)
+        points = round(10 * mult)
         s["score"] += points
         s["xp"] += points
         s["streak"] = streak_now
@@ -305,7 +304,7 @@ def answer(request: Request, choice: int = Form(...), sid: str | None = Cookie(d
         s["correct"] += 1
     else:
         s["streak"] = 0
-        if s["mode"] == "survival" and s["lives"] is not None:
+        if s["lives"] is not None:
             s["lives"] = max(0, s["lives"] - 1)
 
     level_up = rank_info(s["xp"], lang)["level"] > prev_level

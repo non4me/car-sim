@@ -34,12 +34,11 @@
 <div class="mt-4 rounded-xl border {{ 'border-good/40 bg-good/5' if is_correct else 'border-bad/40 bg-bad/5' }} p-4 fade-in">
   <div class="flex items-center justify-between">
     <div class="font-bold {{ 'text-good' if is_correct else 'text-bad' }}">
-      {% if is_correct %}✓ {{ t.correct }}{% elif timed_out %}⏱ {{ t.timeout }}{% else %}✕ {{ t.wrong }}{% endif %}
+      {% if is_correct %}✓ {{ t.correct }}{% else %}✕ {{ t.wrong }}{% endif %}
     </div>
     {% if is_correct %}
     <div class="text-xs text-slate-400 tabular-nums">
       <span class="text-good font-semibold">+{{ points }}</span>
-      {% if time_bonus %} · ⚡+{{ time_bonus }}{% endif %}
       {% if mult > 1 %} · <span class="text-amber-400">×{{ '2' if mult == 2.0 else '1.5' }}</span>{% endif %}
     </div>
     {% endif %}
