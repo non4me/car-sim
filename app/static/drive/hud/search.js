@@ -14,11 +14,13 @@ export async function loadSearchIndex(base) {
     // landmarks = the major city-wide objects (station/castle/…) baked into search.json (msg 2784).
     const places = (idx.places || []).map((p) => ({ name: p.name, x: p.x, y: p.y, kind: p.kind }));
     const landmarks = (idx.landmarks || []).map((l) => ({ name: l.name, x: l.x, y: l.y, kind: l.kind }));
-    // admin = the city's official numbered/named districts (Praha 1…22, Brno-…, …) for the City minimap (msg 2964)
-    const admin = (idx.admin || []).map((a) => ({ name: a.name, x: a.x, y: a.y, n: a.n }));
-    return { items, places, landmarks, admin };
+    // admin = the city's official districts with boundary polygons (Praha 1…22, Brno-…) for the City minimap
+    // (msg 2964/2970); road_refs = numbered-highway badge points (D0/D1/…) (msg 2971).
+    const admin = (idx.admin || []).map((a) => ({ name: a.name, x: a.x, y: a.y, n: a.n, poly: a.poly || null }));
+    const roadRefs = (idx.road_refs || []).map((r) => ({ ref: r.ref, x: r.x, y: r.y, m: !!r.m }));
+    return { items, places, landmarks, admin, roadRefs };
   } catch {
-    return { items: [], places: [], landmarks: [], admin: [] };
+    return { items: [], places: [], landmarks: [], admin: [], roadRefs: [] };
   }
 }
 

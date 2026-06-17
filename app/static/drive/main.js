@@ -99,7 +99,8 @@ async function boot() {
   let districts = [];          // {name,x,y,kind} district/quarter labels (overview mode 2763 + City/Trasa minimap 2784)
   let landmarks = [];          // {name,x,y,kind} major city-wide objects for the City/Trasa minimap (msg 2784)
   let overview = null;         // {water,roads,green} city-wide landscape for the City minimap (msg 2959)
-  let admin = [];              // {name,x,y,n} official city districts — the only labels the City minimap shows (msg 2964)
+  let admin = [];              // {name,x,y,n,poly} official city districts (dashed outlines + numbers) — City minimap (msg 2964/2970)
+  let roadRefs = [];           // {ref,x,y,m} numbered-highway badge points (D0/D1/…) for the City minimap (msg 2971)
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -216,12 +217,13 @@ async function boot() {
       await new Promise((r) => setTimeout(r, 80));    // wait for the destination tiles to stream in
     }
   }
-  loadSearchIndex(window.CARSIM.dataBase).then(({ items, places, landmarks: lms, admin: adm }) => {
+  loadSearchIndex(window.CARSIM.dataBase).then(({ items, places, landmarks: lms, admin: adm, roadRefs: rr }) => {
     makeSearchBox(document.getElementById("searchInput"), document.getElementById("searchResults"), items, goTo);
     setupRoute(items);
     districts = places.length ? places : items.filter((i) => i.kind === "district");  // keep place-kind for City/Trasa (msg 2784)
     landmarks = lms;                                          // major city-wide objects for the City/Trasa minimap
     admin = adm || [];                                        // official districts — the City minimap's only labels (msg 2964)
+    roadRefs = rr || [];                                      // numbered-highway badges (msg 2971)
   });
   // city-wide landscape (river/main roads/parks) for the minimap "City" mode (msg 2959) — loaded once
   fetch(`${window.CARSIM.dataBase}/overview.json`).then((r) => (r.ok ? r.json() : null))
@@ -405,7 +407,7 @@ async function boot() {
     // minimap modes (City / Trasa buttons on the minimap, msg 2784) — pass the city-wide overview data;
     // the minimap itself decides local vs city vs route based on its buttons.
     if (!miniCollapsed) minimap.draw(map, car, rules.street, {
-      districts, landmarks, overview, admin, cityName: window.CARSIM.cityName,
+      districts, landmarks, overview, admin, roadRefs, cityName: window.CARSIM.cityName,
       route: routeLine && routeBox ? { line: routeLine, box: routeBox } : null,
     });
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)

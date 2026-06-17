@@ -79,7 +79,7 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
   function makePlacer() {
     const placed = [];
     return (X, Y, text, color, alpha, fontPx) => {
-      ctx.font = `700 ${fontPx}px ui-sans-serif,system-ui,sans-serif`;
+      ctx.font = `400 ${fontPx}px ui-sans-serif,system-ui,sans-serif`;   // not bold (msg 2969); the dark halo keeps it legible
       const w = ctx.measureText(text).width, h = fontPx + 1, pad = 1.5;
       const box = [X - w / 2 - pad, Y - h / 2 - pad, X + w / 2 + pad, Y + h / 2 + pad];
       if (box[0] < 2 || box[2] > size - 2 || box[1] < 11 || box[3] > size - 2) return false;
@@ -111,14 +111,14 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
     ctx.closePath(); ctx.fillStyle = "#ffd24a"; ctx.fill();
   }
   function tag(text) {
-    ctx.globalAlpha = 1; ctx.fillStyle = "rgba(170,180,200,.85)";
-    ctx.font = "700 8px ui-sans-serif,system-ui,sans-serif";
+    ctx.globalAlpha = 1; ctx.fillStyle = "rgba(186,196,214,.9)";
+    ctx.font = "500 9px ui-sans-serif,system-ui,sans-serif";   // city-name corner label, not bold (msg 2969)
     ctx.textAlign = "left"; ctx.textBaseline = "top";
     ctx.fillText(text, 4, 3);
   }
   function northTick() {
     ctx.globalAlpha = 1; ctx.fillStyle = "rgba(170,180,200,.7)";
-    ctx.font = "700 9px ui-sans-serif,system-ui,sans-serif";
+    ctx.font = "500 9px ui-sans-serif,system-ui,sans-serif";
     ctx.textAlign = "center"; ctx.textBaseline = "top";
     ctx.fillText("N", size / 2, 3);
   }
@@ -179,13 +179,14 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
         ctx.fillStyle = "rgba(70,98,78,.5)";
         for (const a of ovd.green) { ctx.beginPath(); ring(a.poly); ctx.fill(); }
       }
-      if (ovd.roads) {                                  // main roads in LIGHT GREY (msg 2964); motorway/trunk a touch brighter & thicker
-        ctx.lineCap = "round"; ctx.lineJoin = "round";
-        for (const p of [{ t: (r) => r === 2, col: "rgba(150,156,168,.5)", w: 0.8 },
-                         { t: (r) => r <= 1, col: "rgba(196,202,212,.82)", w: 1.5 }]) {
+      if (ovd.roads) {                                  // CLEAN single lines, width BY CLASS (msg 2974/2975):
+        ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.setLineDash([]);  // motorway thickest → primary thinnest
+        for (const p of [{ r: 2, col: "rgba(140,147,160,.5)",  w: 0.6 },    // primary — thin
+                         { r: 1, col: "rgba(170,177,190,.7)",  w: 1.0 },    // trunk — medium
+                         { r: 0, col: "rgba(206,212,222,.9)",  w: 1.7 }]) { // motorway — thickest
           ctx.strokeStyle = p.col; ctx.lineWidth = p.w;
           for (const rd of ovd.roads) {
-            if (!p.t(rd.r)) continue;
+            if (rd.r !== p.r) continue;
             ctx.beginPath();
             for (let i = 0; i < rd.g.length; i++) { const [X, Y] = toM(rd.g[i][0], rd.g[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
             ctx.stroke();
@@ -211,23 +212,36 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
         ctx.stroke();
       }
     }
-    // ONLY globally-significant labels (msg 2964): the city's OFFICIAL districts, nothing else.
-    // Prague = numbered Praha 1…16 (1–10 larger, 11–16 smaller, 17+ dropped); other cities = their
-    // named městská část. The city's own name is NOT printed in the centre — it's the corner tag now.
+    // admin district BOUNDARIES as dashed outlines (msg 2970); Prague keeps only 1–16.
+    const adminList = (ov.admin || []).filter((a) => !(a.n != null && a.n > 16));
+    ctx.save();
+    ctx.setLineDash([2.5, 2]); ctx.lineWidth = 0.9; ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(150,174,210,.78)";
+    for (const a of adminList) {
+      if (!a.poly || a.poly.length < 3) continue;
+      ctx.beginPath();
+      for (let i = 0; i < a.poly.length; i++) { const [X, Y] = toM(a.poly[i][0], a.poly[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+      ctx.closePath(); ctx.stroke();
+    }
+    ctx.restore();
+
+    // the district NUMBER inside each outline (msg 2970): Prague 1–16 (1–10 larger, 11–16 smaller); other
+    // cities show the short district name. Non-bold (msg 2969). Low numbers placed first → win the de-overlap.
+    const stripCity = (name) => {
+      const cn = ov.cityName || "";
+      return cn && (name.startsWith(cn + "-") || name.startsWith(cn + " ")) ? name.slice(cn.length + 1) : name;
+    };
     const place = makePlacer();
-    // low-numbered districts (Praha 1/2/3 = the central core) placed FIRST so they win the de-overlap over
-    // the outer ones; named districts (n=null, other cities) fall back to inner-first (msg 2964).
-    const admin = (ov.admin || []).filter((a) => !(a.n != null && a.n > 16))
-      .sort((a, b2) => ((a.n ?? 999) - (b2.n ?? 999))
-        || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
-    for (const a of admin) {
+    const labels = adminList.slice().sort((a, b2) => ((a.n ?? 999) - (b2.n ?? 999))
+      || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
+    for (const a of labels) {
       const [X, Y] = toM(a.x, a.y);
       const big = a.n != null && a.n <= 10;
-      const fp = a.n == null ? 9 : big ? 10 : 8;             // named → medium; numbered 1–10 → big; 11–16 → smaller
-      const alpha = a.n == null ? 0.9 : big ? 0.97 : 0.72;
-      place(X, Y, a.name, "rgba(224,231,243,1)", alpha, fp);
+      const text = a.n != null ? String(a.n) : stripCity(a.name);
+      const fp = a.n == null ? 8 : big ? 11 : 9;             // named → small; number 1–10 → big; 11–16 → medium
+      place(X, Y, text, "rgba(228,234,244,1)", a.n == null ? 0.85 : big ? 1 : 0.8, fp);
     }
-    if (!admin.length) {                                    // city without harvested admin districts → fall back to place labels
+    if (!adminList.length) {                                 // city without harvested admin districts → fall back to place labels
       const districts = (ov.districts || []).slice().sort((a, b2) =>
         ((PLACE_RANK[a.kind] ?? 9) - (PLACE_RANK[b2.kind] ?? 9))
         || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
@@ -236,6 +250,30 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
         const [X, Y] = toM(d.x, d.y);
         place(X, Y, d.name, "rgba(224,231,243,1)", (PLACE_RANK[d.kind] ?? 9) <= 2 ? 0.95 : 0.66, PLACE_FONT[d.kind] ?? 8);
       }
+    }
+
+    // numbered-highway badges — small blue plates with the road number (msg 2971); motorways win the de-overlap.
+    // Only the dálnice/expressway designations (D0, D1, R7…) + the city ring (MO) — the silnice I/II numbers
+    // (4, 5, 243…) would clutter and be confused with the district numbers.
+    const isHwy = (ref) => /^[DR]\d/.test(ref) || ref === "MO";
+    const badgeBoxes = [];
+    for (const r of (ov.roadRefs || [])) {
+      if (!isHwy(r.ref)) continue;
+      const [X, Y] = toM(r.x, r.y);
+      ctx.font = "500 8px ui-sans-serif,system-ui,sans-serif";
+      const w = ctx.measureText(r.ref).width + 6, h = 11, x0 = X - w / 2, y0 = Y - h / 2;
+      if (x0 < 2 || x0 + w > size - 2 || y0 < 11 || y0 + h > size - 2) continue;
+      let hit = false;
+      for (const bx of badgeBoxes) if (!(x0 + w < bx[0] || x0 > bx[2] || y0 + h < bx[1] || y0 > bx[3])) { hit = true; break; }
+      if (hit) continue;
+      badgeBoxes.push([x0, y0, x0 + w, y0 + h]);
+      ctx.fillStyle = r.m ? "rgba(32,86,190,.95)" : "rgba(54,104,176,.9)";
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x0, y0, w, h, 2.5); else ctx.rect(x0, y0, w, h);
+      ctx.fill();
+      ctx.lineWidth = 0.6; ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.stroke();
+      ctx.fillStyle = "#fff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(r.ref, X, Y + 0.4);
     }
     // car position
     const [px, py] = toM(car.x, car.y);
