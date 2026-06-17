@@ -167,7 +167,7 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 4a) road-number shields on motorways/main roads (msg 3015) — CZ-coloured (red D, blue I, yellow II/III,
   //     green E). Drawn FIRST so the sparse, important road numbers reliably win the shared guard; anchored
   //     to the nearest on-road point → stable across zoom/pan (msg 3030). Current road's number → HUD.
-  if (zoom >= 4) drawRoadRefs(ctx, view, vis, zoom, guard, rules && rules.street);
+  if (zoom >= 4) drawRoadRefs(ctx, view, map.edges, zoom, guard, rules && rules.street);
 
   // 4) street-name labels ON the connecting roads at intersections (NOT the current
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
@@ -175,7 +175,7 @@ export function draw(ctx, view, map, car, rules, route, districts) {
 
   // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
   //     so you can orient while zoomed right out (msg 2763).
-  if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, vis, districts);
+  if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, map.edges, districts);
 
   // 4c) stations + major-landmark labels (marker + name), for orientation at most zooms (msg 2771)
   drawLabels(ctx, view, map, zoom, guard);
@@ -536,33 +536,63 @@ function drawRefBadge(ctx, X, Y, text, st, h) {
   ctx.fillStyle = st.fg; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(text, X, Y + h * 0.04);
 }
-// ONE shield per road number, anchored to the point on that road NEAREST the camera. Previously the shield
-// sat at an edge MIDPOINT gated by view.near() — so as the camera panned, the midpoint vertex flipped in/out
-// of range and the shield popped on/off and jumped between connector edges of the same road (msg 3030). The
-// nearest on-road point slides smoothly and is always in view while the road is, so the shield stays put.
-// The CURRENT road's number is shown in the HUD next to the street name (msg 3030) → skipped here.
-function drawRoadRefs(ctx, view, vis, zoom, guard, currentStreet) {
-  const R2 = (view.visR() * 1.05) ** 2;
-  const h = Math.max(11, Math.min(17, zoom * 0.95));     // badge height in px
+// Static, world-pinned label STATIONS (msg 3035). Google places a road number / street name at FIXED points
+// along the road and just lets them scroll with the map — it does NOT slide one label along the road to chase
+// the camera (which the earlier midpoint+near and nearest-to-camera anchors both did). We get that by laying a
+// fixed world grid of `cell` metres and keeping, per (cell, key), the single on-road sample nearest that
+// cell's centre. The position depends only on geometry + the grid → it's pinned to the world, deterministic,
+// and independent of zoom/pan: labels appear at fixed spots ~every `cell` m along each road and only scroll.
+function gridStations(edges, keyOf, view, cell, step) {
   const cx = view.cx, cy = view.cy;
-  const best = new Map();                                 // ref / E-key -> nearest-to-camera on-road anchor
-  for (const e of vis) {
-    const key = e.ref || (e.iref ? "E" + e.iref.replace(/\s+/g, "") : null);
-    if (!key) continue;
-    if (currentStreet && e.name === currentStreet) continue;   // current road → HUD badge, not the map
-    if (edgeLen(e) < 8) continue;                              // ignore tiny artefacts
-    const p = nearestOnGeom(e.geom, cx, cy);
-    if (p.d2 > R2) continue;
-    const prev = best.get(key);
-    if (!prev || p.d2 < prev.d2) best.set(key, { e, x: p.x, y: p.y, d2: p.d2 });
+  // Consider every edge that can touch the view (cull only by a COARSE per-edge radius, never per-sample) —
+  // so the cell winner is computed from the full geometry and is identical regardless of where the camera
+  // sits. A per-sample camera cull would make the winner (and thus the label) slide with the camera.
+  const maxR2 = (view.visR() + 3 * cell) ** 2;
+  const out = new Map();                                   // "ci,cj|key" -> {x,y,dirx,diry,e,dc}
+  for (const e of edges) {
+    const key = keyOf(e);
+    if (key == null) continue;
+    if (e.bb) {                                            // coarse cull (margin-only → visible stations stable)
+      const mx = (e.bb[0] + e.bb[2]) / 2, my = (e.bb[1] + e.bb[3]) / 2;
+      if ((mx - cx) ** 2 + (my - cy) ** 2 > maxR2) continue;
+    }
+    const g = e.geom;
+    for (let i = 0; i < g.length; i++) {
+      const ax = g[i][0], ay = g[i][1];
+      const hasNext = i + 1 < g.length;
+      const bx = hasNext ? g[i + 1][0] : ax, by = hasNext ? g[i + 1][1] : ay;
+      const seg = Math.hypot(bx - ax, by - ay);
+      const dirx = seg > 1e-6 ? (bx - ax) / seg : (i > 0 ? ax - g[i - 1][0] : 1);
+      const diry = seg > 1e-6 ? (by - ay) / seg : (i > 0 ? ay - g[i - 1][1] : 0);
+      const npts = seg > 1e-6 ? Math.floor(seg / step) : 0;
+      for (let s = 0; s <= npts; s++) {                    // the vertex (s=0) + every `step` along the segment
+        const px = ax + dirx * step * s, py = ay + diry * step * s;
+        const ci = Math.floor(px / cell), cj = Math.floor(py / cell);
+        const dc = (px - (ci + 0.5) * cell) ** 2 + (py - (cj + 0.5) * cell) ** 2;
+        const k = ci + "," + cj + "|" + key;
+        const prev = out.get(k);
+        if (!prev || dc < prev.dc) out.set(k, { x: px, y: py, dirx, diry, e, dc });
+      }
+    }
   }
-  // nearest first → the most relevant numbers win the shared de-overlap guard
-  const cands = [...best.values()].sort((a, b) => a.d2 - b.d2);
+  return out;
+}
+
+// Road-number shields (msg 3015): CZ-coloured badge per road number, placed at static world stations along
+// the road (~every 340 m, msg 3035) so they stay pinned and just scroll — no camera-follow slide. The CURRENT
+// road's number is shown in the HUD next to the street name (msg 3030) → skipped on the map.
+function drawRoadRefs(ctx, view, edges, zoom, guard, currentStreet) {
+  const h = Math.max(11, Math.min(17, zoom * 0.95));     // badge height in px
+  const stations = gridStations(edges, (e) => {
+    if (currentStreet && e.name === currentStreet) return null;
+    return e.ref || (e.iref ? "E" + e.iref.replace(/\s+/g, "") : null);
+  }, view, 220, 18);          // ~one shield per road per 220 m → usually one on-screen at drive zoom, still pinned
   ctx.save();
   ctx.lineJoin = "round";
-  for (const B of cands) {
-    const e = B.e;
-    const [X, Y] = view.project(B.x, B.y);
+  for (const stn of stations.values()) {
+    const e = stn.e;
+    const [X, Y] = view.project(stn.x, stn.y);
+    if (X < -60 || Y < -60 || X > view.w + 60 || Y > view.h + 60) continue;   // off-screen station → skip
     const items = [];
     if (e.ref) items.push({ t: e.ref, st: refStyle(e.ref, e.cls) });
     const ie = e.iref ? e.iref.replace(/\s+/g, "") : "";
@@ -577,20 +607,6 @@ function drawRoadRefs(ctx, view, vis, zoom, guard, currentStreet) {
     }
   }
   ctx.restore();
-}
-
-// Nearest point on a polyline to (cx,cy): projects the camera onto each segment (clamped) — continuous as
-// the camera moves, so anything anchored here slides smoothly instead of snapping between vertices.
-function nearestOnGeom(g, cx, cy) {
-  let bx = g[0][0], by = g[0][1], bd = Infinity;
-  for (let i = 1; i < g.length; i++) {
-    const ax = g[i - 1][0], ay = g[i - 1][1], dx = g[i][0] - ax, dy = g[i][1] - ay;
-    const L2 = dx * dx + dy * dy || 1;
-    let t = ((cx - ax) * dx + (cy - ay) * dy) / L2; t = t < 0 ? 0 : t > 1 ? 1 : t;
-    const px = ax + dx * t, py = ay + dy * t, dd = (px - cx) ** 2 + (py - cy) ** 2;
-    if (dd < bd) { bd = dd; bx = px; by = py; }
-  }
-  return { x: bx, y: by, d2: bd };
 }
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close
@@ -1041,7 +1057,7 @@ function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
 
 // Overview labels (bird's-eye): translucent DISTRICT/quarter names for orientation, plus the
 // names of the MAJOR nearby streets (wide roads), so you know where you are when zoomed right out.
-function drawOverviewLabels(ctx, view, vis, districts) {
+function drawOverviewLabels(ctx, view, edges, districts) {
   const R = view.visR();
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
 
@@ -1056,34 +1072,21 @@ function drawOverviewLabels(ctx, view, vis, districts) {
     }
   }
 
-  // 2) major nearby streets — the wide roads (primary/secondary/trunk ≈ width ≥ 9 m), one label per
-  //    name at the point nearest the camera, oriented along the road. Brighter than districts so the
-  //    names read; keeps the overview legible without the full at-zoom label set.
-  const byName = new Map();
-  for (const e of vis) {
-    if (!e.name || e.width < 9) continue;
-    const g = e.geom;
-    let bd = Infinity, bi = 0;
-    for (let i = 0; i < g.length; i++) {
-      const dd = (g[i][0] - view.cx) ** 2 + (g[i][1] - view.cy) ** 2;
-      if (dd < bd) { bd = dd; bi = i; }
-    }
-    if (bd > (R * 1.1) ** 2) continue;
-    const prev = byName.get(e.name);
-    if (!prev || bd < prev.bd) byName.set(e.name, { g, bi, bd, name: e.name });
-  }
+  // 2) major nearby streets — the wide roads (width ≥ 9 m). Names sit at STATIC world stations along the
+  //    road (~every 600 m, msg 3035), oriented along it, so they stay pinned and just scroll instead of
+  //    sliding along the road to follow the camera. Brighter than districts so the names read.
+  const stations = gridStations(edges, (e) => (e.name && e.width >= 9 ? e.name : null), view, 450, 26);
   ctx.font = "600 13px ui-sans-serif,system-ui,sans-serif";
   const a = view.rot, c = Math.cos(a), s = Math.sin(a);
-  for (const L of byName.values()) {
-    const g = L.g, i = L.bi, j = i < g.length - 1 ? i + 1 : i - 1;   // local road direction
-    const dx = g[j][0] - g[i][0], dy = g[j][1] - g[i][1];
-    let ang = Math.atan2(-(dx * s + dy * c), dx * c - dy * s);
+  for (const stn of stations.values()) {
+    let ang = Math.atan2(-(stn.dirx * s + stn.diry * c), stn.dirx * c - stn.diry * s);
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI;     // keep upright
-    const [X, Y] = view.project(g[i][0], g[i][1]);
+    const [X, Y] = view.project(stn.x, stn.y);
+    if (X < -80 || Y < -40 || X > view.w + 80 || Y > view.h + 40) continue;   // off-screen station → skip
     ctx.save();
     ctx.translate(X, Y); ctx.rotate(ang);
-    ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(8,10,15,.8)"; ctx.strokeText(L.name, 0, 0);
-    ctx.fillStyle = "rgba(226,233,245,.92)"; ctx.fillText(L.name, 0, 0);
+    ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(8,10,15,.8)"; ctx.strokeText(stn.e.name, 0, 0);
+    ctx.fillStyle = "rgba(226,233,245,.92)"; ctx.fillText(stn.e.name, 0, 0);
     ctx.restore();
   }
 }

@@ -101,6 +101,16 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
   returns `ref`/`iref`/`cls`, `hud.js` renders a CZ-coloured `.refbadge` (built via DOM nodes, not innerHTML,
   so an OSM name can't inject markup); the current road is therefore skipped on the map (it's in the HUD).
   Verified on prod: car on Gerská shows "Gerská [1808]" (yellow II/III badge).
+- **3035 static (Google-style) placement:** the 3030 nearest-to-camera anchor fixed the flicker but made the
+  shield *slide along the road* to follow the camera — Vlad flagged that as distracting; same for the overview
+  street names (they used nearest-camera-vertex). Replaced both with **static world-pinned stations**
+  (`gridStations`): lay a fixed world grid of `cell` m and keep, per (cell, key), the on-road sample nearest
+  that cell's centre — the position depends only on geometry + the grid, so labels sit at fixed spots ~every
+  `cell` m along the road and merely scroll with the map (never slide). Cells computed from ALL loaded
+  `map.edges` (not the boxVisible `vis`) with only a coarse per-edge cull, so the winner can't change with the
+  camera. Shields `cell`=220 m, overview names `cell`=450 m. Verified deterministically: a 141 m pan leaves
+  22/23 common cells pixel-identical (the 1 that moved is far off-screen, past the on-screen cull). `nearestOnGeom`
+  removed. PATTERN: map labels must be world-pinned (placed at fixed road stations), not follow-camera.
 
 ## Junction interior fill + sign de-overlap (msg 3022) — render-only, no re-bake
 Three asks on the same Studentská/Gerská interchange: (1) no signs inside the junction box; (2) no sign
