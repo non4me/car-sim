@@ -9,7 +9,7 @@ import re
 import secrets
 from pathlib import Path
 
-from fastapi import FastAPI, Form, HTTPException, Request
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -23,6 +23,9 @@ ROOT = BASE.parent
 CITIES = Path(os.environ.get("CITIES_DIR", ROOT / "data" / "cities"))
 DOCS = Path(os.environ.get("DOCS_DIR", ROOT / "data" / "docs"))
 STATIC = BASE / "static"
+# admin-uploaded custom object icons (msg 2983 ph3). Lives next to the SQLite DB so it shares the
+# persistent named volume (the image's data/ is rebuilt each deploy; uploads must NOT live there).
+UPLOADS = Path(os.environ.get("CARSIM_UPLOADS", db.DB_PATH.parent / "uploads"))
 
 
 def _build_token(root: Path) -> str:
@@ -57,6 +60,18 @@ class RevalidatingStatic(StaticFiles):
     def file_response(self, *args, **kwargs) -> Response:
         resp = super().file_response(*args, **kwargs)
         resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
+class IconStatic(RevalidatingStatic):
+    """Admin-uploaded custom icons (msg 2983 ph3). Defence-in-depth for the SVG case: a strict CSP
+    (`script-src 'none'`) neutralises any script an uploaded SVG might carry if opened directly, and
+    `nosniff` stops MIME confusion. They still render fine via <img>/canvas drawImage."""
+
+    def file_response(self, *args, **kwargs) -> Response:
+        resp = super().file_response(*args, **kwargs)
+        resp.headers["Content-Security-Policy"] = "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox"
+        resp.headers["X-Content-Type-Options"] = "nosniff"
         return resp
 
 
@@ -101,6 +116,8 @@ app.mount(f"/s/{BUILD}", ImmutableStatic(directory=str(STATIC)), name="assets")
 app.mount("/static", RevalidatingStatic(directory=str(STATIC)), name="static")  # legacy/direct hits
 if CITIES.exists():
     app.mount("/citydata", RevalidatingStatic(directory=str(CITIES)), name="citydata")
+UPLOADS.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", IconStatic(directory=str(UPLOADS)), name="uploads")  # admin custom icons (ph3)
 
 # quizzes — migrated from the standalone "ulice" apps (msg 2802), each mounted as a sub-app under /quiz
 from .quiz.photo import photo_app          # noqa: E402  (after app/mounts so import side-effects are last)
@@ -146,6 +163,35 @@ def _city(slug: str) -> dict | None:
 def _available_cities() -> list[dict]:
     """Registry cities whose bake is present — drives the homepage city selector."""
     return [c for c in CITY_REGISTRY if _resolve_dir(c["cc"], c["slug"], c["district"])]
+
+
+# Standard object-icon library (msg 2983 ph3) — kind → emoji pictogram, mirrors ICON_GLYPH in
+# render/draw.js. The admin picks one of these, or uploads a custom image instead. Order = picker order.
+STD_ICONS: dict[str, str] = {
+    "station": "🚉", "bus_station": "🚌", "airport": "✈️", "square": "⛲", "castle": "🏰",
+    "museum": "🏛️", "monument": "🗿", "attraction": "⭐", "theatre": "🎭", "church": "⛪",
+    "university": "🎓", "hospital": "🏥", "stadium": "🏟️", "townhall": "🏛️",
+    "pharmacy": "💊", "atm": "🏧", "bank": "🏦", "food": "🍽️", "fuel": "⛽",
+    "police": "🚓", "fire": "🚒", "post": "✉️", "shop": "🛒",
+}
+
+
+def _city_proj(slug: str) -> dict | None:
+    """The {lat0,lon0,kx,ky} local-metres projection a city was baked with (from its meta.json),
+    so admin-entered lat/lon can be projected to the same world coords the map labels/edges use."""
+    c = _city(slug)
+    d = _resolve_dir(c["cc"], c["slug"], c["district"]) if c else None
+    if d is None:
+        return None
+    try:
+        return json.loads((d / "meta.json").read_text(encoding="utf-8")).get("proj")
+    except (OSError, ValueError):
+        return None
+
+
+def _project(proj: dict, lat: float, lon: float) -> tuple[float, float]:
+    """lat/lon → world metres, identical to tools/bake_city.make_proj (y north-positive)."""
+    return ((lon - proj["lon0"]) * proj["kx"], (lat - proj["lat0"]) * proj["ky"])
 
 
 @app.get("/healthz")
@@ -315,7 +361,9 @@ def admin(request: Request):
     users = db.list_users(q=q)
     return templates.TemplateResponse(request, "admin.html", {
         "user": u, "users": users, "q": q or "",
-        "total": db.count_users(), "admin_emails": sorted(auth.ADMIN_EMAILS), "lang": ui.resolve_lang(request),
+        "total": db.count_users(), "admin_emails": sorted(auth.ADMIN_EMAILS),
+        "objects": db.list_objects(), "obj_cities": _available_cities(), "std_icons": STD_ICONS,
+        "lang": ui.resolve_lang(request),
     }, headers=HTML_HEADERS)
 
 
@@ -351,3 +399,88 @@ def admin_delete(request: Request, uid: int):
         raise HTTPException(status_code=400, detail="refusing to delete yourself")
     db.delete_user(uid)
     return RedirectResponse("/admin", status_code=303)
+
+
+# ---- map objects (msg 2983 ph3): admin places named icons/landmarks; the client renders them on /drive ----
+
+_ICON_MAX = 256 * 1024  # 256 KB cap on a custom icon
+
+
+def _save_icon(file: UploadFile) -> str:
+    """Validate + store an admin-uploaded custom icon, returning its served URL path. Format is sniffed
+    from the magic bytes (the client-sent content-type/filename is NOT trusted); the stored name is random."""
+    data = file.file.read(_ICON_MAX + 1)
+    if not data:
+        raise HTTPException(status_code=400, detail="empty icon file")
+    if len(data) > _ICON_MAX:
+        raise HTTPException(status_code=400, detail="icon too large (max 256 KB)")
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        ext = ".png"
+    elif data[:3] == b"\xff\xd8\xff":
+        ext = ".jpg"
+    elif data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        ext = ".webp"
+    elif b"<svg" in data[:2048].lower():
+        ext = ".svg"
+    else:
+        raise HTTPException(status_code=400, detail="unsupported icon format — use PNG, JPG, WebP or SVG")
+    fname = f"obj_{secrets.token_hex(8)}{ext}"
+    (UPLOADS / fname).write_bytes(data)
+    return f"/uploads/{fname}"
+
+
+@app.get("/api/objects")
+def api_objects(city: str = DEFAULT_CITY_SLUG):
+    """Public: the admin-placed objects for a city, in world coords the client renders directly."""
+    if _city(city) is None:
+        return JSONResponse([], headers={"Cache-Control": "no-cache"})
+    out = [{"id": o["id"], "name": o["name"], "description": o["description"],
+            "kind": o["kind"] or None, "icon": o["icon"] or None, "x": o["x"], "y": o["y"]}
+           for o in db.list_objects(city)]
+    return JSONResponse(out, headers={"Cache-Control": "no-cache"})
+
+
+@app.post("/admin/objects")
+def admin_create_object(request: Request, city: str = Form(...), name: str = Form(...),
+                        description: str = Form(""), kind: str = Form(""),
+                        lat: float = Form(...), lon: float = Form(...),
+                        icon: UploadFile | None = File(None)):
+    u, redirect = _require_admin(request)
+    if redirect:
+        return redirect
+    if _city(city) is None:
+        raise HTTPException(status_code=400, detail="unknown city")
+    name = name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="name required")
+    proj = _city_proj(city)
+    if not proj:
+        raise HTTPException(status_code=400, detail="city not baked")
+    # a custom uploaded icon wins; otherwise a standard-library kind is required
+    has_upload = icon is not None and bool(getattr(icon, "filename", ""))
+    icon_path, kind_val = None, None
+    if has_upload:
+        icon_path = _save_icon(icon)
+    elif kind in STD_ICONS:
+        kind_val = kind
+    else:
+        raise HTTPException(status_code=400, detail="pick a standard icon or upload a custom one")
+    x, y = _project(proj, lat, lon)
+    db.create_object(city=city, name=name, description=(description.strip() or None),
+                     kind=kind_val, icon=icon_path, lat=lat, lon=lon, x=x, y=y,
+                     created_by=u["id"])
+    return RedirectResponse("/admin#objects", status_code=303)
+
+
+@app.post("/admin/objects/{oid}/delete")
+def admin_delete_object(request: Request, oid: int):
+    u, redirect = _require_admin(request)
+    if redirect:
+        return redirect
+    o = db.get_object(oid)
+    if o and o.get("icon"):                          # drop the uploaded file too (best-effort)
+        fn = o["icon"].rsplit("/", 1)[-1]
+        if fn.startswith("obj_"):
+            (UPLOADS / fn).unlink(missing_ok=True)
+    db.delete_object(oid)
+    return RedirectResponse("/admin#objects", status_code=303)

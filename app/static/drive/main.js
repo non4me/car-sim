@@ -230,6 +230,10 @@ async function boot() {
   // city-wide landscape (river/main roads/parks) for the minimap "City" mode (msg 2959) — loaded once
   fetch(`${window.CARSIM.dataBase}/overview.json`).then((r) => (r.ok ? r.json() : null))
     .then((o) => { overview = o; }).catch(() => {});
+  // admin-placed objects (msg 2983 ph3) — standard/custom icons at a geolocation; drawn on the main map.
+  // Stored on `map` so the render loop picks them up; rebuild() (tile streaming) leaves this field intact.
+  fetch(`/api/objects?city=${encodeURIComponent(window.CARSIM.city)}`).then((r) => (r.ok ? r.json() : []))
+    .then((o) => { map.objects = Array.isArray(o) ? o : []; }).catch(() => {});
 
   // Route panel: pick two streets, ask the server for the shortest drivable path (one-ways honoured),
   // draw it as a ribbon and teleport the car to its start so you can drive the route yourself.

@@ -49,6 +49,24 @@ Start Phase 1 (visible, continues the level work, no backend). Then Phase 2 (ico
 — the biggest piece: upload handling, storage, validation, UI). Confirm priority with Vlad; proceed on 1.
 
 ## Status
-- [ ] Phase 1 surfaces + bridge/tunnel names
-- [ ] Phase 2 standard/custom object icons + squares
-- [ ] Phase 3 admin object editor (DB + API + UI + upload)
+- [x] Phase 1 surfaces + bridge/tunnel names (commit 21ade02) — 3-level road render (tunnel below/dashed,
+      bridge above/lighter-deck+shadow) + named-structure labels; no re-bake (uses 2980 `lv`/`name`).
+- [x] Phase 2 standard object icons (commit 2e3cdd8) — emoji pictograms on a dark badge for landmarks + POIs.
+      **Squares (place=square) still TODO** — needs a bake change + re-bake; bundle with Phase 3 or a later pass.
+- [x] Phase 3 admin object editor (DB + API + UI + upload) — DONE 2026-06-17:
+      - `app/db.py`: `map_objects` table (city,name,description,kind,icon,lat,lon,x,y,created_by,created_at)
+        + index + list/get/create/delete helpers; `init_db()` adds it idempotently to the prod DB.
+      - `app/main.py`: public `GET /api/objects?city=` (world coords); admin `POST /admin/objects`
+        (multipart create) + `POST /admin/objects/{id}/delete` behind `_require_admin`; custom-icon upload
+        validated by magic bytes (PNG/JPG/WebP/SVG, ≤256 kB), stored under the `carsim-data` volume at
+        `/app/var/uploads`, served by `IconStatic` (CSP `script-src 'none'` + nosniff so an SVG can't run
+        script); lat/lon projected to world metres with the city's baked `proj` (matches `make_proj`).
+        `STD_ICONS` mirrors `ICON_GLYPH`.
+      - `templates/admin.html`: "Objekty na mapě" section — add form (city select, name, description,
+        23-icon standard-library picker OR custom upload, lat/lon) + a list with delete.
+      - client: `main.js` fetches `/api/objects?city=` into `map.objects`; `draw.js` `drawObjects()` renders
+        a custom uploaded image (lazy-loaded + cached) or a standard emoji icon + name, gated at zoom≥3.
+      - verified on prod in-browser: created a standard (🚉) + a custom-PNG object via the real admin form
+        (incl. file upload), both rendered at the correct geolocation on /drive (street "Wilsonova" at
+        Hlavní nádraží confirms placement); delete removed the rows AND unlinked the uploaded file (→404).
+      - NOTE still pending: **squares (place=square)** in the bake label set (needs a re-bake) — separate pass.

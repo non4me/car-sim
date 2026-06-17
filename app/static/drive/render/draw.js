@@ -137,6 +137,10 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 4c2) named bridges & tunnels — a label on the structure (msg 2983), distinct tint per level
   drawStructureLabels(ctx, view, vis, zoom, guard);
 
+  // 4c3) admin-placed objects (msg 2983 ph3): custom uploaded icon or standard library icon + name,
+  //      at the geolocation the admin entered (projected to world coords server-side).
+  drawObjects(ctx, view, map, zoom, guard);
+
   // 4d) close-up street detail (msg 2771 phase 2): POIs (pharmacy/ATM/food/shop…) when zoomed in,
   //     and house numbers when very close — so the street you're on shows its full info.
   if (zoom >= 13) drawPois(ctx, view, map, zoom, guard);
@@ -307,6 +311,51 @@ function drawPois(ctx, view, map, zoom, guard) {
     }
   }
   ctx.textAlign = "center";   // restore default
+}
+
+// Admin-placed objects (msg 2983 ph3): a custom uploaded image (on a dark badge) or, failing that, a
+// standard emoji icon — plus the object's name — at its geolocation. Custom images load lazily and are
+// cached; the continuous rAF render loop repaints them in as soon as each finishes loading.
+const _objImg = new Map();
+function objImage(url) {
+  let im = _objImg.get(url);
+  if (!im) {
+    im = new Image();
+    im.onload = () => { im._ok = true; };
+    im.onerror = () => { im._ok = false; };
+    im.src = url;
+    _objImg.set(url, im);
+  }
+  return im;
+}
+function drawObjects(ctx, view, map, zoom, guard) {
+  const objs = map.objects;
+  if (!objs || !objs.length || zoom < 3) return;
+  const R = view.visR();
+  for (const o of objs) {
+    if (!view.near(o.x, o.y, R)) continue;
+    const [X, Y] = view.project(o.x, o.y);
+    const isz = zoom < 5 ? 13 : 17;
+    let tx;
+    if (o.icon) {                                       // custom uploaded image, clipped onto a dark badge
+      const im = objImage(o.icon);
+      ctx.beginPath(); ctx.arc(X, Y, isz * 0.78, 0, 7);
+      ctx.fillStyle = "rgba(12,15,22,.82)"; ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,.32)"; ctx.stroke();
+      if (im._ok) { const s = isz * 1.12; ctx.drawImage(im, X - s / 2, Y - s / 2, s, s); }
+      tx = X + isz * 0.78 + 3;
+    } else {                                            // standard library icon (emoji), generic pin fallback
+      drawIcon(ctx, X, Y, ICON_GLYPH[o.kind] || "📍", isz);
+      tx = X + isz * 0.72 + 3;
+    }
+    if (!o.name) continue;
+    ctx.font = "700 12px ui-sans-serif,system-ui,sans-serif";    // restore after drawIcon changed font/align
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    if (guard && !guard.tryPlace(tx, Y - 7, tx + ctx.measureText(o.name).width, Y + 7)) continue;
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(o.name, tx, Y);
+    ctx.fillStyle = "rgba(233,239,249,.98)"; ctx.fillText(o.name, tx, Y);
+  }
+  ctx.textAlign = "center";   // restore default for subsequent text
 }
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close

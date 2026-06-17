@@ -47,8 +47,21 @@ CREATE TABLE IF NOT EXISTS events (
   kind    TEXT,                                    -- over_limit|wrong_way|ran_red|stop|off_road|boundary
   x       REAL, y REAL, meta TEXT
 );
+CREATE TABLE IF NOT EXISTS map_objects (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  city        TEXT NOT NULL,                          -- city slug (praha/brno/…) the object belongs to
+  name        TEXT NOT NULL,
+  description TEXT,
+  kind        TEXT,                                    -- standard-icon key (station/museum/…); '' for a custom icon
+  icon        TEXT,                                    -- custom-icon URL path (/uploads/…) or NULL when using `kind`
+  lat         REAL NOT NULL, lon REAL NOT NULL,        -- geolocation (what the admin enters)
+  x           REAL NOT NULL, y   REAL NOT NULL,        -- projected world metres for `city` (computed at save time)
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at  TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id);
 CREATE INDEX IF NOT EXISTS idx_events_trip ON events(trip_id);
+CREATE INDEX IF NOT EXISTS idx_objects_city ON map_objects(city);
 """
 
 
@@ -191,6 +204,46 @@ def trip_events(trip_id: int) -> list[dict]:
     with conn() as c:
         return [dict(r) for r in c.execute(
             "SELECT t_ms, kind, x, y, meta FROM events WHERE trip_id=? ORDER BY t_ms", (trip_id,)).fetchall()]
+
+
+# ---- map objects (msg 2983 ph3): admin-placed icons/landmarks rendered on /drive ----
+
+_OBJ_COLS = ("id", "city", "name", "description", "kind", "icon", "lat", "lon", "x", "y",
+             "created_by", "created_at")
+
+
+def list_objects(city: str | None = None) -> list[dict]:
+    sql = "SELECT * FROM map_objects"
+    args: tuple = ()
+    if city:
+        sql += " WHERE city=?"
+        args = (city,)
+    sql += " ORDER BY name COLLATE NOCASE"
+    with conn() as c:
+        return [dict(r) for r in c.execute(sql, args).fetchall()]
+
+
+def get_object(oid: int) -> dict | None:
+    with conn() as c:
+        r = c.execute("SELECT * FROM map_objects WHERE id=?", (oid,)).fetchone()
+        return dict(r) if r else None
+
+
+def create_object(*, city: str, name: str, description: str | None, kind: str | None,
+                  icon: str | None, lat: float, lon: float, x: float, y: float,
+                  created_by: int | None) -> dict:
+    with conn() as c:
+        cur = c.execute(
+            "INSERT INTO map_objects (city, name, description, kind, icon, lat, lon, x, y, "
+            "created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (city, name, description, kind, icon, lat, lon, x, y, created_by, now_iso()),
+        )
+        return dict(c.execute("SELECT * FROM map_objects WHERE id=?", (cur.lastrowid,)).fetchone())
+
+
+def delete_object(oid: int) -> None:
+    with conn() as c:
+        c.execute("DELETE FROM map_objects WHERE id=?", (oid,))
 
 
 def export_user(uid: int) -> dict:

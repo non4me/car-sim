@@ -41,6 +41,27 @@
     .acts button.danger{color:#ffb3b3;border-color:rgba(255,107,107,.4)}
     .acts button.danger:hover{background:rgba(255,107,107,.12)}
     .me-tag{font-size:10px;color:var(--accent);margin-left:6px}
+    h2{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:38px 0 2px}
+    .obj-form{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0 18px;
+      display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+    .obj-form .full{grid-column:1/-1}
+    .obj-form label.fld{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b7385;margin-bottom:5px}
+    .obj-form input[type=text],.obj-form input[type=number],.obj-form textarea,.obj-form select{
+      width:100%;box-sizing:border-box;background:#0e131d;border:1px solid var(--line);border-radius:9px;
+      color:#e6e9f0;padding:9px 11px;font-size:14px;font-family:inherit}
+    .obj-form textarea{resize:vertical;min-height:46px}
+    .obj-form .hint{font-size:11px;color:#6b7385;margin-top:4px}
+    .iconpick{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+    .iconpick label{cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:5px 7px;font-size:18px;line-height:1;
+      background:#0e131d;display:inline-flex;align-items:center;gap:5px;user-select:none}
+    .iconpick label .k{font-size:10px;color:#8a93a6}
+    .iconpick input{display:none}
+    .iconpick input:checked + label,.iconpick label:has(input:checked){border-color:var(--accent);background:rgba(91,156,255,.14)}
+    .submit{grid-column:1/-1;background:var(--accent);color:#06203f;border:none;border-radius:10px;padding:11px 16px;
+      font-size:14px;font-weight:800;cursor:pointer;justify-self:start}
+    .submit:hover{filter:brightness(1.08)}
+    td .ic{width:22px;height:22px;object-fit:contain;vertical-align:middle}
+    td.em{font-size:18px}
   </style>
 </head>
 <body>
@@ -97,6 +118,71 @@
           </td>
         </tr>
         {% endfor %}
+      </table>
+    </div>
+
+    <h2 id="objects">🗺️ Objekty na mapě</h2>
+    <div class="sub">Ručně přidané objekty (vokzaly, památky, náměstí…) se standardní nebo vlastní ikonou, názvem,
+      popisem a polohou. Zobrazí se na mapě v <a class="home" href="/drive">/drive</a>.</div>
+
+    <form class="obj-form" method="post" action="/admin/objects" enctype="multipart/form-data"
+          onsubmit="return this.querySelector('input[name=kind]:checked')||this.icon.files.length||(alert('Vyberte standardní ikonu nebo nahrajte vlastní'),false)">
+      <div>
+        <label class="fld">Město</label>
+        <select name="city" required>
+          {% for c in obj_cities %}<option value="{{ c.slug }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="fld">Název</label>
+        <input type="text" name="name" required placeholder="Hlavní nádraží" autocomplete="off">
+      </div>
+      <div class="full">
+        <label class="fld">Popis (nepovinné)</label>
+        <textarea name="description" placeholder="Krátký popis objektu…"></textarea>
+      </div>
+      <div class="full">
+        <label class="fld">Standardní ikona</label>
+        <div class="iconpick">
+          {% for k, em in std_icons.items() %}
+          <label title="{{ k }}"><input type="radio" name="kind" value="{{ k }}"><span>{{ em }}</span><span class="k">{{ k }}</span></label>
+          {% endfor %}
+        </div>
+        <div class="hint">…nebo nahrajte vlastní ikonu (PNG / SVG / WebP / JPG, max 256 kB). Vlastní ikona má přednost.</div>
+        <input type="file" name="icon" accept="image/png,image/jpeg,image/webp,image/svg+xml" style="margin-top:6px">
+      </div>
+      <div>
+        <label class="fld">Zeměpisná šířka (lat)</label>
+        <input type="number" name="lat" step="any" required placeholder="50.0830">
+      </div>
+      <div>
+        <label class="fld">Zeměpisná délka (lon)</label>
+        <input type="number" name="lon" step="any" required placeholder="14.4356">
+        <div class="hint">Souřadnice z Map.cz / Google Maps (pravý klik → souřadnice).</div>
+      </div>
+      <button class="submit" type="submit">+ Přidat objekt</button>
+    </form>
+
+    <div class="card">
+      <table>
+        <tr><th>#</th><th>Město</th><th>Ikona</th><th>Název</th><th>Popis</th><th>Poloha</th><th>Akce</th></tr>
+        {% for o in objects %}
+        <tr>
+          <td>{{ o.id }}</td>
+          <td>{{ o.city }}</td>
+          <td class="em">{% if o.icon %}<img class="ic" src="{{ o.icon }}" alt="">{% elif o.kind %}{{ std_icons.get(o.kind, '•') }}{% else %}•{% endif %}</td>
+          <td>{{ o.name }}</td>
+          <td>{{ (o.description or '—')[:48] }}</td>
+          <td class="prov">{{ '%.5f'|format(o.lat) }}, {{ '%.5f'|format(o.lon) }}</td>
+          <td>
+            <div class="acts">
+              <form method="post" action="/admin/objects/{{ o.id }}/delete" onsubmit="return confirm('Smazat objekt {{ o.name }}?')">
+                <button class="danger" type="submit">smazat</button></form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not objects %}<tr><td colspan="7" style="color:#6b7385;padding:14px">Zatím žádné objekty.</td></tr>{% endif %}
       </table>
     </div>
   </div>
