@@ -141,6 +141,10 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
   drawStreetLabels(ctx, view, vis, rules && rules.street, guard);
 
+  // 4a2) road-number shields on motorways/main roads (msg 3015) — CZ-coloured (red D, blue I, yellow II/III,
+  //      green E). Drawn early so they win the guard over POI/landmark labels.
+  if (zoom >= 4) drawRoadRefs(ctx, view, vis, zoom, guard);
+
   // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
   //     so you can orient while zoomed right out (msg 2763).
   if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, vis, districts);
@@ -445,6 +449,62 @@ function drawLaneArrow(ctx, view, wx, wy, tx, ty, turns, S) {
     ctx.lineTo(tip[0] - hx * hs - hpx * hs * 0.6, tip[1] - hy * hs - hpy * hs * 0.6);
     ctx.closePath(); ctx.fill();
   }
+}
+
+// Road-number shields (msg 3015): a coloured badge with the road number along motorways/main roads,
+// CZ-style — red dálnice (D), blue I-class, yellow II/III, green E-routes. Billboarded + de-overlapped.
+function refStyle(ref, cls) {
+  if (/^E\s?\d/i.test(ref)) return { bg: "#2f8f43", fg: "#fff", bd: "rgba(255,255,255,.92)" };                 // euro green
+  if (/^D\d/.test(ref) || cls === "motorway" || cls === "motorway_link") return { bg: "#c1272d", fg: "#fff", bd: "rgba(255,255,255,.92)" };  // dálnice red
+  if (cls === "trunk" || cls === "primary" || cls === "trunk_link" || cls === "primary_link") return { bg: "#1f6fd6", fg: "#fff", bd: "rgba(255,255,255,.92)" };  // I. třída blue
+  return { bg: "#f2b21a", fg: "#241803", bd: "rgba(90,66,6,.95)" };                                             // II/III yellow
+}
+function drawRefBadge(ctx, X, Y, text, st, h) {
+  ctx.font = `800 ${Math.round(h * 0.6)}px ui-sans-serif,system-ui,sans-serif`;
+  const w = Math.max(h * 1.05, ctx.measureText(text).width + h * 0.5);
+  roundRect(ctx, X - w / 2, Y - h / 2, w, h, h * 0.26);
+  ctx.fillStyle = st.bg; ctx.fill();
+  ctx.lineWidth = Math.max(1, h * 0.1); ctx.strokeStyle = st.bd; ctx.stroke();
+  ctx.fillStyle = st.fg; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(text, X, Y + h * 0.04);
+}
+// Google places ONE shield per road, ON the road, spaced out — NOT a cluster at the junction (msg 3017).
+// So: skip short connector edges (the interchange interior is all stubs), put the shield at a long edge's
+// midpoint (away from the junction nodes), process longest-first, and keep same-ref shields ≥ MINSEP apart.
+function drawRoadRefs(ctx, view, vis, zoom, guard) {
+  const R = view.visR();
+  const h = Math.max(11, Math.min(17, zoom * 0.95));     // badge height in px
+  const MINLEN = 45;                                     // only substantial road stretches → off the junction box
+  const MINSEP2 = 150 * 150;                             // min world spacing between two shields of the SAME ref
+  const placed = new Map();                              // ref -> [[x,y]…] already-placed world positions
+  const cand = vis.filter((e) => e.ref || e.iref).map((e) => ({ e, L: edgeLen(e) }))
+    .filter((o) => o.L >= MINLEN).sort((a, b) => b.L - a.L);
+  ctx.save();
+  ctx.lineJoin = "round";
+  for (const { e } of cand) {
+    const g = e.geom, m = g[Math.floor(g.length / 2)];
+    if (!view.near(m[0], m[1], R)) continue;
+    const key = e.ref || ("E" + e.iref);
+    const prevs = placed.get(key) || [];
+    if (prevs.some((p) => (p[0] - m[0]) ** 2 + (p[1] - m[1]) ** 2 < MINSEP2)) continue;  // space them along the road
+    const [X, Y] = view.project(m[0], m[1]);
+    const items = [];
+    if (e.ref) items.push({ t: e.ref, st: refStyle(e.ref, e.cls) });
+    if (e.iref && e.iref.replace(/\s+/g, "") !== (e.ref || "")) items.push({ t: e.iref.replace(/\s+/g, ""), st: refStyle("E", e.cls) });
+    let oy = -(items.length - 1) * (h * 0.62);            // stack the ref + E-route badges vertically
+    let drew = false;
+    for (const it of items) {
+      ctx.font = `800 ${Math.round(h * 0.6)}px ui-sans-serif,system-ui,sans-serif`;
+      const w = Math.max(h * 1.05, ctx.measureText(it.t).width + h * 0.5);
+      const cy = Y + oy;
+      oy += h * 1.24;
+      if (guard && !guard.tryPlace(X - w / 2, cy - h / 2, X + w / 2, cy + h / 2)) continue;
+      drawRefBadge(ctx, X, cy, it.t, it.st, h);
+      drew = true;
+    }
+    if (drew) { prevs.push([m[0], m[1]]); placed.set(key, prevs); }
+  }
+  ctx.restore();
 }
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close

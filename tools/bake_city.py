@@ -307,6 +307,10 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         tlb = t.get("turn:lanes:backward")
         lf = int(t["lanes:forward"]) if str(t.get("lanes:forward", "")).isdigit() else None
         lb = int(t["lanes:backward"]) if str(t.get("lanes:backward", "")).isdigit() else None
+        # road number(s) (msg 3015) — `ref` (D5 / 20 / 1808…) + `int_ref` (E 49) for the on-map shields.
+        # First value only (refs can be "20;E49"); stored when present (most minor streets have none).
+        ref = (t.get("ref") or "").split(";")[0].strip() or None
+        iref = (t.get("int_ref") or "").split(";")[0].strip() or None
         nlist = wy["nodes"]
         if ow_raw == "-1":
             nlist = list(reversed(nlist))   # oneway=-1: reverse so geom order = traffic-flow direction
@@ -334,6 +338,10 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
                             ed["lf"] = lf         # lanes:forward (per-direction lane count, if tagged)
                         if lb:
                             ed["lb"] = lb         # lanes:backward
+                        if ref:
+                            ed["ref"] = ref       # road number for the on-map shield (msg 3015)
+                        if iref:
+                            ed["iref"] = iref     # international (E-route) number
                         edges.append(ed)
                 seg = [nid]
     print(f"  edges (junction-to-junction): {len(edges)}")

@@ -81,3 +81,13 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
   lines** (railings); tunnels: dimmer (#1d222c) + dashed; bridges/tunnels sorted by `lv` so higher decks paint
   last. Verified: most U Jána reads as an elevated bridge over the river; interchange decks read above the
   ground roads.
+
+## Road-number shields (msg 3015 + 3017 declutter)
+- **3015:** bake captures per-edge `ref` + `int_ref` (free — way tags already preserved). `draw.js`
+  `drawRoadRefs()`/`drawRefBadge()`/`refStyle()` draw CZ-coloured shields: red dálnice (D), blue I. třída
+  (trunk/primary), yellow II/III (secondary/tertiary), green E-routes (stacked under the national ref).
+  Re-baked all 4 cities (3rd re-bake; admin/road_refs/landmark counts still unchanged).
+- **3017 declutter (before commit):** first cut put a shield at EVERY edge midpoint → a swarm across the
+  interchange (same anti-pattern as the names). Fixed to Google-style: skip short connector edges
+  (len < 45 m, so shields stay OFF the junction box), place at a long edge's midpoint, process longest-first,
+  and keep same-`ref` shields ≥ 150 m apart. Verified: junction interior clean, one neat blue "20" per road.
