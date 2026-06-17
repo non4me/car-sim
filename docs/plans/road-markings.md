@@ -236,3 +236,25 @@ Kralovická 1123 m — all unnumbered residential, now labelled); teleporting to
 Pattern: "main street" for overview labelling = class OR number OR aggregate-by-name length (long ⇒ main).
 Aggregate ref/length BY NAME, not per edge — OSM splits a street so number/class vary per segment; cache the
 aggregate by the edge-array reference.
+
+## msg 3071 — resolve the name of numbered-but-unnamed route segments
+
+At the Folmavská/Sukova roundabout the HUD showed "— 27 E53" (a dash for the street name) when the car sat on
+the route. Cause: OSM tags many segments of a numbered route (dual-carriageway halves, roundabout approaches)
+with the ref/iref but NO name — the name "Sukova" lives only on a parallel/connected segment. `nearestEdge`
+under the car landed on an unnamed segment, so `rules.street` was "" and the HUD printed "—". Around this one
+roundabout ~10 `primary` edges had ref 27 / iref "E 53" and no name.
+
+Fix (client JS in tiles.js, no re-bake): `fillRefNames(edges)` in `rebuildIndexes` — an unnamed edge carrying a
+ref/iref inherits the name of the nearest NAMED edge sharing that ref or iref, within 600 m. It runs on every
+resident-set rebuild because the named segment may have streamed in from a different tile; only resident
+(near-camera) edges take part, so the matched set stays small and local. Resolving at the data layer fixes the
+HUD, the map labels, AND the length aggregation at once.
+
+Verified on prod: parking on a former "(none)" segment now gives `nearestEdge.name = "Sukova"`, the HUD reads
+"Sukova 27 E53", and the road carries the "Sukova" label + 27/E53 shields on the map; five different 27/E53
+segments around the roundabout all resolve to Sukova. No console errors.
+
+Pattern: a numbered OSM route often has its `name` on only SOME segments (dual-carriageways / roundabout
+approaches are ref-without-name); fix by inheriting the name from the nearest same-ref named edge at tile
+assembly, so HUD + labels + length all benefit together.

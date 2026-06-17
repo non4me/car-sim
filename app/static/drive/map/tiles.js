@@ -38,6 +38,48 @@ function nearestOnEdge(e, x, y) {
   return { d: best, px, py, tx, ty };
 }
 
+// Some OSM segments of a numbered route carry the ref (e.g. "27" / "E 53") but NO street name — typically the
+// dual-carriageway halves and roundabout approaches, while a parallel/connected segment holds the name
+// ("Sukova"). Driving onto such a segment left the HUD showing "—" and the map unlabelled (msg 3071). Inherit
+// the name from the nearest NAMED segment that shares the same ref or iref (within 600 m), so the street reads
+// everywhere the route runs. Re-run on every resident-set rebuild — the named segment may have streamed in from
+// a different tile; only resident (near-camera) edges take part, so the matched set stays small and local.
+function fillRefNames(edges) {
+  const named = new Map();                 // "r:27" / "i:E 53" → [{x, y, name}]
+  const mid = (g) => g[Math.floor(g.length / 2)];
+  const keysOf = (e) => {
+    const k = [];
+    if (e.ref) k.push("r:" + e.ref);
+    if (e.iref) k.push("i:" + e.iref);
+    return k;
+  };
+  for (const e of edges) {
+    if (!e.name) continue;
+    const m = mid(e.geom);
+    for (const k of keysOf(e)) {
+      let a = named.get(k);
+      if (!a) { a = []; named.set(k, a); }
+      a.push({ x: m[0], y: m[1], name: e.name });
+    }
+  }
+  if (!named.size) return;
+  const MAXD2 = 600 * 600;                  // don't borrow a name from a same-ref segment further than 600 m
+  for (const e of edges) {
+    if (e.name || (!e.ref && !e.iref)) continue;
+    const m = mid(e.geom);
+    let best = null, bestD = MAXD2;
+    for (const k of keysOf(e)) {
+      const a = named.get(k);
+      if (!a) continue;
+      for (const c of a) {
+        const d = (c.x - m[0]) ** 2 + (c.y - m[1]) ** 2;
+        if (d < bestD) { bestD = d; best = c.name; }
+      }
+    }
+    if (best) e.name = best;
+  }
+}
+
 function bbox(pts) {
   let mnx = Infinity, mny = Infinity, mxx = -Infinity, mxy = -Infinity;
   for (const p of pts) {
@@ -119,6 +161,7 @@ export async function loadMap(base) {
       for (const po of t.pois || []) pois.push(po);             // POIs + house numbers: 1 tile each, no dedupe
       for (const ad of t.addrs || []) addrs.push(ad);
     }
+    fillRefNames(edges);                                     // give numbered-but-unnamed segments their street name (msg 3071)
     grid = buildGrid(edges);
     map.edges = edges; map.junctions = junctions; map.areas = areas; map.signs = signs; map.crossings = crossings;
     map.rails = rails; map.labels = labels; map.pois = pois; map.addrs = addrs;
