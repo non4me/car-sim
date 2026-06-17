@@ -208,3 +208,31 @@ errors.
 Pattern: switch label DENSITY by zoom (per-approach close, one-per-name far); keep spacing/length thresholds
 in SCREEN pixels (÷ pxPerM), not fixed world metres — a fixed world step collapses to a few pixels when
 zoomed out and swarms.
+
+## msg 3068 — name every long "main" street when zoomed out, not just numbered/classified
+
+At minimum zoom many long streets still showed no name — e.g. the road the car was parked on near Na Roudné.
+The msg-3059 `worthy()` filter at low zoom only accepted MAJOR_CLS roads or ones whose own edge carried a
+ref/iref. A long through-street tagged tertiary/residential with no number (or with the number on only some of
+its edges — OSM splits a street into edges at every junction, so the segment under the car can be ref-less)
+fell through. Vlad: long streets ARE main streets, name them like the highways; only short/side streets may go
+unnamed.
+
+Fix: add a length-based "main street" test.
+- `refsByName` → `nameMeta(map)`: aggregates per street name its ref, iref, colour class AND the TOTAL length
+  of all its edges (summed via edgeLen). Cached on the map keyed by the `map.edges` array reference — the tile
+  loader reassigns that array when streaming, so the cache self-invalidates and this whole-network pass doesn't
+  run every frame.
+- `mainStreet(e) = MAJOR_CLS.has(cls) || ref || iref || nameMeta(name).len >= 600 m`. At z<4 a street is
+  labelled if it's a main street; the 4–8 band additionally keeps width≥7 / tertiary.
+
+So a long residential/tertiary street is named at overview zoom even with no number, and its badge still comes
+from the aggregate (a street numbered on only some segments shows its shield everywhere). Verified on prod:
+at the Studentská view every street ≥600 m is now eligible (Sokolovská 3443 m, alej Svobody 2392 m,
+Kralovická 1123 m — all unnumbered residential, now labelled); teleporting to Na Roudné, the car's road
+("Na Roudné", tertiary, ref-less segment, long) is now labelled with its 231 + E49 shields. No app errors
+(the 404s in console were my own probe of wrong search.json paths).
+
+Pattern: "main street" for overview labelling = class OR number OR aggregate-by-name length (long ⇒ main).
+Aggregate ref/length BY NAME, not per edge — OSM splits a street so number/class vary per segment; cache the
+aggregate by the edge-array reference.

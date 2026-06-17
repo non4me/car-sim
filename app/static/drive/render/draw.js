@@ -169,8 +169,8 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   //     to the nearest on-road point → stable across zoom/pan (msg 3030). Current road's number → HUD.
   // 4) street-name labels at EVERY zoom (msg 3054) — one per name, off the junction, with the road NUMBER
   //    right beside the name (msg 3045); no separate swarm of shields. The current road is in the HUD.
-  //    `nameRefs` resolves the number per name (national ref preferred) across the road's variably-tagged edges.
-  const nameRefs = refsByName(map.edges);
+  //    `nameRefs` resolves the number + total length per name across the road's variably-tagged edges.
+  const nameRefs = nameMeta(map);
   drawStreetLabels(ctx, view, map.edges, rules && rules.street, guard, nameRefs);
 
   // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
@@ -540,15 +540,23 @@ function drawRefBadge(ctx, X, Y, text, st, h) {
 // Studentská segment is tagged ref=20, the next only int_ref=E49), so we aggregate across every edge of the
 // name → the badge always shows the national number (+ E-route) regardless of which segment anchors the
 // label. Map name -> {ref, iref, cls}. Cheap (named-with-number edges only), rebuilt per frame.
-function refsByName(edges) {
+// Per-name aggregate over EVERY named edge: the road number(s) + its colour class, plus the street's TOTAL
+// length (OSM splits a street into many edges at junctions, so length must be summed by name). The total
+// length is what tells a long "main" street apart from a short side street when zoomed out (msg 3068).
+// Cached on the map and rebuilt only when the tile loader swaps in a new edge array (tiles.js reassigns
+// map.edges), so this whole-network pass doesn't run every frame.
+function nameMeta(map) {
+  if (map._nameMeta && map._nameMetaFor === map.edges) return map._nameMeta;
   const m = new Map();
-  for (const e of edges) {
-    if (!e.name || (!e.ref && !e.iref)) continue;
+  for (const e of map.edges) {
+    if (!e.name) continue;
     let cur = m.get(e.name);
-    if (!cur) { cur = { ref: "", iref: "", cls: e.cls }; m.set(e.name, cur); }
+    if (!cur) { cur = { ref: "", iref: "", cls: e.cls, len: 0 }; m.set(e.name, cur); }
+    cur.len += edgeLen(e);
     if (e.ref && !cur.ref) { cur.ref = e.ref; cur.cls = e.cls; }     // national ref wins the colour
     if (e.iref && !cur.iref) cur.iref = e.iref;
   }
+  map._nameMeta = m; map._nameMetaFor = map.edges;
   return m;
 }
 
@@ -977,12 +985,19 @@ const MAJOR_CLS = new Set(["motorway", "trunk", "primary", "secondary",
 function drawStreetLabels(ctx, view, edges, currentStreet, guard, nameRefs) {
   const z = view.zoom, R = view.visR();
   const fs = z >= 8 ? 11 : 13;                          // a touch larger when zoomed out
+  // A "main" street: a classified arterial, anything carrying a road number, OR any LONG street — a street
+  // whose edges sum to a large total length is a through-route even if OSM tags it tertiary/unclassified, and
+  // Vlad wants every long main street named when zoomed out, not just the marked highways (msg 3068). Short
+  // side streets fall below the length cutoff and stay unlabelled at overview zoom.
+  const LONGMAIN = 600;  // metres of total name length → treat as a main street
+  const mainStreet = (e) => MAJOR_CLS.has(e.cls) || !!e.ref || !!e.iref ||
+                            ((nameRefs && nameRefs.get(e.name)?.len) || 0) >= LONGMAIN;
   // Which streets are worth a label at this zoom. Close in: anything with real width. Zoomed right out: the
-  // arterial skeleton only — classified roads + anything carrying a number — so the main network always reads,
-  // even though those edges aren't the widest on screen (msg 3059). Mid band bridges the two.
+  // main network — arterials, numbered roads and long through-streets — so it always reads even though those
+  // edges aren't the widest on screen (msg 3059 / 3068). Mid band bridges the two.
   const worthy = (e) => z >= 8 ? (e.width || 0) >= 3
-                      : z >= 4 ? ((e.width || 0) >= 7 || !!e.ref || !!e.iref || MAJOR_CLS.has(e.cls) || e.cls === "tertiary")
-                               : (!!e.ref || !!e.iref || MAJOR_CLS.has(e.cls));
+                      : z >= 4 ? ((e.width || 0) >= 7 || e.cls === "tertiary" || mainStreet(e))
+                               : mainStreet(e);
   const pxPerM = (view.h * 0.5) / Math.max(R, 1);      // screen pixels per world metre at this zoom
   // Up close, one label per junction APPROACH so every road at a complex interchange is named (msg 3055). Zoomed
   // out, ONE label per road NAME — a fixed 170 m grid is only ~76 px wide at min zoom, so it stamped a road every
