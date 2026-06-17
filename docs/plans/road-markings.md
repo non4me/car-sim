@@ -120,6 +120,24 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
   don't swarm; positions are world-fixed (static). The zoom gate is removed → shields show at EVERY zoom.
   Verified in-browser across zoom 2.7 / 5.3 / 9.3 / 12.4 on the Studentská/Gerská interchange: the "20"
   shield sits on Studentská next to (not on) the junction at every level, and is visible even at deep overview.
+- **3045–3055 number rides WITH the name, at every zoom:** Vlad rejected the standalone shields — too frequent,
+  clustered at junctions; he wanted the number placed like the street NAME, beside it. And the overview names
+  (the 3035 gridStations) were DUPLICATED ("Kralovická Kralovická") and overlapping, and landed on junctions.
+  Reworked completely:
+  - Removed the standalone `drawRoadRefs` + `gridStations`. The number now rides next to the street name via
+    `drawNameRef` — billboarded, just past the end of the name (so it never covers it), drawn unconditionally
+    (the rotated name's conservative AABB would otherwise falsely drop it). `refsByName` aggregates the road
+    number per name across the road's variably-tagged edges so the NATIONAL ref shows (e.g. Studentská → "20"
+    blue + "E49" green; the E-route is coloured by passing the real "E49", not "E", to `refStyle`).
+  - Unified ALL street-name labels into one `drawStreetLabels` that runs at EVERY zoom (msg 3054 — there was a
+    dead 5–8 band where neither layer drew, so nothing showed). One label per (name, ~170 m cell) anchored a
+    short way INTO the street from the nearest junction → off the intersection, world-static, de-overlapped via
+    the shared guard (kills the dupes/pile-ups), with the number beside it. Thresholds scale with zoom (close:
+    all streets; far: only wider roads). The CURRENT street is no longer skipped — Vlad wants it labelled on its
+    approaches too (msg 3055); the HUD badge is an extra. `drawOverviewLabels` now only does district names.
+  - Verified in-browser across zoom 2.97 / 3.59 / 7 / 11.28 / 13.65: every approach of the interchange is
+    labelled (Gerská, Studentská, Sokolovská, Turistická), numbers beside the names, off the junctions, no
+    dupes/overlaps, nothing empty in the old 5–8 gap. No console errors.
 
 ## Junction interior fill + sign de-overlap (msg 3022) — render-only, no re-bake
 Three asks on the same Studentská/Gerská interchange: (1) no signs inside the junction box; (2) no sign

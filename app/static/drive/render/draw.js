@@ -167,15 +167,15 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 4a) road-number shields on motorways/main roads (msg 3015) — CZ-coloured (red D, blue I, yellow II/III,
   //     green E). Drawn FIRST so the sparse, important road numbers reliably win the shared guard; anchored
   //     to the nearest on-road point → stable across zoom/pan (msg 3030). Current road's number → HUD.
-  drawRoadRefs(ctx, view, map.edges, zoom, guard, rules && rules.street);   // every zoom (msg 3040)
-
-  // 4) street-name labels ON the connecting roads at intersections (NOT the current
-  //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
-  drawStreetLabels(ctx, view, vis, rules && rules.street, guard);
+  // 4) street-name labels at EVERY zoom (msg 3054) — one per name, off the junction, with the road NUMBER
+  //    right beside the name (msg 3045); no separate swarm of shields. The current road is in the HUD.
+  //    `nameRefs` resolves the number per name (national ref preferred) across the road's variably-tagged edges.
+  const nameRefs = refsByName(map.edges);
+  drawStreetLabels(ctx, view, map.edges, rules && rules.street, guard, nameRefs);
 
   // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
   //     so you can orient while zoomed right out (msg 2763).
-  if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, map.edges, districts);
+  if (zoom < OVERVIEW_LABEL_Z) drawOverviewLabels(ctx, view, districts, guard);
 
   // 4c) stations + major-landmark labels (marker + name), for orientation at most zooms (msg 2771)
   drawLabels(ctx, view, map, zoom, guard);
@@ -536,98 +536,47 @@ function drawRefBadge(ctx, X, Y, text, st, h) {
   ctx.fillStyle = st.fg; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(text, X, Y + h * 0.04);
 }
-// Static, world-pinned label STATIONS (msg 3035). Google places a road number / street name at FIXED points
-// along the road and just lets them scroll with the map — it does NOT slide one label along the road to chase
-// the camera (which the earlier midpoint+near and nearest-to-camera anchors both did). We get that by laying a
-// fixed world grid of `cell` metres and keeping, per (cell, key), the single on-road sample nearest that
-// cell's centre. The position depends only on geometry + the grid → it's pinned to the world, deterministic,
-// and independent of zoom/pan: labels appear at fixed spots ~every `cell` m along each road and only scroll.
-function gridStations(edges, keyOf, view, cell, step) {
-  const cx = view.cx, cy = view.cy;
-  // Consider every edge that can touch the view (cull only by a COARSE per-edge radius, never per-sample) —
-  // so the cell winner is computed from the full geometry and is identical regardless of where the camera
-  // sits. A per-sample camera cull would make the winner (and thus the label) slide with the camera.
-  const maxR2 = (view.visR() + 3 * cell) ** 2;
-  const out = new Map();                                   // "ci,cj|key" -> {x,y,dirx,diry,e,dc}
+// The road number(s) for a street NAME, preferring the national ref. OSM tags vary edge to edge (one
+// Studentská segment is tagged ref=20, the next only int_ref=E49), so we aggregate across every edge of the
+// name → the badge always shows the national number (+ E-route) regardless of which segment anchors the
+// label. Map name -> {ref, iref, cls}. Cheap (named-with-number edges only), rebuilt per frame.
+function refsByName(edges) {
+  const m = new Map();
   for (const e of edges) {
-    const key = keyOf(e);
-    if (key == null) continue;
-    if (e.bb) {                                            // coarse cull (margin-only → visible stations stable)
-      const mx = (e.bb[0] + e.bb[2]) / 2, my = (e.bb[1] + e.bb[3]) / 2;
-      if ((mx - cx) ** 2 + (my - cy) ** 2 > maxR2) continue;
-    }
-    const g = e.geom;
-    for (let i = 0; i < g.length; i++) {
-      const ax = g[i][0], ay = g[i][1];
-      const hasNext = i + 1 < g.length;
-      const bx = hasNext ? g[i + 1][0] : ax, by = hasNext ? g[i + 1][1] : ay;
-      const seg = Math.hypot(bx - ax, by - ay);
-      const dirx = seg > 1e-6 ? (bx - ax) / seg : (i > 0 ? ax - g[i - 1][0] : 1);
-      const diry = seg > 1e-6 ? (by - ay) / seg : (i > 0 ? ay - g[i - 1][1] : 0);
-      const npts = seg > 1e-6 ? Math.floor(seg / step) : 0;
-      for (let s = 0; s <= npts; s++) {                    // the vertex (s=0) + every `step` along the segment
-        const px = ax + dirx * step * s, py = ay + diry * step * s;
-        const ci = Math.floor(px / cell), cj = Math.floor(py / cell);
-        const dc = (px - (ci + 0.5) * cell) ** 2 + (py - (cj + 0.5) * cell) ** 2;
-        const k = ci + "," + cj + "|" + key;
-        const prev = out.get(k);
-        if (!prev || dc < prev.dc) out.set(k, { x: px, y: py, dirx, diry, e, dc });
-      }
-    }
+    if (!e.name || (!e.ref && !e.iref)) continue;
+    let cur = m.get(e.name);
+    if (!cur) { cur = { ref: "", iref: "", cls: e.cls }; m.set(e.name, cur); }
+    if (e.ref && !cur.ref) { cur.ref = e.ref; cur.cls = e.cls; }     // national ref wins the colour
+    if (e.iref && !cur.iref) cur.iref = e.iref;
   }
-  return out;
+  return m;
 }
 
-// Road-number shields (msg 3015): a CZ-coloured badge per road number, placed ON the street a short way IN
-// from each junction — NEVER on the intersection itself, but right next to it on the carriageway (msg 3040).
-// OSM splits ways at junctions, so an edge's ENDS are the junctions: we offset OFFSET m in from each end
-// (+ extra stations at INTERVAL along long stretches). Positions are fixed in world (edge offsets) → static,
-// they just scroll; deduped per ~DEDUP m so interchanges don't swarm; drawn at EVERY zoom (msg 3040). The
-// current road's number rides in the HUD next to the street name (msg 3030) → skipped on the map.
-function drawRoadRefs(ctx, view, edges, zoom, guard, currentStreet) {
-  const R2 = (view.visR() + 200) ** 2, cx = view.cx, cy = view.cy;
-  const h = Math.max(11, Math.min(17, zoom * 0.95));     // badge height in px
-  const OFFSET = 20, INTERVAL = 200, MINLEN = 26, DEDUP = 130;
-  const out = new Map();                                  // "ci,cj|key" -> {x,y,e,dc} (one static shield per cell)
-  for (const e of edges) {
-    const key = e.ref || (e.iref ? "E" + e.iref.replace(/\s+/g, "") : null);
-    if (!key) continue;
-    if (currentStreet && e.name === currentStreet) continue;     // current road → HUD badge
-    if (e.bb) { const mx = (e.bb[0] + e.bb[2]) / 2, my = (e.bb[1] + e.bb[3]) / 2; if ((mx - cx) ** 2 + (my - cy) ** 2 > R2) continue; }
-    const L = edgeLen(e);
-    if (L < MINLEN) continue;                            // skip interchange connector stubs (anti-swarm)
-    const ds = [];
-    if (L < 2 * OFFSET) ds.push(L / 2);                  // tiny stretch → one mid-street station
-    else { ds.push(OFFSET); for (let s = OFFSET + INTERVAL; s < L - OFFSET; s += INTERVAL) ds.push(s); ds.push(L - OFFSET); }
-    for (const dist of ds) {
-      const wp = walkAlong(e.geom, true, dist);          // `dist` m in from the start → on the street, clear of the node
-      const ci = Math.floor(wp.x / DEDUP), cj = Math.floor(wp.y / DEDUP);
-      const dc = (wp.x - (ci + 0.5) * DEDUP) ** 2 + (wp.y - (cj + 0.5) * DEDUP) ** 2;
-      const k = ci + "," + cj + "|" + key;
-      const prev = out.get(k);
-      if (!prev || dc < prev.dc) out.set(k, { x: wp.x, y: wp.y, e, dc });
-    }
+// Road-number badge(s) drawn RIGHT NEXT TO a street-name label (msg 3045): billboarded, just past the END of
+// the name text so it never covers the name, reserved in the shared guard so it can't pile onto another
+// label. `ri` = {ref, iref, cls} from refsByName; (sx,sy) = the name anchor, `ang` = its angle, `hw` = half
+// the name width in px. Tying the number to the name gives one-per-street frequency, no swarm of shields.
+function drawNameRef(ctx, ri, sx, sy, ang, hw, guard) {
+  if (!ri) return;
+  const items = [];
+  if (ri.ref) items.push({ t: ri.ref, st: refStyle(ri.ref, ri.cls) });
+  const ie = ri.iref ? ri.iref.replace(/\s+/g, "") : "";
+  if (ie && ie !== (ri.ref || "")) items.push({ t: ie, st: refStyle(ie, ri.cls) });   // pass the real "E49" → green
+  if (!items.length) return;
+  const h = 15;                                      // badge height px (matches the ~11-13 px name)
+  const c = Math.cos(ang), s = Math.sin(ang);
+  let edge = hw + 7;                                 // start just past the end of the name text
+  for (const it of items) {
+    ctx.font = `800 ${Math.round(h * 0.6)}px ui-sans-serif,system-ui,sans-serif`;
+    const w = Math.max(h * 1.05, ctx.measureText(it.t).width + h * 0.5);
+    const bx = sx + c * (edge + w / 2), by = sy + s * (edge + w / 2);
+    edge += w + 4;
+    // The badge sits PAST the end of the name (along the text angle), so it never covers the name — draw it
+    // unconditionally (the name's conservative axis-aligned box would otherwise falsely drop it for diagonal
+    // text). Still reserve it best-effort so later labels avoid it.
+    if (guard) guard.tryPlace(bx - w / 2, by - h / 2, bx + w / 2, by + h / 2);
+    drawRefBadge(ctx, bx, by, it.t, it.st, h);
   }
-  ctx.save();
-  ctx.lineJoin = "round";
-  for (const stn of out.values()) {
-    const e = stn.e;
-    const [X, Y] = view.project(stn.x, stn.y);
-    if (X < -60 || Y < -60 || X > view.w + 60 || Y > view.h + 60) continue;   // off-screen station → skip
-    const items = [];
-    if (e.ref) items.push({ t: e.ref, st: refStyle(e.ref, e.cls) });
-    const ie = e.iref ? e.iref.replace(/\s+/g, "") : "";
-    if (ie && ie !== (e.ref || "")) items.push({ t: ie, st: refStyle("E", e.cls) });
-    let oy = -(items.length - 1) * (h * 0.62);            // stack the national + E-route badges vertically
-    for (const it of items) {
-      ctx.font = `800 ${Math.round(h * 0.6)}px ui-sans-serif,system-ui,sans-serif`;
-      const w = Math.max(h * 1.05, ctx.measureText(it.t).width + h * 0.5);
-      const cyy = Y + oy; oy += h * 1.24;
-      if (guard && !guard.tryPlace(X - w / 2, cyy - h / 2, X + w / 2, cyy + h / 2)) continue;
-      drawRefBadge(ctx, X, cyy, it.t, it.st, h);
-    }
-  }
-  ctx.restore();
 }
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close
@@ -1014,101 +963,82 @@ function pointInPoly(x, y, poly) {
   return inside;
 }
 
-// Street names sit ON the adjoining street next to the junction you can turn at — anchored to the
-// JUNCTION geometry, NOT the car. So a label never overprints the intersection, makes clear which
-// street you can turn onto, and DOESN'T slide as you drive (it just scrolls with the map). Very
-// short streets get a single mid-street label so two end-labels don't collide. (Vlad msg 2956.)
-function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
-  if (view.zoom < 8) return;                  // too zoomed out to be legible/useful
-  const cx = view.cx, cy = view.cy;           // camera centre = car, used ONLY to gate which junctions show
-  const NEAR2 = 62 * 62;                       // a junction must be within ~62 m of the car to label its streets
-  const GAP = 10;                              // metres the text keeps clear of the junction (msg 3007)
-  const z = view.zoom;
-  ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";   // a touch smaller (msg 2956)
+// Street names + their road number, at EVERY zoom (msg 3054). ONE label per NAME, anchored a short way INTO
+// the street from the edge-end (= a junction) nearest the camera → off the intersection and world-static (it
+// never slides as you drive, it just scrolls), de-overlapped via the shared guard (no dupes / pile-ups), with
+// the road-number badge right beside the name (msg 3045). Thresholds scale with zoom: close up labels every
+// street; zoomed out only the wider roads so it stays legible. The CURRENT road is in the HUD → skipped.
+function drawStreetLabels(ctx, view, edges, currentStreet, guard, nameRefs) {
+  const z = view.zoom, R = view.visR();
+  const fs = z >= 8 ? 11 : 13;                          // a touch larger when zoomed out
+  const widthMin = z >= 8 ? 3 : (z >= 4 ? 8 : 11);      // close: most streets; far: only the wider roads
+  const minLen = z >= 8 ? 20 : 38;                      // skip interchange connector stubs
+  const GAP = z >= 8 ? 10 : 16;                         // metres the text keeps clear of the junction
+  const NEAR2 = (R * 1.15) ** 2;                        // anchor within the view → covers the screen at any zoom
+  const CELL = 170;                                    // one label per name per ~170 m region → EVERY junction
+  const HH = fs * 0.6;                                  // approach gets labelled, but a road isn't swarmed (msg 3055)
+  ctx.font = `600 ${fs}px ui-sans-serif,system-ui,sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  const HH = 7;                               // half text height incl. halo
-
-  // ONE label per street NAME (msg 3007): a complex interchange is one street ("Studentská") split into
-  // dozens of short connector edges — labelling each one swarmed the junction. Instead keep the single
-  // nearest candidate per name, placed on a real APPROACH edge (length ≥ MINLEN, so the short connectors
-  // inside the junction box are skipped) a clear distance INTO the street from the nearest node.
-  const MINLEN = 20;
+  // The current street is NOT skipped — Vlad wants the name+number on its approaches too (msg 3055); the HUD
+  // badge is just an always-on convenience on top of that.
   const best = new Map();
-  for (const e of vis) {
-    if (!e.name || e.name === currentStreet) continue;
+  for (const e of edges) {
+    if (!e.name) continue;
+    if ((e.width || 0) < widthMin) continue;
     const g = e.geom;
     if (g.length < 2) continue;
     const len = edgeLen(e);
-    if (len < MINLEN) continue;                               // skip interchange connectors → names go on streets
+    if (len < minLen) continue;
     const J0 = g[0], J1 = g[g.length - 1];
-    const d0 = (J0[0] - cx) ** 2 + (J0[1] - cy) ** 2, d1 = (J1[0] - cx) ** 2 + (J1[1] - cy) ** 2;
+    const d0 = (J0[0] - view.cx) ** 2 + (J0[1] - view.cy) ** 2, d1 = (J1[0] - view.cx) ** 2 + (J1[1] - view.cy) ** 2;
     const near0 = d0 < NEAR2, near1 = d1 < NEAR2;
     if (!near0 && !near1) continue;
     const halfW = ctx.measureText(e.name).width / 2 / z;      // half label width in WORLD metres
     const off = Math.min(GAP + halfW, len * 0.5);             // this far INTO the street from the nearer node
-    const fromStart = near0 && (!near1 || d0 <= d1);          // label off the end nearest the car
+    const fromStart = near0 && (!near1 || d0 <= d1);
     const p = walkAlong(g, fromStart, off);
     const d = fromStart ? d0 : d1;
-    const prev = best.get(e.name);
-    if (!prev || d < prev.d) best.set(e.name, { name: e.name, x: p.x, y: p.y, dirx: p.dirx, diry: p.diry, d });
+    // one label per (name, ~170 m cell): each junction approach gets its own, but the short connector edges
+    // inside an interchange collapse to one → no swarm (msg 3007 / 3055).
+    const key = e.name + "|" + Math.floor(p.x / CELL) + "," + Math.floor(p.y / CELL);
+    const prev = best.get(key);
+    if (!prev || d < prev.d) best.set(key, { name: e.name, x: p.x, y: p.y, dirx: p.dirx, diry: p.diry, d });
   }
   // closest-junction labels first → the most relevant ones win the shared de-overlap guard (msg 2786)
   const cands = [...best.values()].sort((a, b) => a.d - b.d);
+  const a = view.rot, c = Math.cos(a), s = Math.sin(a);
   for (const L of cands) {
+    ctx.font = `600 ${fs}px ui-sans-serif,system-ui,sans-serif`;   // reset (drawNameRef changes the font)
     const [sx, sy] = view.project(L.x, L.y);
-    // direction in screen space so text runs along the street. project() rotates by camera rot then
-    // flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
-    const a = view.rot, c = Math.cos(a), s = Math.sin(a);
-    let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
-    if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
+    let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);  // run text along the street
+    if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI;   // keep upright
     const hw = ctx.measureText(L.name).width / 2;
     const ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
     const ex = hw * ca + HH * sa, ey = hw * sa + HH * ca;
     if (guard && !guard.tryPlace(sx - ex, sy - ey, sx + ex, sy + ey)) continue;
     ctx.save();
-    ctx.translate(sx, sy);
-    ctx.rotate(ang);
-    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.75)";
-    ctx.strokeText(L.name, 0, 0);             // halo for legibility on asphalt
-    ctx.fillStyle = "rgba(210,220,236,.82)";
-    ctx.fillText(L.name, 0, 0);
+    ctx.translate(sx, sy); ctx.rotate(ang);
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(10,12,17,.78)"; ctx.strokeText(L.name, 0, 0);
+    ctx.fillStyle = "rgba(220,228,242,.9)"; ctx.fillText(L.name, 0, 0);
     ctx.restore();
+    drawNameRef(ctx, nameRefs && nameRefs.get(L.name), sx, sy, ang, hw, guard);   // road number beside the name (msg 3045)
   }
 }
 
-// Overview labels (bird's-eye): translucent DISTRICT/quarter names for orientation, plus the
-// names of the MAJOR nearby streets (wide roads), so you know where you are when zoomed right out.
-function drawOverviewLabels(ctx, view, edges, districts) {
+// Overview (bird's-eye): translucent DISTRICT/quarter names for orientation. Street names + their numbers are
+// drawn at every zoom by drawStreetLabels now (msg 3054), so this only handles districts.
+function drawOverviewLabels(ctx, view, districts, guard) {
+  if (!districts || !districts.length) return;
   const R = view.visR();
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
-
-  // 1) district names — large, translucent, billboarded (axis-aligned, always upright)
-  if (districts && districts.length) {
-    ctx.font = "700 16px ui-sans-serif,system-ui,sans-serif";
-    for (const d of districts) {
-      if (!view.near(d.x, d.y, R * 1.25)) continue;
-      const [X, Y] = view.project(d.x, d.y);
-      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.45)"; ctx.strokeText(d.name, X, Y);
-      ctx.fillStyle = "rgba(206,216,232,.34)"; ctx.fillText(d.name, X, Y);   // полупрозрачно (msg 2763)
-    }
-  }
-
-  // 2) major nearby streets — the wide roads (width ≥ 9 m). Names sit at STATIC world stations along the
-  //    road (~every 600 m, msg 3035), oriented along it, so they stay pinned and just scroll instead of
-  //    sliding along the road to follow the camera. Brighter than districts so the names read.
-  const stations = gridStations(edges, (e) => (e.name && e.width >= 9 ? e.name : null), view, 450, 26);
-  ctx.font = "600 13px ui-sans-serif,system-ui,sans-serif";
-  const a = view.rot, c = Math.cos(a), s = Math.sin(a);
-  for (const stn of stations.values()) {
-    let ang = Math.atan2(-(stn.dirx * s + stn.diry * c), stn.dirx * c - stn.diry * s);
-    if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI;     // keep upright
-    const [X, Y] = view.project(stn.x, stn.y);
-    if (X < -80 || Y < -40 || X > view.w + 80 || Y > view.h + 40) continue;   // off-screen station → skip
-    ctx.save();
-    ctx.translate(X, Y); ctx.rotate(ang);
-    ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(8,10,15,.8)"; ctx.strokeText(stn.e.name, 0, 0);
-    ctx.fillStyle = "rgba(226,233,245,.92)"; ctx.fillText(stn.e.name, 0, 0);
-    ctx.restore();
+  ctx.font = "700 16px ui-sans-serif,system-ui,sans-serif";
+  for (const d of districts) {
+    if (!view.near(d.x, d.y, R * 1.25)) continue;
+    const [X, Y] = view.project(d.x, d.y);
+    const dw = ctx.measureText(d.name).width / 2;
+    if (guard && !guard.tryPlace(X - dw, Y - 10, X + dw, Y + 10)) continue;
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.45)"; ctx.strokeText(d.name, X, Y);
+    ctx.fillStyle = "rgba(206,216,232,.34)"; ctx.fillText(d.name, X, Y);   // полупрозрачно (msg 2763)
   }
 }
 
