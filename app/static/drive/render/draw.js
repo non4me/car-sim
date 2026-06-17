@@ -167,7 +167,7 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 4a) road-number shields on motorways/main roads (msg 3015) — CZ-coloured (red D, blue I, yellow II/III,
   //     green E). Drawn FIRST so the sparse, important road numbers reliably win the shared guard; anchored
   //     to the nearest on-road point → stable across zoom/pan (msg 3030). Current road's number → HUD.
-  if (zoom >= 4) drawRoadRefs(ctx, view, map.edges, zoom, guard, rules && rules.street);
+  drawRoadRefs(ctx, view, map.edges, zoom, guard, rules && rules.street);   // every zoom (msg 3040)
 
   // 4) street-name labels ON the connecting roads at intersections (NOT the current
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
@@ -578,18 +578,39 @@ function gridStations(edges, keyOf, view, cell, step) {
   return out;
 }
 
-// Road-number shields (msg 3015): CZ-coloured badge per road number, placed at static world stations along
-// the road (~every 340 m, msg 3035) so they stay pinned and just scroll — no camera-follow slide. The CURRENT
-// road's number is shown in the HUD next to the street name (msg 3030) → skipped on the map.
+// Road-number shields (msg 3015): a CZ-coloured badge per road number, placed ON the street a short way IN
+// from each junction — NEVER on the intersection itself, but right next to it on the carriageway (msg 3040).
+// OSM splits ways at junctions, so an edge's ENDS are the junctions: we offset OFFSET m in from each end
+// (+ extra stations at INTERVAL along long stretches). Positions are fixed in world (edge offsets) → static,
+// they just scroll; deduped per ~DEDUP m so interchanges don't swarm; drawn at EVERY zoom (msg 3040). The
+// current road's number rides in the HUD next to the street name (msg 3030) → skipped on the map.
 function drawRoadRefs(ctx, view, edges, zoom, guard, currentStreet) {
+  const R2 = (view.visR() + 200) ** 2, cx = view.cx, cy = view.cy;
   const h = Math.max(11, Math.min(17, zoom * 0.95));     // badge height in px
-  const stations = gridStations(edges, (e) => {
-    if (currentStreet && e.name === currentStreet) return null;
-    return e.ref || (e.iref ? "E" + e.iref.replace(/\s+/g, "") : null);
-  }, view, 220, 18);          // ~one shield per road per 220 m → usually one on-screen at drive zoom, still pinned
+  const OFFSET = 20, INTERVAL = 200, MINLEN = 26, DEDUP = 130;
+  const out = new Map();                                  // "ci,cj|key" -> {x,y,e,dc} (one static shield per cell)
+  for (const e of edges) {
+    const key = e.ref || (e.iref ? "E" + e.iref.replace(/\s+/g, "") : null);
+    if (!key) continue;
+    if (currentStreet && e.name === currentStreet) continue;     // current road → HUD badge
+    if (e.bb) { const mx = (e.bb[0] + e.bb[2]) / 2, my = (e.bb[1] + e.bb[3]) / 2; if ((mx - cx) ** 2 + (my - cy) ** 2 > R2) continue; }
+    const L = edgeLen(e);
+    if (L < MINLEN) continue;                            // skip interchange connector stubs (anti-swarm)
+    const ds = [];
+    if (L < 2 * OFFSET) ds.push(L / 2);                  // tiny stretch → one mid-street station
+    else { ds.push(OFFSET); for (let s = OFFSET + INTERVAL; s < L - OFFSET; s += INTERVAL) ds.push(s); ds.push(L - OFFSET); }
+    for (const dist of ds) {
+      const wp = walkAlong(e.geom, true, dist);          // `dist` m in from the start → on the street, clear of the node
+      const ci = Math.floor(wp.x / DEDUP), cj = Math.floor(wp.y / DEDUP);
+      const dc = (wp.x - (ci + 0.5) * DEDUP) ** 2 + (wp.y - (cj + 0.5) * DEDUP) ** 2;
+      const k = ci + "," + cj + "|" + key;
+      const prev = out.get(k);
+      if (!prev || dc < prev.dc) out.set(k, { x: wp.x, y: wp.y, e, dc });
+    }
+  }
   ctx.save();
   ctx.lineJoin = "round";
-  for (const stn of stations.values()) {
+  for (const stn of out.values()) {
     const e = stn.e;
     const [X, Y] = view.project(stn.x, stn.y);
     if (X < -60 || Y < -60 || X > view.w + 60 || Y > view.h + 60) continue;   // off-screen station → skip

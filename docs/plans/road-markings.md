@@ -111,6 +111,15 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
   camera. Shields `cell`=220 m, overview names `cell`=450 m. Verified deterministically: a 141 m pan leaves
   22/23 common cells pixel-identical (the 1 that moved is far off-screen, past the on-screen cull). `nearestOnGeom`
   removed. PATTERN: map labels must be world-pinned (placed at fixed road stations), not follow-camera.
+- **3040 on-the-street, off the junction, every zoom:** the grid-cell-centre station could land mid-
+  intersection, and the `zoom ≥ 4` gate hid shields when zoomed out. Reworked `drawRoadRefs` to place
+  shields a fixed OFFSET (20 m) IN from each edge end — and since OSM splits ways at junctions, an edge's
+  ends ARE the junctions, so the badge sits ON the carriageway right next to the intersection, never in it
+  — plus extra stations every 200 m on long stretches. Short interchange-connector stubs (< 26 m, which live
+  in the junction interior) are skipped, so no shield lands inside an interchange; deduped per 130 m so they
+  don't swarm; positions are world-fixed (static). The zoom gate is removed → shields show at EVERY zoom.
+  Verified in-browser across zoom 2.7 / 5.3 / 9.3 / 12.4 on the Studentská/Gerská interchange: the "20"
+  shield sits on Studentská next to (not on) the junction at every level, and is visible even at deep overview.
 
 ## Junction interior fill + sign de-overlap (msg 3022) — render-only, no re-bake
 Three asks on the same Studentská/Gerská interchange: (1) no signs inside the junction box; (2) no sign
