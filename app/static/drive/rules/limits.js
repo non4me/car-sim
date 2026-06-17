@@ -5,7 +5,7 @@ export function evalRules(map, car) {
   const M = 25; // metres of slack past the baked bounds before "no road"
   const inBounds = b && car.x > b.minx - M && car.x < b.maxx + M &&
                         car.y > b.miny - M && car.y < b.maxy + M;
-  const ne = map.nearestEdge(car.x, car.y);
+  const ne = map.nearestEdge(car.x, car.y, car.layer ?? null);   // prefer the car's carriageway level (msg 2980)
   const edge = ne.edge, dist = ne.dist;
   const onSurface = edge ? dist <= edge.width / 2 + 1.2 : false;
   const kmh = Math.round(Math.abs(car.v) * 3.6);
@@ -33,6 +33,7 @@ export function evalRules(map, car) {
     offRoad: inBounds && !onSurface,
     street: edge ? (edge.name || "") : "",
     width: edge ? edge.width : 7,
+    lv: edge ? (edge.lv || 0) : (car.layer || 0),     // carriageway level the car is on (msg 2980)
     kmh,
   };
 }

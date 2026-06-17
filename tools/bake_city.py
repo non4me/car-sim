@@ -70,6 +70,23 @@ def fetch_osm(bbox) -> dict:
 RAILWAY_KINDS = {"rail", "light_rail", "narrow_gauge", "tram"}
 
 
+def road_level(tags: dict) -> int:
+    """Carriageway level for multi-level interchanges (msg 2980): the OSM `layer` int if tagged, else
+    +1 for a bridge / -1 for a tunnel, else 0. Lets the runtime keep roads on different levels apart so
+    the car can't hop from a street onto an overpass passing above it."""
+    lz = tags.get("layer")
+    if lz not in (None, ""):
+        try:
+            return int(float(lz))
+        except (ValueError, TypeError):
+            pass
+    if tags.get("bridge") in ("yes", "viaduct"):
+        return 1
+    if tags.get("tunnel") in ("yes", "building_passage"):
+        return -1
+    return 0
+
+
 def railway_kind(tags: dict) -> str | None:
     """Surface railway line → 'rail' (heavy/light) or 'tram'. Underground (subway/tunnel) skipped."""
     rw = tags.get("railway")
@@ -283,6 +300,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         ow_raw = str(t.get("oneway", "")).lower()
         oneway = ow_raw in ("yes", "true", "1", "-1") or cdef.get("oneway_implied", False)
         maxspeed = parse_maxspeed(t.get("maxspeed"), cdef["context"], profile)
+        lv = road_level(t)                        # carriageway level for multi-level interchanges (msg 2980)
         nlist = wy["nodes"]
         if ow_raw == "-1":
             nlist = list(reversed(nlist))   # oneway=-1: reverse so geom order = traffic-flow direction
@@ -293,13 +311,16 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
                 if len(seg) >= 2:
                     pts = [to_xy(nodes[x]["lat"], nodes[x]["lon"]) for x in seg if x in nodes]
                     if len(pts) >= 2:
-                        edges.append({
+                        ed = {
                             "cls": cls, "name": t.get("name", ""), "oneway": oneway,
                             "lanes": lanes, "width": round(lanes * profile["lane_width_m"], 1),
                             "maxspeed": maxspeed,
                             "geom": [[round(x, 1), round(y, 1)] for x, y in pts],
                             "a": seg[0], "b": seg[-1],
-                        })
+                        }
+                        if lv:
+                            ed["lv"] = lv         # omit when 0 → keeps tiles small, old tiles default 0
+                        edges.append(ed)
                 seg = [nid]
     print(f"  edges (junction-to-junction): {len(edges)}")
 
@@ -344,7 +365,19 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
             px, py = nx + tx * sb + (-ty) * off, ny + ty * sb + tx * off
             signs.append({"x": round(px, 1), "y": round(py, 1), "kind": kind})
 
-        ranks = [(ei, hierarchy.get(edges[ei]["cls"], 99)) for ei in inc]
+        # grade-separated / interchange node (msg 2980): motorway/trunk/ramp incident, mixed carriageway
+        # levels, or a high-degree merge → DON'T derive give-way/priority here (real interchanges use
+        # direction boards, not yield signs; this is what swarmed the Plzeň screenshot). Explicit OSM
+        # signals/stop/give_way still place.
+        inc_cls = [edges[ei]["cls"] for ei in inc]
+        grade_sep = (deg >= 6 or len({edges[ei].get("lv", 0) for ei in inc}) > 1
+                     or any(c in ("motorway", "trunk") or c.endswith("_link") for c in inc_cls))
+
+        # Only PUBLIC roads carry give-way/priority signs — a main road meeting a driveway/parking aisle
+        # (service) or a living-street zone is NOT signed in reality. Filtering these out removes the bulk
+        # of the derived-sign swarm (service ≈ half of all edges) (msg 2980).
+        signworthy = [ei for ei in inc if edges[ei]["cls"] not in ("service", "living_street")]
+        ranks = [(ei, hierarchy.get(edges[ei]["cls"], 99)) for ei in signworthy]
         min_rank = min((r for _, r in ranks), default=99)
         mains = [ei for ei, r in ranks if r == min_rank]
         minors = [ei for ei, r in ranks if r > min_rank]
@@ -353,11 +386,23 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         elif ctrl in ("stop", "give_way"):
             for ei in (minors or inc):
                 place(ei, ctrl)
-        elif minors and mains:                       # derived: mixed classes
+        elif minors and mains and not grade_sep:     # derived: mixed classes at a normal at-grade junction
             for ei in minors:
                 place(ei, "give_way")
             for ei in mains:
                 place(ei, "priority_road")
+
+    # collapse co-located signs of the same kind (interchange clusters / dense nodes) to one per ~12 m
+    # cell so complex junctions don't swarm with duplicates (msg 2980).
+    if signs:
+        seen_sg, deduped = set(), []
+        for sg in signs:
+            key = (sg["kind"], round(sg["x"] / 12.0), round(sg["y"] / 12.0))
+            if key in seen_sg:
+                continue
+            seen_sg.add(key)
+            deduped.append(sg)
+        signs = deduped
 
     # pedestrian crossings (zebra): a crossing node lying on a drivable way → a zebra band laid
     # across that road. Tangent comes from the way neighbours so stripes sit square across the

@@ -135,18 +135,24 @@ export async function loadMap(base) {
     return out;
   }
 
-  function nearestEdge(x, y) {
-    let best = null, bd = Infinity, info = null;
+  // When `layer` is given, edges on a DIFFERENT carriageway level pay a big distance penalty so the car
+  // can't snap onto an overpass/underpass passing above/below it (msg 2980). A much-closer different-level
+  // edge can still win — that's a genuine ramp transition, where no same-level road is near.
+  const LAYER_PENALTY = 22;
+  function nearestEdge(x, y, layer = null) {
+    let best = null, bestScore = Infinity, info = null;
     for (const e of candidates(x, y)) {
       const r = nearestOnEdge(e, x, y);
-      if (r.d < bd) { bd = r.d; best = e; info = r; }
+      const score = r.d + (layer != null && (e.lv || 0) !== layer ? LAYER_PENALTY : 0);
+      if (score < bestScore) { bestScore = score; best = e; info = r; }
     }
-    return info ? { edge: best, dist: bd, px: info.px, py: info.py, tx: info.tx, ty: info.ty }
+    return info ? { edge: best, dist: info.d, px: info.px, py: info.py, tx: info.tx, ty: info.ty }
                 : { edge: null, dist: Infinity };
   }
 
-  function onSurface(x, y, margin = 1.0) {
+  function onSurface(x, y, margin = 1.0, layer = null) {
     for (const e of candidates(x, y)) {
+      if (layer != null && (e.lv || 0) !== layer) continue;
       if (edgeDist(e, x, y) <= e.width / 2 + margin) return true;
     }
     return false;

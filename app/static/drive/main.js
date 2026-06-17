@@ -69,9 +69,11 @@ async function boot() {
   const POS_KEY = `carsim_pos_${window.CARSIM.district}`;
   const sp = readSavedPos(POS_KEY) || pickSpawn(map);
   const car = new Car(sp.x, sp.y, sp.h);
-  // metres the car's centre is past the road edge (0 = on the drivable surface)
+  car.layer = 0;                       // carriageway level (msg 2980): updated each frame from the snapped edge
+  // metres the car's centre is past the road edge (0 = on the drivable surface) — measured against roads on
+  // the car's OWN level, so a car under a bridge isn't "on" the overpass passing above it (msg 2980)
   const offroadPen = (x, y) => {
-    const ne = map.nearestEdge(x, y);
+    const ne = map.nearestEdge(x, y, car.layer);
     return ne.edge ? Math.max(0, ne.dist - (ne.edge.width / 2 + 1.0)) : 0;
   };
   const input = makeInput();
@@ -213,7 +215,7 @@ async function boot() {
     car.x = x; car.y = y; car.v = 0;                  // jump there; render() now streams around it
     for (let i = 0; i < 30; i++) {
       const ne = map.nearestEdge(x, y);
-      if (ne.edge && ne.dist < 60) { car.x = ne.px; car.y = ne.py; car.h = Math.atan2(ne.ty, ne.tx); car.v = 0; return; }
+      if (ne.edge && ne.dist < 60) { car.x = ne.px; car.y = ne.py; car.h = Math.atan2(ne.ty, ne.tx); car.v = 0; car.layer = ne.edge.lv || 0; return; }
       await new Promise((r) => setTimeout(r, 80));    // wait for the destination tiles to stream in
     }
   }
@@ -323,7 +325,7 @@ async function boot() {
   // two-way carriageway (RHT), the centreline of a one-way. Gentle + only when already roughly
   // aligned, so deliberate crossings/turns aren't fought.
   function laneAlign(dt) {
-    const ne = map.nearestEdge(car.x, car.y);
+    const ne = map.nearestEdge(car.x, car.y, car.layer);
     if (!ne.edge) return;
     let tx = ne.tx, ty = ne.ty;
     if (Math.cos(car.h) * tx + Math.sin(car.h) * ty < 0) { tx = -tx; ty = -ty; }   // align to travel dir
@@ -367,6 +369,7 @@ async function boot() {
     if (!handled) car.update(dt, controls);
 
     rules = evalRules(map, car);
+    if (rules.onSurface) car.layer = rules.lv;   // adopt the level of the road we're on; keep it while off-road (msg 2980)
     if (rules.boundary) { car.x = px; car.y = py; car.v = 0; car.blocked = true; }   // map edge = real wall
     else if (!following) {
       // off-road soft wall — but NOT while auto-following: the server route is on-road by construction,
