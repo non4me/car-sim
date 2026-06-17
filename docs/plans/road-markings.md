@@ -183,3 +183,28 @@ Karlovarská all read name+number, off-junction, de-overlapped, no console error
 
 Pattern: on overview zooms, pick label-worthy roads by class/number (the arterial skeleton), not by width;
 width is a gate only for close zooms.
+
+## msg 3064 — zoomed-out labels: one per road, not a swarm
+
+The msg-3059 fix surfaced more arterials but the dedup key was a fixed 170 m world grid, which at minimum
+zoom is only ~76 px wide. So a road got a label every ~76 px (Gerská stamped ~4× down its length), same-name
+labels sat back-to-back overlapping, and the number badges piled onto the junction. The de-overlap guard
+couldn't help — copies 76 px apart don't actually overlap. A world grid can't express "one label per road"
+on a wide screen.
+
+Fix: make label density zoom-dependent. `perApproach = z >= 6`.
+- z >= 6 (close): dedup key `name|cellX,cellY` (170 m) — one label per junction APPROACH, the msg-3055
+  behaviour Vlad approved at a complex interchange. Unchanged.
+- z < 6 (overview): dedup key is just `name` — ONE label per road, placed on the approach nearest the
+  camera (world-pinned, no slide). `minLen` and `GAP` switch to SCREEN-pixel scaling
+  (`minLen = max(38, 90/pxPerM)`, `GAP = max(20, 26/pxPerM)`) so the single label rides only the long
+  arterial segments (never a junction stub) and keeps a constant pixel margin off the node.
+
+Verified on prod at zoom 1 / 3.8 / 8.7 / 12.8 (instrumented `ctx.fillText` to count exactly what each frame
+draws): zoomed out → one "Gerská 1808" / one "Studentská 20 + E49", off-junction, no duplicates/overlaps,
+numbers not on the node; zoomed in → per-approach labels with full lane markings, no regression. No console
+errors.
+
+Pattern: switch label DENSITY by zoom (per-approach close, one-per-name far); keep spacing/length thresholds
+in SCREEN pixels (÷ pxPerM), not fixed world metres — a fixed world step collapses to a few pixels when
+zoomed out and swarms.

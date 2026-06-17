@@ -983,10 +983,16 @@ function drawStreetLabels(ctx, view, edges, currentStreet, guard, nameRefs) {
   const worthy = (e) => z >= 8 ? (e.width || 0) >= 3
                       : z >= 4 ? ((e.width || 0) >= 7 || !!e.ref || !!e.iref || MAJOR_CLS.has(e.cls) || e.cls === "tertiary")
                                : (!!e.ref || !!e.iref || MAJOR_CLS.has(e.cls));
-  const minLen = z >= 8 ? 20 : 38;                      // skip interchange connector stubs
-  const GAP = z >= 8 ? 10 : 16;                         // metres the text keeps clear of the junction
+  const pxPerM = (view.h * 0.5) / Math.max(R, 1);      // screen pixels per world metre at this zoom
+  // Up close, one label per junction APPROACH so every road at a complex interchange is named (msg 3055). Zoomed
+  // out, ONE label per road NAME — a fixed 170 m grid is only ~76 px wide at min zoom, so it stamped a road every
+  // few pixels and piled the numbers onto the junction (msg 3059, "одной достаточно"). The de-overlap guard then
+  // can't help, because 76-px-apart copies don't actually overlap.
+  const perApproach = z >= 6;
+  const minLen = perApproach ? (z >= 8 ? 20 : 38) : Math.max(38, 90 / pxPerM);  // zoomed out: only long arterials, never junction stubs
+  const GAP = perApproach ? (z >= 8 ? 10 : 16) : Math.max(20, 26 / pxPerM);     // keep the label a constant screen margin off the node
   const NEAR2 = (R * 1.15) ** 2;                        // anchor within the view → covers the screen at any zoom
-  const CELL = 170;                                    // one label per name per ~170 m region → EVERY junction
+  const CELL = 170;                                    // per-approach cell: one label per name per ~170 m region
   const HH = fs * 0.6;                                  // approach gets labelled, but a road isn't swarmed (msg 3055)
   ctx.font = `600 ${fs}px ui-sans-serif,system-ui,sans-serif`;
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
@@ -1009,9 +1015,10 @@ function drawStreetLabels(ctx, view, edges, currentStreet, guard, nameRefs) {
     const fromStart = near0 && (!near1 || d0 <= d1);
     const p = walkAlong(g, fromStart, off);
     const d = fromStart ? d0 : d1;
-    // one label per (name, ~170 m cell): each junction approach gets its own, but the short connector edges
-    // inside an interchange collapse to one → no swarm (msg 3007 / 3055).
-    const key = e.name + "|" + Math.floor(p.x / CELL) + "," + Math.floor(p.y / CELL);
+    // up close: one label per (name, ~170 m cell) → each junction approach gets its own, but short connector edges
+    // inside an interchange collapse to one (msg 3007 / 3055). zoomed out: one label per NAME, placed on the
+    // approach nearest the camera → a road is named once, off-junction, never repeated (msg 3059).
+    const key = perApproach ? e.name + "|" + Math.floor(p.x / CELL) + "," + Math.floor(p.y / CELL) : e.name;
     const prev = best.get(key);
     if (!prev || d < prev.d) best.set(key, { name: e.name, x: p.x, y: p.y, dirx: p.dirx, diry: p.diry, d });
   }
