@@ -219,6 +219,22 @@ const LABEL_COLOR = {
   monument: "#c0a16b", theatre: "#e0788f", university: "#7aa7ff", hospital: "#ef6a6a",
   townhall: "#9aa6bd", stadium: "#5fbf7f", airport: "#7aa7ff", church: "#c7b27a",
 };
+// standard object icons (msg 2983): an emoji pictogram per kind, drawn on a dark badge so it reads on any
+// surface — recognisable "значки" at the object's location (custom landmark icons come via the admin in ph3).
+const ICON_GLYPH = {
+  station: "🚉", bus_station: "🚌", airport: "✈️", museum: "🏛️", castle: "🏰", theatre: "🎭",
+  university: "🎓", hospital: "🏥", stadium: "🏟️", townhall: "🏛️", monument: "🗿", attraction: "⭐",
+  church: "⛪", square: "⛲",
+  pharmacy: "💊", atm: "🏧", bank: "🏦", food: "🍽️", fuel: "⛽", police: "🚓", fire: "🚒", post: "✉️", shop: "🛒",
+};
+function drawIcon(ctx, X, Y, glyph, size) {
+  ctx.beginPath(); ctx.arc(X, Y, size * 0.72, 0, 7);
+  ctx.fillStyle = "rgba(12,15,22,.82)"; ctx.fill();
+  ctx.lineWidth = 1; ctx.strokeStyle = "rgba(255,255,255,.28)"; ctx.stroke();
+  ctx.font = `${size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(glyph, X, Y + 0.5);
+}
 // zoomed right out, show only the biggest landmarks (the rest would crowd the overview)
 const OVERVIEW_MAJOR = new Set(["station", "castle", "museum", "university", "hospital", "stadium", "airport"]);
 function drawLabels(ctx, view, map, zoom, guard) {
@@ -232,13 +248,20 @@ function drawLabels(ctx, view, map, zoom, guard) {
     if (!view.near(L.x, L.y, R)) continue;
     const [X, Y] = view.project(L.x, L.y);
     const col = LABEL_COLOR[L.kind] || "#cfd6e2";
-    ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(8,10,15,.85)";
-    if (L.kind === "station") {                        // rail station = filled square (marker always shows)
-      ctx.fillStyle = col; ctx.fillRect(X - 4, Y - 4, 8, 8); ctx.strokeRect(X - 4, Y - 4, 8, 8);
-    } else {                                            // landmark = filled dot
+    const glyph = ICON_GLYPH[L.kind];
+    let tx;
+    if (glyph) {                                        // standard icon at the object's location (msg 2983)
+      const isz = zoom < 5 ? 12 : 15;
+      drawIcon(ctx, X, Y, glyph, isz);
+      tx = X + isz * 0.72 + 3;
+    } else {                                            // no standard icon → category dot
+      ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(8,10,15,.85)";
       ctx.beginPath(); ctx.arc(X, Y, 4, 0, 7); ctx.fillStyle = col; ctx.fill(); ctx.stroke();
+      tx = X + 7;
     }
-    const tx = X + 7;                                   // name yields to higher-priority labels (msg 2786)
+    ctx.font = "600 12px ui-sans-serif,system-ui,sans-serif";   // restore name font + align (drawIcon changed them)
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    // name yields to higher-priority labels (msg 2786)
     if (guard && !guard.tryPlace(tx, Y - 7, tx + ctx.measureText(L.name).width, Y + 7)) continue;
     ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(L.name, tx, Y);
     ctx.fillStyle = "rgba(233,239,249,.96)"; ctx.fillText(L.name, tx, Y);
@@ -263,18 +286,24 @@ function drawPois(ctx, view, map, zoom, guard) {
   for (const po of pois) {
     if (!view.near(po.x, po.y, R)) continue;
     const [X, Y] = view.project(po.x, po.y);
-    ctx.beginPath(); ctx.arc(X, Y, 5, 0, 7);
-    ctx.fillStyle = POI_COLOR[po.kind] || "#cfd6e2"; ctx.fill();
-    ctx.lineWidth = 1.4; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.stroke();
-    ctx.fillStyle = "#0b0e14"; ctx.font = "800 8px ui-sans-serif,system-ui,sans-serif";
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillText(POI_GLYPH[po.kind] || "", X, Y + 0.5);
+    const glyph = ICON_GLYPH[po.kind];
+    if (glyph) {                                        // standard POI icon (msg 2983)
+      drawIcon(ctx, X, Y, glyph, 12);
+    } else {                                            // unknown kind → category dot + letter (legacy)
+      ctx.beginPath(); ctx.arc(X, Y, 5, 0, 7);
+      ctx.fillStyle = POI_COLOR[po.kind] || "#cfd6e2"; ctx.fill();
+      ctx.lineWidth = 1.4; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.stroke();
+      ctx.fillStyle = "#0b0e14"; ctx.font = "800 8px ui-sans-serif,system-ui,sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(POI_GLYPH[po.kind] || "", X, Y + 0.5);
+    }
     if (showName && po.name) {                          // name yields to street/landmark labels (msg 2786)
+      const nx = X + (glyph ? 11 : 8);
       ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";
-      if (guard && !guard.tryPlace(X + 8, Y - 6, X + 8 + ctx.measureText(po.name).width, Y + 6)) continue;
-      ctx.textAlign = "left";
-      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(po.name, X + 8, Y);
-      ctx.fillStyle = "rgba(228,235,246,.96)"; ctx.fillText(po.name, X + 8, Y);
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      if (guard && !guard.tryPlace(nx, Y - 6, nx + ctx.measureText(po.name).width, Y + 6)) continue;
+      ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,10,15,.85)"; ctx.strokeText(po.name, nx, Y);
+      ctx.fillStyle = "rgba(228,235,246,.96)"; ctx.fillText(po.name, nx, Y);
     }
   }
   ctx.textAlign = "center";   // restore default
