@@ -45,22 +45,26 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // 0b) railway tracks — under the roads (roads cross over), track symbol (msg 2771)
   drawRails(ctx, view, map, zoom);
 
-  // 1) asphalt: ALL casings first, then ALL surfaces in ONE uniform colour. Per-class tints made
-  //    crossing roads show a visible seam where two different shades overlapped (Vlad's screenshot);
-  //    a single surface colour blends seamlessly, and road hierarchy still reads through width.
+  // 1) asphalt in three carriageway-level layers (msg 2983) so multi-level interchanges read correctly:
+  //    tunnels UNDER (dimmed + dashed = covered/below), ground at grade, bridges ON TOP (lighter deck +
+  //    a wider dark drop-shadow casing so they lift above the road below). Within each layer narrowest
+  //    first → clean crossings; one surface colour per layer → no seams.
   ctx.lineCap = "round"; ctx.lineJoin = "round";
-  for (const e of vis) {
-    path(ctx, view, e.geom);
-    ctx.strokeStyle = "#0a0c11";
-    ctx.lineWidth = e.width * zoom + 4;
-    ctx.stroke();
-  }
-  ctx.strokeStyle = ASPHALT;
-  for (const e of vis) {
-    path(ctx, view, e.geom);
-    ctx.lineWidth = Math.max(2, e.width * zoom);
-    ctx.stroke();
-  }
+  const ground = [], bridges = [], tunnels = [];
+  for (const e of vis) { const lv = e.lv || 0; (lv > 0 ? bridges : lv < 0 ? tunnels : ground).push(e); }
+  const casings = (eds, col, pad) => {
+    ctx.strokeStyle = col;
+    for (const e of eds) { path(ctx, view, e.geom); ctx.lineWidth = e.width * zoom + pad; ctx.stroke(); }
+  };
+  const surfaces = (eds, col, dash) => {
+    ctx.setLineDash(dash || []);
+    ctx.strokeStyle = col;
+    for (const e of eds) { path(ctx, view, e.geom); ctx.lineWidth = Math.max(2, e.width * zoom); ctx.stroke(); }
+    ctx.setLineDash([]);
+  };
+  casings(tunnels, "#0a0c11", 4); surfaces(tunnels, "#23272f", [zoom * 1.3, zoom * 0.9]);  // below: dim + dashed
+  casings(ground, "#0a0c11", 4); surfaces(ground, ASPHALT);                                 // at grade
+  casings(bridges, "#05070a", 7); surfaces(bridges, "#3a424f");                             // above: shadow + lighter deck
 
   // 1b) computed route — a glowing blue ribbon laid over the asphalt (under markings/signs/car),
   //     so the suggested path reads clearly while the lane markings still show through at the edges.
@@ -129,6 +133,9 @@ export function draw(ctx, view, map, car, rules, route, districts) {
 
   // 4c) stations + major-landmark labels (marker + name), for orientation at most zooms (msg 2771)
   drawLabels(ctx, view, map, zoom, guard);
+
+  // 4c2) named bridges & tunnels — a label on the structure (msg 2983), distinct tint per level
+  drawStructureLabels(ctx, view, vis, zoom, guard);
 
   // 4d) close-up street detail (msg 2771 phase 2): POIs (pharmacy/ATM/food/shop…) when zoomed in,
   //     and house numbers when very close — so the street you're on shows its full info.
@@ -471,6 +478,29 @@ function drawSignal(ctx, X, Y, s) {
 // Shared label-collision guard (msg 2786): reserves axis-aligned screen boxes; tryPlace() returns
 // false when a candidate overlaps an already-placed label, so callers can skip it. PAD keeps a small
 // gap between labels. Rebuilt every frame (label positions move with the camera).
+// Named bridges & tunnels (msg 2983): edges carry the way name + level (lv). Label each named structure
+// once, in a tint that matches its surface (bridge bluish-light, tunnel grey), placed at the structure's
+// midpoint and de-overlapped via the shared guard. Only structures that actually carry a name.
+function drawStructureLabels(ctx, view, vis, zoom, guard) {
+  if (zoom < 7) return;
+  const seen = new Set();
+  const fs = Math.max(10, Math.min(14, zoom * 0.7));
+  ctx.font = `italic 600 ${fs}px ui-sans-serif,system-ui,sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (const e of vis) {
+    const lv = e.lv || 0;
+    if (!lv || !e.name || seen.has(e.name)) continue;
+    seen.add(e.name);
+    const g = e.geom, m = g[Math.floor(g.length / 2)];
+    const [X, Y] = view.project(m[0], m[1]);
+    const w = ctx.measureText(e.name).width;
+    if (!guard.tryPlace(X - w / 2 - 2, Y - fs / 2, X + w / 2 + 2, Y + fs / 2)) continue;
+    ctx.lineWidth = 3; ctx.strokeStyle = "rgba(8,11,16,.85)"; ctx.strokeText(e.name, X, Y);
+    ctx.fillStyle = lv > 0 ? "#cfe0ff" : "#aeb8cb";    // bridge = light blue, tunnel = grey
+    ctx.fillText(e.name, X, Y);
+  }
+}
+
 function makeLabelGuard() {
   const placed = [];
   const PAD = 1.5;
