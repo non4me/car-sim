@@ -12,15 +12,15 @@
     h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:.2em 0}
     .accent{color:var(--accent)}
     .sub{color:#8a93a6;margin-top:6px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
-    .pick{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14px}
-    .pick label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385}
-    .pick b{font-weight:700}
-    .citysel{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+    .citysel{display:flex;gap:6px;flex-wrap:wrap}
     .citysel a{color:#cfd6e2;text-decoration:none;font-size:14px;font-weight:700;background:#1c2330;
       border:1px solid #2a3346;border-radius:8px;padding:3px 11px;transition:border-color .12s,color .12s}
     .citysel a:hover{border-color:var(--accent);color:#fff}
-    .cards{display:grid;gap:14px;margin-top:18px}
+    /* city picker lives INSIDE the Drive card now — one combined primary block (msg 3076) */
+    .drivecities{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:14px;
+      border-top:1px solid var(--line)}
+    .dc-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7385}
+    .cards{display:grid;gap:14px;margin-top:22px}
     .card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:16px;
       padding:18px;text-decoration:none;color:inherit;transition:border-color .15s}
     .card:hover{border-color:rgba(91,156,255,.6)}
@@ -48,19 +48,16 @@
     <h1><span class="accent">car</span>-sim</h1>
     <div class="sub">{{ t.sub }}</div>
 
-    <div class="row">
-      <div class="pick"><label>{{ t.country }}</label><b>🇨🇿 Česko</b></div>
-      <div class="pick"><label>{{ t.city }}</label>
-        <span class="citysel">{% for c in cities %}<a href="/drive?city={{ c.slug }}">{{ c.name }}</a>{% endfor %}</span>
-      </div>
-    </div>
-
     <div class="cards">
       <div class="card">
         <a class="card-main" href="/drive">
           <div class="t">🚗 {{ t.drive_t }} <span class="tag">{{ t.tag_primary }}</span></div>
           <div class="d">{{ t.drive_d }}</div>
         </a>
+        <div class="drivecities">
+          <span class="dc-lbl">🇨🇿 Česko · {{ t.city }}</span>
+          <span class="citysel">{% for c in cities %}<a href="/drive?city={{ c.slug }}">{{ c.name }}</a>{% endfor %}</span>
+        </div>
       </div>
       <a class="card" href="/quiz">
         <div class="t">🧠 {{ t.quiz_t }} <span class="tag">{{ t.tag_live }}</span></div>
