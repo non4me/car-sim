@@ -14,8 +14,11 @@
   </style>
   {{ hdr.assets() }}
 </head>
-<body class="h-full">
-  <div class="relative w-full h-full mx-auto max-w-3xl">
+<body class="h-full flex flex-col">
+  <!-- standalone header — same bar as every other page (msg 2953); the game sits below it -->
+  <header class="ah-bar">{{ hdr.logo() }}<div class="ah-spacer"></div><div class="ah-right">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div></header>
+
+  <div class="relative w-full flex-1 min-h-0 mx-auto max-w-3xl">
     <canvas id="game"></canvas>
 
     <!-- top HUD -->
@@ -43,9 +46,7 @@
 
     <!-- start / scenario menu -->
     <div id="menu" class="absolute inset-0 bg-ink/95 backdrop-blur flex flex-col items-center justify-center p-6 text-center fade-in">
-      <div class="absolute top-3 left-3">{{ hdr.logo() }}</div>
-      <div class="absolute top-3 right-3 flex items-center gap-2.5">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div>
-      <a href="/quiz" class="absolute top-16 left-4 text-accent text-sm font-bold hover:opacity-80">← {{ 'Quizzes' }}</a>
+      <a href="/quiz" class="absolute top-3 left-3 text-accent text-sm font-bold hover:opacity-80">← {{ 'Quizzes' }}</a>
       <h1 class="text-3xl font-extrabold tracking-tight">Ulice <span class="text-accent">Sim</span></h1>
       <p class="mt-2 text-slate-400 text-sm max-w-sm">Dopravní situace z ptačí perspektivy. Projeď křižovatkou podle pravidel — a hned se dozvíš proč.</p>
       <div id="scenario-list" class="mt-6 w-full max-w-sm grid gap-2"></div>

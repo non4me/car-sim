@@ -45,16 +45,9 @@ def resolve_lang(request, default: str = "cs") -> str:
     return c if c in SUPPORTED else default
 
 
-# Brand mark: a top-down car (the simulator's own motif) on a rounded accent badge.
-LOGO_SVG = (
-    '<svg class="ah-mark" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">'
-    '<rect width="32" height="32" rx="8" fill="#5b9cff"/>'
-    '<path d="M11 9.2c0-2 1.4-3.2 5-3.2s5 1.2 5 3.2v13.6c0 2-1.4 3.2-5 3.2s-5-1.2-5-3.2z" fill="#0b0e14"/>'
-    '<path d="M12.6 10.7c.9-1.2 5.9-1.2 6.8 0l-.5 2.5h-5.8z" fill="#7fb4ff"/>'
-    '<rect x="12.8" y="18.4" width="6.4" height="2.8" rx="1.1" fill="#3b6fb0"/>'
-    '<circle cx="12.6" cy="7.7" r=".9" fill="#ffd76a"/><circle cx="19.4" cy="7.7" r=".9" fill="#ffd76a"/>'
-    '</svg>'
-)
+# Brand mark: the literal 🚗 emoji — the same car shown next to the "Drive"/"Jízda" card — with NO
+# background badge (Vlad msg 2938/2939). The favicon (static/favicon.svg) renders the same emoji as text.
+LOGO_SVG = '<span class="ah-mark" aria-hidden="true">🚗</span>'
 
 _FLAG = '<img class="ah-flag" src="/static/flags/{cc}.svg" alt="" width="20" height="14">'
 
@@ -65,7 +58,7 @@ _CSS = """
   border-bottom:1px solid #1c2330;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 .ah-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:#e6e9f0;font-weight:800;
   font-size:17px;letter-spacing:-.02em;white-space:nowrap}
-.ah-mark{flex:none;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.ah-mark{flex:none;font-size:21px;line-height:1}
 .ah-logo .ac{color:#5b9cff}
 .ah-spacer{flex:1}
 .ah-right{display:flex;align-items:center;gap:10px}
@@ -113,9 +106,18 @@ _JS = """
 """
 
 
+ASSET_VER = ""  # set by main.py to the static BUILD token; ?v=<token> busts the favicon cache the
+                # moment the icon file changes (the route sends a long max-age), so no stale icon.
+
+
+def _favicon_link() -> str:
+    v = f"?v={ASSET_VER}" if ASSET_VER else ""
+    return f'<link rel="icon" type="image/svg+xml" href="/favicon.svg{v}">'
+
+
 def assets() -> Markup:
-    """The header's CSS + JS. Include once per page (idempotent JS guard)."""
-    return Markup(_CSS + _JS)
+    """The header's favicon link + CSS + JS. Include once per page (idempotent JS guard)."""
+    return Markup(_favicon_link() + _CSS + _JS)
 
 
 def logo(home: str = "/") -> Markup:
