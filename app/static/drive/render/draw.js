@@ -487,35 +487,57 @@ function makeLabelGuard() {
   };
 }
 
+function edgeLen(e) {
+  if (e._len != null) return e._len;          // geometry is immutable → cache the polyline length
+  const g = e.geom; let L = 0;
+  for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
+  return (e._len = L);
+}
+
+// Street names sit ON the adjoining street next to the junction you can turn at — anchored to the
+// JUNCTION geometry, NOT the car. So a label never overprints the intersection, makes clear which
+// street you can turn onto, and DOESN'T slide as you drive (it just scrolls with the map). Very
+// short streets get a single mid-street label so two end-labels don't collide. (Vlad msg 2956.)
 function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
   if (view.zoom < 8) return;                  // too zoomed out to be legible/useful
-  const cx = view.cx, cy = view.cy;           // camera centre = car, in world metres
-  const NEAR = 55 * 55;                        // the cross street's junction with us must be within ~55 m
-  const INSET = 20;                            // place the label ~20 m into the adjoining street
-  const byName = new Map();
+  const cx = view.cx, cy = view.cy;           // camera centre = car, used ONLY to gate which junctions show
+  const NEAR2 = 62 * 62;                       // a junction must be within ~62 m of the car to label its streets
+  const GAP = 7;                               // metres the text keeps clear of the junction
+  const z = view.zoom;
+  ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";   // a touch smaller (msg 2956)
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const HH = 7;                               // half text height incl. halo
+
+  const cands = [];
+  const seen = new Set();
   for (const e of vis) {
     if (!e.name || e.name === currentStreet) continue;
     const g = e.geom;
-    const d0 = (g[0][0] - cx) ** 2 + (g[0][1] - cy) ** 2;
-    const dN = (g[g.length - 1][0] - cx) ** 2 + (g[g.length - 1][1] - cy) ** 2;
-    const nearD = Math.min(d0, dN);
-    if (nearD > NEAR) continue;               // only streets whose junction with us is here
-    const p = walkAlong(g, d0 <= dN, INSET);  // step into the street from its near (junction) end
-    const prev = byName.get(e.name);
-    if (!prev || nearD < prev.nearD) byName.set(e.name, { ...p, name: e.name, nearD });
+    if (g.length < 2) continue;
+    const J0 = g[0], J1 = g[g.length - 1];
+    const d0 = (J0[0] - cx) ** 2 + (J0[1] - cy) ** 2, d1 = (J1[0] - cx) ** 2 + (J1[1] - cy) ** 2;
+    const near0 = d0 < NEAR2, near1 = d1 < NEAR2;
+    if (!near0 && !near1) continue;
+    const halfW = ctx.measureText(e.name).width / 2 / z;      // half label width in WORLD metres
+    const off = GAP + halfW;                                  // centre this far from a junction → text clears it
+    const len = edgeLen(e);
+    if (len < 2 * GAP + 4 * halfW) {
+      // too short to clear both ends → one label at the middle (so two names don't overlap)
+      addLabel(cands, seen, e.name, walkAlong(g, true, len / 2), Math.min(d0, d1));
+    } else {
+      if (near0) addLabel(cands, seen, e.name, walkAlong(g, true, off), d0);
+      if (near1) addLabel(cands, seen, e.name, walkAlong(g, false, off), d1);
+    }
   }
-  ctx.font = "600 12px ui-sans-serif,system-ui,sans-serif";
-  ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  // closest-junction labels first → the most relevant ones win the de-overlap (msg 2786)
-  const HH = 8;                               // half text height incl. halo
-  for (const L of [...byName.values()].sort((a, b) => a.nearD - b.nearD)) {
+  // closest-junction labels first → the most relevant ones win the shared de-overlap guard (msg 2786)
+  cands.sort((a, b) => a.d - b.d);
+  for (const L of cands) {
     const [sx, sy] = view.project(L.x, L.y);
-    // direction in screen space so text runs along the cross street. project() rotates by
-    // camera rot then flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
+    // direction in screen space so text runs along the street. project() rotates by camera rot then
+    // flips y (canvas y grows down): sdx = dx·c − dy·s, sdy = −(dx·s + dy·c).
     const a = view.rot, c = Math.cos(a), s = Math.sin(a);
     let ang = Math.atan2(-(L.dirx * s + L.diry * c), L.dirx * c - L.diry * s);
     if (ang > Math.PI / 2 || ang < -Math.PI / 2) ang += Math.PI; // keep upright
-    // axis-aligned bounding box of the rotated label (conservative) → reserve it or skip
     const hw = ctx.measureText(L.name).width / 2;
     const ca = Math.abs(Math.cos(ang)), sa = Math.abs(Math.sin(ang));
     const ex = hw * ca + HH * sa, ey = hw * sa + HH * ca;
@@ -529,6 +551,13 @@ function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
     ctx.fillText(L.name, 0, 0);
     ctx.restore();
   }
+}
+
+function addLabel(cands, seen, name, p, d) {
+  const key = name + "|" + Math.round(p.x / 4) + "|" + Math.round(p.y / 4);   // drop near-identical placements
+  if (seen.has(key)) return;
+  seen.add(key);
+  cands.push({ name, x: p.x, y: p.y, dirx: p.dirx, diry: p.diry, d });
 }
 
 // Overview labels (bird's-eye): translucent DISTRICT/quarter names for orientation, plus the

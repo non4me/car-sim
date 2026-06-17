@@ -22,6 +22,12 @@ export function makeView(canvas) {
     const rx = dx * c - dy * s, ry = dx * s + dy * c;
     return [v.w / 2 + rx * v.zoom, v.h * v.anchorY - ry * v.zoom];
   };
+  // screen px → world metres (inverse of project): used by the free-look pan/orbit + double-click snap.
+  v.unproject = (sx, sy) => {
+    const rx = (sx - v.w / 2) / v.zoom, ry = (v.h * v.anchorY - sy) / v.zoom;
+    const c = Math.cos(v.rot), s = Math.sin(v.rot);
+    return [v.cx + rx * c + ry * s, v.cy - rx * s + ry * c];
+  };
   v.anchor = () => [v.w / 2, v.h * v.anchorY];
   // cull radius in metres (half screen diagonal back to world units + margin)
   v.visR = () => Math.hypot(v.w, v.h) / 2 / v.zoom + 40;

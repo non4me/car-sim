@@ -98,6 +98,8 @@ async function boot() {
   let dbgFollow = null;        // last auto-pilot target+index (headless debug hook)
   let districts = [];          // {name,x,y,kind} district/quarter labels (overview mode 2763 + City/Trasa minimap 2784)
   let landmarks = [];          // {name,x,y,kind} major city-wide objects for the City/Trasa minimap (msg 2784)
+  let overview = null;         // {water,roads,green} city-wide landscape for the City minimap (msg 2959)
+  let admin = [];              // {name,x,y,n} official city districts — the only labels the City minimap shows (msg 2964)
 
   // minimap opacity (10–100%) + collapse-to-icon, both persisted (msg 2691)
   const miniEl = document.getElementById("minimap");
@@ -132,6 +134,52 @@ async function boot() {
     zTarget = clampZoom(zTarget * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
     localStorage.setItem("carsim_zoom", zTarget.toFixed(2));
   }, { passive: false });
+
+  // ---- Free-look camera (Vlad msg 2943): left-drag pans the map, right-drag orbits it, double-click
+  // snaps the car onto the nearest street. While free, the camera detaches from the car; the next
+  // drive key (or a double-click that repositions the car) re-attaches it heading-up.
+  let freeCam = false;
+  const cam = { cx: 0, cy: 0, rot: 0 };               // free camera pose (world centre + rotation)
+  const enterFree = () => { if (!freeCam) { freeCam = true; cam.cx = view.cx; cam.cy = view.cy; cam.rot = view.rot; } };
+  const exitFree = () => { freeCam = false; };
+  const ORBIT_SENS = 0.006;                            // radians of rotation per px of horizontal drag
+  const DRAG_THRESH = 3;                               // px before a press becomes a drag (so a plain click/dblclick is untouched)
+  let press = null;                                    // {button, sx, sy}: a held button, also the running "last" point while dragging
+  let drag = null;                                     // null | 'pan' | 'orbit'
+  const evXY = (e) => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+
+  canvas.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 && e.button !== 2) return;      // left or right only
+    const [sx, sy] = evXY(e);
+    press = { button: e.button, sx, sy }; drag = null;
+  });
+  window.addEventListener("mousemove", (e) => {
+    if (!press) return;
+    const [sx, sy] = evXY(e);
+    if (!drag) {                                       // promote to a drag once past the threshold
+      if (Math.hypot(sx - press.sx, sy - press.sy) < DRAG_THRESH) return;
+      drag = press.button === 2 ? "orbit" : "pan";     // right-button orbits, left-button pans
+      enterFree();
+    } else if (drag === "pan") {                       // grab: keep the world point under the cursor
+      const c = Math.cos(cam.rot), s = Math.sin(cam.rot), z = view.zoom;
+      const rx = (sx - press.sx) / z, ry = -(sy - press.sy) / z;
+      cam.cx -= c * rx + s * ry;
+      cam.cy -= -s * rx + c * ry;
+    } else {                                           // orbit around the screen centre
+      cam.rot += (sx - press.sx) * ORBIT_SENS;
+    }
+    press.sx = sx; press.sy = sy;
+  });
+  const endDrag = () => { press = null; drag = null; };
+  window.addEventListener("mouseup", endDrag);
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());   // right-drag orbits — suppress the menu
+  canvas.addEventListener("dblclick", (e) => {
+    e.preventDefault();
+    const [sx, sy] = evXY(e);
+    const [wx, wy] = view.unproject(sx, sy);
+    goTo(wx, wy);                                      // teleport + snap onto the nearest road there
+    exitFree();                                        // camera re-follows the car at its new spot
+  });
 
   // controls overlay (first visit only, then "?"), pause (Esc), any-key dismiss
   const ov = document.getElementById("helpOverlay");
@@ -168,12 +216,16 @@ async function boot() {
       await new Promise((r) => setTimeout(r, 80));    // wait for the destination tiles to stream in
     }
   }
-  loadSearchIndex(window.CARSIM.dataBase).then(({ items, places, landmarks: lms }) => {
+  loadSearchIndex(window.CARSIM.dataBase).then(({ items, places, landmarks: lms, admin: adm }) => {
     makeSearchBox(document.getElementById("searchInput"), document.getElementById("searchResults"), items, goTo);
     setupRoute(items);
     districts = places.length ? places : items.filter((i) => i.kind === "district");  // keep place-kind for City/Trasa (msg 2784)
     landmarks = lms;                                          // major city-wide objects for the City/Trasa minimap
+    admin = adm || [];                                        // official districts — the City minimap's only labels (msg 2964)
   });
+  // city-wide landscape (river/main roads/parks) for the minimap "City" mode (msg 2959) — loaded once
+  fetch(`${window.CARSIM.dataBase}/overview.json`).then((r) => (r.ok ? r.json() : null))
+    .then((o) => { overview = o; }).catch(() => {});
 
   // Route panel: pick two streets, ask the server for the shortest drivable path (one-ways honoured),
   // draw it as a ribbon and teleport the car to its start so you can drive the route yourself.
@@ -214,7 +266,8 @@ async function boot() {
       if (!from || !to) return;
       info.textContent = "hledám trasu…"; info.className = "";
       try {
-        const u = `/route?district=${encodeURIComponent(window.CARSIM.district)}`
+        const u = `/route?city=${encodeURIComponent(window.CARSIM.city)}`
+          + `&district=${encodeURIComponent(window.CARSIM.district)}`
           + `&fx=${from.x}&fy=${from.y}&tx=${to.x}&ty=${to.y}`;
         const res = await fetch(u).then((r) => r.json());
         if (res.polyline && res.polyline.length > 1) {
@@ -285,6 +338,8 @@ async function boot() {
   function update(dt) {
     if (paused) return;                               // Esc / lost focus freezes the sim
     const controls = dbg || input.controls();
+    // any drive key re-attaches the camera to the car (exits free-look, msg 2943)
+    if (freeCam && (controls.throttle || controls.brake || controls.hard || controls.turn)) exitFree();
     // ONE driving model everywhere (heading-up, rotate-in-place). Off-road: NEVER brake (msg 2759 #1) —
     // overview (arrow) roams free; at normal zoom a soft wall only blocks going DEEPER past OFFROAD_WALL,
     // keeping the car's speed so you can steer back out. Only the map boundary is a hard wall.
@@ -334,18 +389,23 @@ async function boot() {
   function render() {
     // main window always follows the car heading-up — route auto-follow must NOT zoom it out (msg 2777
     // reverted the route-overview camera; the whole route is shown in the MINIMAP instead, on demand).
-    const target = clampZoom(zTarget * speedEase(Math.abs(car.v)));
+    const target = clampZoom(freeCam ? zTarget : zTarget * speedEase(Math.abs(car.v)));
     view.zoom += (target - view.zoom) * 0.12;   // smooth zoom transitions
-    view.setCamera(car.x, car.y, car.h);         // heading-up at every zoom — car always points up
-    // stream tiles around the car (≥480 m so the minimap always has data) + look ahead by velocity
-    map.update(car.x, car.y, Math.max(view.visR(), 480), car.v * Math.cos(car.h), car.v * Math.sin(car.h));
+    if (freeCam) {                               // detached free-look — user pans/orbits (msg 2943)
+      view.cx = cam.cx; view.cy = cam.cy; view.rot = cam.rot;
+    } else {
+      view.setCamera(car.x, car.y, car.h);       // heading-up at every zoom — car always points up
+    }
+    // stream tiles around whatever the camera looks at — the car when following, the free centre when panning
+    const vx = freeCam ? cam.cx : car.x, vy = freeCam ? cam.cy : car.y;
+    map.update(vx, vy, Math.max(view.visR(), 480), freeCam ? 0 : car.v * Math.cos(car.h), freeCam ? 0 : car.v * Math.sin(car.h));
     draw(ctx, view, map, car, rules, routeLine, districts);
     // hide violation warnings in bird's-eye — only when the car shows (msg 2768)
     hud.update(rules, view.zoom < OVERVIEW_Z);
     // minimap modes (City / Trasa buttons on the minimap, msg 2784) — pass the city-wide overview data;
     // the minimap itself decides local vs city vs route based on its buttons.
     if (!miniCollapsed) minimap.draw(map, car, rules.street, {
-      districts, landmarks,
+      districts, landmarks, overview, admin, cityName: window.CARSIM.cityName,
       route: routeLine && routeBox ? { line: routeLine, box: routeBox } : null,
     });
     // live zoom readout so Vlad can orient/direct by the number (current px/m · range)

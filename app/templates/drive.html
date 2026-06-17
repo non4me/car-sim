@@ -9,8 +9,10 @@
     :root{ --panel:#141925; --line:#222a3a; --accent:#5b9cff; --bad:#f87171; --warn:#f6c453; --good:#34d399; }
     html,body{margin:0;height:100%;background:#0b0e14;color:#e6e9f0;
       font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
-    #game{display:block;width:100vw;height:100vh;touch-action:none}
-    .hud{position:fixed;pointer-events:none;z-index:10}
+    body{display:flex;flex-direction:column}                 /* standalone header on top, map stage below (msg 2947) */
+    #stage{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
+    #game{display:block;width:100%;height:100%;touch-action:none}
+    .hud{position:absolute;pointer-events:none;z-index:10}    /* absolute within #stage, not the viewport */
     button{font-family:inherit}
 
     #speedo{left:18px;bottom:18px;background:rgba(20,25,37,.82);border:1px solid var(--line);
@@ -52,11 +54,11 @@
       border-radius:10px;padding:5px 16px;max-width:70vw;color:rgba(255,255,255,.78);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(2px)}
 
-    #topbar{left:0;top:0;right:0;display:flex;justify-content:space-between;align-items:center;
-      padding:12px 16px;pointer-events:auto}
-    #topbar .tb-left{display:flex;align-items:center;gap:10px}
-    #topbar a{color:var(--accent);text-decoration:none;font-weight:700}
-    #topbar .meta{font-size:12px;color:#8a93a6}
+    /* drive-tools strip (search / Trasa / help) — overlaid on the top-left of the map, BELOW the
+       standalone header. The bar is click-through so map-pan still works in the gaps between tools. */
+    #drivebar{left:0;top:0;display:flex;align-items:center;gap:10px;padding:10px 14px;pointer-events:none}
+    #drivebar > *{pointer-events:auto}
+    #drivebar .db-meta{font-size:12px;color:#8a93a6;pointer-events:none}
     #helpBtn{pointer-events:auto;cursor:pointer;width:24px;height:24px;border-radius:50%;
       background:rgba(20,25,37,.85);border:1px solid var(--line);color:#aab2c4;font-weight:800;
       font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
@@ -83,7 +85,7 @@
     #routeBtn{pointer-events:auto;cursor:pointer;height:30px;padding:0 10px;border-radius:9px;
       background:rgba(20,25,37,.92);border:1px solid var(--line);color:#aab2c4;font-weight:700;font-size:12px}
     #routeBtn:hover,#routeBtn.on{color:#fff;border-color:var(--accent)}
-    #routePanel{position:fixed;top:54px;left:16px;z-index:35;pointer-events:auto;background:rgba(14,18,28,.96);
+    #routePanel{position:absolute;top:54px;left:16px;z-index:35;pointer-events:auto;background:rgba(14,18,28,.96);
       border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;
       box-shadow:0 12px 36px rgba(0,0,0,.5)}
     #routePanel.hidden{display:none}
@@ -132,7 +134,7 @@
     #miniRestore.hidden{display:none}
 
     /* controls overlay — shown at start and on '?' */
-    #helpOverlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+    #helpOverlay{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
       background:rgba(8,11,16,.55);backdrop-filter:blur(2px)}
     #helpOverlay.hidden{display:none}
     #helpCard{pointer-events:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;
@@ -144,7 +146,7 @@
     kbd{background:#0b0e14;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:12px}
 
     /* pause overlay */
-    #pauseOverlay{position:fixed;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;
+    #pauseOverlay{position:absolute;inset:0;z-index:25;display:flex;align-items:center;justify-content:center;
       background:rgba(8,11,16,.5);backdrop-filter:blur(2px)}
     #pauseOverlay.hidden{display:none}
     #pauseCard{text-align:center}
@@ -153,24 +155,25 @@
   </style>
 </head>
 <body>
-  <canvas id="game"></canvas>
+  <!-- standalone header — identical bar to every other page (msg 2947); the map + HUD live below it -->
+  <header class="ah-bar">
+    {{ hdr.logo() }}
+    <div class="ah-spacer"></div>
+    <div class="ah-right">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div>
+  </header>
 
-  <div class="hud" id="topbar">
-    <div class="tb-left">
-      {{ hdr.logo() }}
+  <div id="stage">
+    <canvas id="game"></canvas>
+
+    <div class="hud" id="drivebar">
       <button id="helpBtn" title="Ovládání">?</button>
       <div id="searchWrap">
         <input id="searchInput" type="text" placeholder="Hledat ulici / čtvrť…" autocomplete="off" spellcheck="false">
         <div id="searchResults" class="sr-results hidden"></div>
       </div>
       <button id="routeBtn" title="Trasa mezi ulicemi">🛣 Trasa</button>
+      <span class="db-meta ah-hide-sm">{{ city_name }}{% if snapshot %} · OSM {{ snapshot }}{% endif %}</span>
     </div>
-    <div class="meta" style="display:flex;align-items:center;gap:12px">
-      <span class="ah-hide-sm">Praha{% if snapshot %} · OSM {{ snapshot }}{% endif %}</span>
-      {{ hdr.lang_dropdown(lang) }}
-      {{ hdr.user_menu(lang, user) }}
-    </div>
-  </div>
 
   <div class="hud" id="minimap">
     <div class="mini-top">
@@ -227,7 +230,7 @@
       <div class="krow"><kbd>↑</kbd> plyn (rychlost drží) · <kbd>↓</kbd> brzda / zpátečka</div>
       <div class="krow"><kbd>←</kbd> <kbd>→</kbd> otáčení na místě / řízení</div>
       <div class="krow"><kbd>Space</kbd> prudké brzdění · <kbd>Esc</kbd> pauza</div>
-      <div class="krow">kolečko myši = přiblížení mapy</div>
+      <div class="krow">kolečko myši = přiblížení · táhni levým = posun mapy · pravým = otáčení · dvojklik = přesun auta</div>
       <button id="helpClose">Jet →</button>
     </div>
   </div>
@@ -235,9 +238,10 @@
   <div id="pauseOverlay" class="hidden">
     <div id="pauseCard"><div class="ttl">Pauza</div><div class="sub"><kbd>Esc</kbd> pokračovat</div></div>
   </div>
+  </div><!-- /#stage -->
 
   <script>
-    window.CARSIM = { dataBase: "{{ data_base }}", district: "{{ district }}" };
+    window.CARSIM = { dataBase: "{{ data_base }}", city: "{{ city }}", cityName: "{{ city_name }}", district: "{{ district }}" };
     // returning visitors: don't flash the controls overlay (it's shown by default for first-timers).
     // All overlay / pause / persistence behaviour is wired in main.js.
     if (localStorage.getItem("carsim_help_seen")) {

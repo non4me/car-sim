@@ -30,6 +30,18 @@ function distToLine(px, py, line) {
   }
   return best;
 }
+// bbox span of a polygon (cached on the polygon) — used to keep only the river + major tributaries
+// in the City overview and drop the hundreds of small ponds/lakes (msg 2964).
+const WATER_MIN_SPAN = 600;   // metres
+function polySpan(poly) {
+  if (poly._span !== undefined) return poly._span;
+  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+  for (const p of poly) {
+    if (p[0] < minx) minx = p[0]; if (p[0] > maxx) maxx = p[0];
+    if (p[1] < miny) miny = p[1]; if (p[1] > maxy) maxy = p[1];
+  }
+  return (poly._span = Math.max(maxx - minx, maxy - miny));
+}
 
 export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBtn) {
   const ctx = canvas.getContext("2d");
@@ -156,48 +168,80 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
     const box = { cx: (b.minx + b.maxx) / 2, cy: (b.miny + b.maxy) / 2, w: b.maxx - b.minx, h: b.maxy - b.miny };
     const { toM } = fitToBox(box, 10);
     const cxw = box.cx, cyw = box.cy;
+    const ovd = ov.overview;
 
-    // faint resident streets (only near the car — a hint of where you are in the city)
-    ctx.strokeStyle = "rgba(120,135,160,.16)"; ctx.lineWidth = 1;
-    for (const e of map.edges) {
-      ctx.beginPath();
-      for (let i = 0; i < e.geom.length; i++) { const [X, Y] = toM(e.geom[i][0], e.geom[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
-      ctx.stroke();
+    // city-wide landscape (msg 2959): parks → river/water → the main road network. The streaming tiles
+    // can't show the whole city at once, so this comes from the baked overview.json. Drawn first, under
+    // the dots + labels, so the minimap reads like a real map (river + arterials + districts).
+    const ring = (poly) => { for (let i = 0; i < poly.length; i++) { const [X, Y] = toM(poly[i][0], poly[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); } ctx.closePath(); };
+    if (ovd) {
+      if (ovd.green) {                                  // parks / forests — a soft green backdrop
+        ctx.fillStyle = "rgba(70,98,78,.5)";
+        for (const a of ovd.green) { ctx.beginPath(); ring(a.poly); ctx.fill(); }
+      }
+      if (ovd.roads) {                                  // main roads in LIGHT GREY (msg 2964); motorway/trunk a touch brighter & thicker
+        ctx.lineCap = "round"; ctx.lineJoin = "round";
+        for (const p of [{ t: (r) => r === 2, col: "rgba(150,156,168,.5)", w: 0.8 },
+                         { t: (r) => r <= 1, col: "rgba(196,202,212,.82)", w: 1.5 }]) {
+          ctx.strokeStyle = p.col; ctx.lineWidth = p.w;
+          for (const rd of ovd.roads) {
+            if (!p.t(rd.r)) continue;
+            ctx.beginPath();
+            for (let i = 0; i < rd.g.length; i++) { const [X, Y] = toM(rd.g[i][0], rd.g[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+            ctx.stroke();
+          }
+        }
+      }
+      if (ovd.water) {                                  // ONLY the river + major tributaries — small ponds dropped (msg 2964)
+        ctx.fillStyle = "rgba(76,130,198,.95)";         // fill + a brighter stroke keeps thin stretches visible
+        ctx.strokeStyle = "rgba(120,172,234,.95)"; ctx.lineWidth = 1.3; ctx.lineJoin = "round";
+        for (const a of ovd.water) {
+          if (polySpan(a.poly) < WATER_MIN_SPAN) continue;
+          ctx.beginPath(); ring(a.poly);
+          if (a.holes && a.holes.length) { for (const h of a.holes) ring(h); ctx.fill("evenodd"); } else ctx.fill();
+          ctx.stroke();
+        }
+      }
+    } else {
+      // overview not loaded yet → fall back to a faint hint of the resident streets near the car
+      ctx.strokeStyle = "rgba(120,135,160,.16)"; ctx.lineWidth = 1;
+      for (const e of map.edges) {
+        ctx.beginPath();
+        for (let i = 0; i < e.geom.length; i++) { const [X, Y] = toM(e.geom[i][0], e.geom[i][1]); i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+        ctx.stroke();
+      }
     }
-    // every district as a faint dot — the spread of dots gives the city its body & full extent, so the
-    // overview reads as a map of all Prague rather than a few labels floating in black (msg 2811)
-    ctx.fillStyle = "rgba(140,160,190,.45)";
-    for (const d of (ov.districts || [])) { const [X, Y] = toM(d.x, d.y); ctx.beginPath(); ctx.arc(X, Y, 1.3, 0, 7); ctx.fill(); }
-
+    // ONLY globally-significant labels (msg 2964): the city's OFFICIAL districts, nothing else.
+    // Prague = numbered Praha 1…16 (1–10 larger, 11–16 smaller, 17+ dropped); other cities = their
+    // named městská část. The city's own name is NOT printed in the centre — it's the corner tag now.
     const place = makePlacer();
-    // label the MAIN districts: by rank (city's own suburbs/quarters first), then central-first within a
-    // rank so the well-known inner districts win the de-overlap over far-out ones.
-    const districts = (ov.districts || []).slice().sort((a, b2) =>
-      ((PLACE_RANK[a.kind] ?? 9) - (PLACE_RANK[b2.kind] ?? 9))
-      || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
-    for (const d of districts) {
-      const [X, Y] = toM(d.x, d.y);
-      const fp = PLACE_FONT[d.kind] ?? 8;
-      const alpha = (PLACE_RANK[d.kind] ?? 9) <= 2 ? 0.97 : 0.66;
-      place(X, Y, d.name, "rgba(224,231,243,1)", alpha, fp);
+    // low-numbered districts (Praha 1/2/3 = the central core) placed FIRST so they win the de-overlap over
+    // the outer ones; named districts (n=null, other cities) fall back to inner-first (msg 2964).
+    const admin = (ov.admin || []).filter((a) => !(a.n != null && a.n > 16))
+      .sort((a, b2) => ((a.n ?? 999) - (b2.n ?? 999))
+        || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
+    for (const a of admin) {
+      const [X, Y] = toM(a.x, a.y);
+      const big = a.n != null && a.n <= 10;
+      const fp = a.n == null ? 9 : big ? 10 : 8;             // named → medium; numbered 1–10 → big; 11–16 → smaller
+      const alpha = a.n == null ? 0.9 : big ? 0.97 : 0.72;
+      place(X, Y, a.name, "rgba(224,231,243,1)", alpha, fp);
     }
-    // then major objects, by significance, lower priority than districts
-    const lms = (ov.landmarks || []).slice().sort((a, b2) => (LM_RANK[a.kind] ?? 9) - (LM_RANK[b2.kind] ?? 9));
-    let shown = 0;
-    for (const l of lms) {
-      if (shown >= 16) break;
-      const [X, Y] = toM(l.x, l.y);
-      if (place(X, Y - 4, l.name, "rgba(150,200,255,.9)", 0.9, 8)) {
-        ctx.globalAlpha = 0.9; ctx.fillStyle = "#5b9cff";
-        ctx.beginPath(); ctx.arc(X, Y, 1.8, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
-        shown++;
+    if (!admin.length) {                                    // city without harvested admin districts → fall back to place labels
+      const districts = (ov.districts || []).slice().sort((a, b2) =>
+        ((PLACE_RANK[a.kind] ?? 9) - (PLACE_RANK[b2.kind] ?? 9))
+        || (Math.hypot(a.x - cxw, a.y - cyw) - Math.hypot(b2.x - cxw, b2.y - cyw)));
+      for (const d of districts) {
+        if (d.kind === "city") continue;                    // never the city's own name in the centre (msg 2964)
+        const [X, Y] = toM(d.x, d.y);
+        place(X, Y, d.name, "rgba(224,231,243,1)", (PLACE_RANK[d.kind] ?? 9) <= 2 ? 0.95 : 0.66, PLACE_FONT[d.kind] ?? 8);
       }
     }
     // car position
     const [px, py] = toM(car.x, car.y);
     ctx.fillStyle = "#ffd24a"; ctx.beginPath(); ctx.arc(px, py, 3, 0, 7); ctx.fill();
     ctx.lineWidth = 1; ctx.strokeStyle = "#0a0d13"; ctx.stroke();
-    tag("CITY");
+    tag(ov.cityName || "CITY");                             // the city's name lives in the corner now (msg 2964)
   }
 
   // ---- route (Trasa) ----------------------------------------------------------------------------

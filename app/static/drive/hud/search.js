@@ -14,9 +14,11 @@ export async function loadSearchIndex(base) {
     // landmarks = the major city-wide objects (station/castle/…) baked into search.json (msg 2784).
     const places = (idx.places || []).map((p) => ({ name: p.name, x: p.x, y: p.y, kind: p.kind }));
     const landmarks = (idx.landmarks || []).map((l) => ({ name: l.name, x: l.x, y: l.y, kind: l.kind }));
-    return { items, places, landmarks };
+    // admin = the city's official numbered/named districts (Praha 1…22, Brno-…, …) for the City minimap (msg 2964)
+    const admin = (idx.admin || []).map((a) => ({ name: a.name, x: a.x, y: a.y, n: a.n }));
+    return { items, places, landmarks, admin };
   } catch {
-    return { items: [], places: [], landmarks: [] };
+    return { items: [], places: [], landmarks: [], admin: [] };
   }
 }
 
