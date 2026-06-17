@@ -91,3 +91,29 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
   interchange (same anti-pattern as the names). Fixed to Google-style: skip short connector edges
   (len < 45 m, so shields stay OFF the junction box), place at a long edge's midpoint, process longest-first,
   and keep same-`ref` shields ≥ 150 m apart. Verified: junction interior clean, one neat blue "20" per road.
+
+## Junction interior fill + sign de-overlap (msg 3022) — render-only, no re-bake
+Three asks on the same Studentská/Gerská interchange: (1) no signs inside the junction box; (2) no sign
+collisions (▽ give-way overprinting ◆ priority); (3) no false gaps in the junction carriageway (like Google).
+Root cause: a single real intersection is modelled as a CLUSTER of nodes, so derived give_way/priority signs
+proliferate + collide in the interior, and roads are STROKES so the splay between diverging roads leaves dark
+gore-gaps. All fixed in `draw.js` with **per-junction convex hulls** (`junctionHulls()` + `convexHull`,
+`expandPoly`, `pointInPoly`), built once per frame at zoom ≥ 8:
+- **Gap fill:** for each at-grade junction (deg ≥ 3, level 0), the convex hull of a point a short way into
+  every incident edge (+ the node), expanded ~1.5 m, filled with `ASPHALT` right after the ground surfaces
+  → one continuous carriageway, no holes. Elevated/under junctions (`lv ≠ 0`) are skipped so the multi-level
+  cue (msg 3009) survives.
+- **Interior cull:** a sign is dropped if it falls inside any junction's (tight) hull — signs belong on the
+  approach, not the middle.
+- **De-overlap:** the rest are placed through a `makeLabelGuard()`, sorted critical-first (signal/stop >
+  give_way > priority_road) then nearest-first, so two signs never collide and it stays clear which road each
+  governs. Verified on prod (Plzeň Studentská/Gerská, zoom 9–17): interior continuous, signs on approach mouths,
+  no ▽-on-◆ collisions, no console errors.
+
+## Tram tracks on the street (msg 3023/3024) — render-only
+Trams were drawn UNDER the roads (in `drawRails`), so the asphalt painted over them at junctions ("пропадают")
+and the leftover faint solid line read as a thin "fake road". Fixed: `drawRails` now skips trams; a new
+`drawTrams()` draws them ON TOP of the asphalt (and across the junction fill) as twin faint rails (zoom ≥ 8)
++ periodic transverse ties ("поперечные риски", zoom ≥ 7) — Google-style, so they read unmistakably as track
+and run continuously through the intersection. Verified on prod (a tram line crosses the Studentská core):
+continuous, tie-marked, no fake-road effect.

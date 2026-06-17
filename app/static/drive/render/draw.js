@@ -39,6 +39,10 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // narrowest first so wider roads paint last (on top) → clean crossings, hierarchy by width
   const vis = map.edges.filter((e) => view.boxVisible(e.bb)).sort((a, b) => a.width - b.width);
 
+  // junction interior hulls (msg 3022): used to (a) FILL the carriageway so intersections have no false
+  // gaps and (b) DROP signs that fall inside the box. Built once per frame, close zoom only.
+  const hulls = zoom >= 8 ? junctionHulls(view, vis, map.junctions) : null;
+
   // 0) schematic backdrop — buildings, greens, water (behind the roads)
   drawAreas(ctx, view, map);
 
@@ -68,6 +72,16 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   casings(tunnels, "#0a0c11", 4); surfaces(tunnels, "#1d222c", [zoom * 1.3, zoom * 0.9]);
   // ground AT GRADE
   casings(ground, "#0a0c11", 4); surfaces(ground, ASPHALT);
+  // junction interior fill (msg 3022): roads are strokes, so the splay where roads diverge leaves false
+  // dark gaps at intersections. Fill each at-grade junction's convex hull with asphalt → one continuous
+  // carriageway (like Google), no holes where there really aren't any.
+  if (hulls) {
+    ctx.setLineDash([]); ctx.fillStyle = ASPHALT;
+    for (const H of hulls) { if (H.lv) continue; path(ctx, view, H.hull); ctx.closePath(); ctx.fill(); }
+  }
+  // tram tracks run IN the street → draw them ON the asphalt (incl. straight across the junction) with
+  // Google-style transverse ties, so they read as tracks and don't vanish or become a "fake road" (msg 3023/3024).
+  if (zoom >= 5) drawTrams(ctx, view, map, zoom);
   // bridges ABOVE: a WIDE dark drop-shadow + a clearly lighter deck → lifts above the road below (msg 3009)
   casings(bridges, "#05070a", 11); surfaces(bridges, "#475164");
   // parapet edge lines (the bridge railings) — the strongest "this carriageway is elevated" cue
@@ -117,9 +131,22 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   //    explicitly-controlled junctions still get a faint dot so they read on the overview.
   if (zoom >= 6) {
     const ss = Math.max(9, Math.min(26, zoom * 1.15));
+    // de-overlap + interior cull (msg 3022): drop signs that fall INSIDE a junction box (they belong on
+    // the approach, not the middle), then place the rest through a guard so no two signs ever collide —
+    // critical control (signal/stop) and the nearest signs win, so it stays clear which road each governs.
+    const RANK = { signals: 0, signal: 0, stop: 0, give_way: 1, priority_road: 2 };
+    const sg = makeLabelGuard();
+    const cands = [];
     for (const s of map.signs) {
       if (!view.near(s.x, s.y, R)) continue;
+      if (hulls && hulls.some((H) => pointInPoly(s.x, s.y, H.core))) continue;
+      cands.push({ s, rank: RANK[s.kind] ?? 3, dd: (s.x - view.cx) ** 2 + (s.y - view.cy) ** 2 });
+    }
+    cands.sort((a, b) => a.rank - b.rank || a.dd - b.dd);
+    const bs = ss * 1.05;
+    for (const { s } of cands) {
       const [X, Y] = view.project(s.x, s.y);
+      if (!sg.tryPlace(X - bs, Y - bs, X + bs, Y + bs)) continue;
       drawSign(ctx, X, Y, s.kind, ss);
     }
   } else {
@@ -210,10 +237,7 @@ function drawRails(ctx, view, map, zoom) {
   for (const r of rails) {
     if (r.bb && !view.boxVisible(r.bb)) continue;
     if (r.kind === "tram") {
-      ctx.setLineDash([]);
-      ctx.strokeStyle = "rgba(92,100,118,.4)";          // tram: very faint (secondary, runs in-street)
-      ctx.lineWidth = Math.max(1, zoom * 0.10);
-      path(ctx, view, r.geom); ctx.stroke();
+      continue;                                          // trams run in-street → drawn ON TOP of the asphalt (drawTrams, msg 3024)
     } else {
       // rails are SECONDARY info (msg 2776) → dark gray, only a touch above the background, with a
       // muted (not white) tie overlay so they read as track without competing with the roads.
@@ -228,6 +252,49 @@ function drawRails(ctx, view, map, zoom) {
         path(ctx, view, r.geom); ctx.stroke();
         ctx.setLineDash([]);
       }
+    }
+  }
+  ctx.restore();
+}
+
+// Tram tracks (msg 3024): trams run in the street, so — unlike heavy rail — they're drawn ON TOP of the
+// asphalt (and straight across the junction, so they no longer disappear or read as a "fake road", msg 3023).
+// Google-style: a faint twin-rail pair + periodic transverse ties ("поперечные риски") so it reads as track.
+function drawTrams(ctx, view, map, zoom) {
+  const rails = map.rails;
+  if (!rails || !rails.length) return;
+  ctx.save();
+  ctx.lineCap = "butt"; ctx.lineJoin = "round";
+  const RAIL = "rgba(150,160,182,.55)";
+  const gauge = 0.7;                                   // half rail-to-rail spacing, metres
+  const ties = zoom >= 7;
+  const tieEvery = 6, tieHalf = 1.1;                   // metres between ties / tie half-length
+  for (const r of rails) {
+    if (r.kind !== "tram") continue;
+    if (r.bb && !view.boxVisible(r.bb)) continue;
+    ctx.strokeStyle = RAIL;
+    ctx.lineWidth = Math.max(0.8, zoom * 0.06);
+    if (zoom >= 8) {                                   // twin rails once close enough to tell them apart
+      path(ctx, view, offsetGeom(r.geom, gauge)); ctx.stroke();
+      path(ctx, view, offsetGeom(r.geom, -gauge)); ctx.stroke();
+    } else {
+      path(ctx, view, r.geom); ctx.stroke();           // single faint line when zoomed out
+    }
+    if (!ties) continue;
+    ctx.lineWidth = Math.max(0.8, zoom * 0.06);
+    const g = r.geom; let acc = 0, nextAt = tieEvery * 0.5;
+    for (let i = 1; i < g.length; i++) {
+      const ax = g[i - 1][0], ay = g[i - 1][1], bx = g[i][0], by = g[i][1];
+      const seg = Math.hypot(bx - ax, by - ay); if (seg < 1e-6) continue;
+      const dx = (bx - ax) / seg, dy = (by - ay) / seg, px = -dy, py = dx;
+      while (nextAt <= acc + seg) {
+        const t = (nextAt - acc) / seg, mx = ax + (bx - ax) * t, my = ay + (by - ay) * t;
+        const [X0, Y0] = view.project(mx + px * tieHalf, my + py * tieHalf);
+        const [X1, Y1] = view.project(mx - px * tieHalf, my - py * tieHalf);
+        ctx.beginPath(); ctx.moveTo(X0, Y0); ctx.lineTo(X1, Y1); ctx.stroke();
+        nextAt += tieEvery;
+      }
+      acc += seg;
     }
   }
   ctx.restore();
@@ -825,6 +892,70 @@ function edgeLen(e) {
   const g = e.geom; let L = 0;
   for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
   return (e._len = L);
+}
+
+// Junction interior hulls (msg 3022): for each real intersection in view, the convex hull of a point a
+// short way into every incident edge (+ the node). `core` is the tight hull (sign-inside test); `hull` is
+// expanded a touch so the asphalt fill overlaps the road strokes with no seam; `lv` = carriageway level
+// (we only fill at-grade junctions, so a bridge/tunnel interchange keeps its multi-level look — msg 3009).
+function junctionHulls(view, vis, junctions) {
+  const R = view.visR();
+  const out = [];
+  for (const j of junctions) {
+    if ((j.deg != null && j.deg < 3) || !view.near(j.x, j.y, R)) continue;
+    const inc = []; let maxHalf = 0, lvSum = 0, lvN = 0;
+    for (const e of vis) {
+      const g = e.geom, last = g.length - 1;
+      const atStart = Math.hypot(g[0][0] - j.x, g[0][1] - j.y) < 4;
+      const atEnd = !atStart && Math.hypot(g[last][0] - j.x, g[last][1] - j.y) < 4;
+      if (!atStart && !atEnd) continue;
+      maxHalf = Math.max(maxHalf, (e.width || 4) / 2);
+      lvSum += e.lv || 0; lvN++;
+      inc.push({ e, atStart });
+    }
+    if (inc.length < 3) continue;                       // only real intersections splay into gaps
+    const rad = Math.min(20, maxHalf + 4);
+    const pts = [[j.x, j.y]];
+    for (const d of inc) {
+      const wp = walkAlong(d.e.geom, d.atStart, Math.min(rad, edgeLen(d.e) * 0.5));
+      pts.push([wp.x, wp.y]);
+    }
+    const core = convexHull(pts);
+    if (core.length < 3) continue;
+    out.push({ core, hull: expandPoly(core, 1.5), lv: lvN ? Math.round(lvSum / lvN) : 0 });
+  }
+  return out;
+}
+
+// Andrew's monotone-chain convex hull. Returns the hull vertices CCW; <3 input points pass through.
+function convexHull(pts) {
+  const p = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (p.length < 3) return p;
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [];
+  for (const pt of p) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], pt) <= 0) lo.pop(); lo.push(pt); }
+  const hi = [];
+  for (let i = p.length - 1; i >= 0; i--) { const pt = p[i]; while (hi.length >= 2 && cross(hi[hi.length - 2], hi[hi.length - 1], pt) <= 0) hi.pop(); hi.push(pt); }
+  lo.pop(); hi.pop();
+  return lo.concat(hi);
+}
+
+// Push every vertex `d` metres outward from the polygon centroid (so a fill overlaps adjoining strokes).
+function expandPoly(poly, d) {
+  let cx = 0, cy = 0;
+  for (const p of poly) { cx += p[0]; cy += p[1]; }
+  cx /= poly.length; cy /= poly.length;
+  return poly.map((p) => { const dx = p[0] - cx, dy = p[1] - cy, L = Math.hypot(dx, dy) || 1; return [p[0] + (dx / L) * d, p[1] + (dy / L) * d]; });
+}
+
+// Even-odd point-in-polygon (ray cast). poly = [[x,y]…] in world coords.
+function pointInPoly(x, y, poly) {
+  let inside = false;
+  for (let i = 0, k = poly.length - 1; i < poly.length; k = i++) {
+    const xi = poly[i][0], yi = poly[i][1], xj = poly[k][0], yj = poly[k][1];
+    if (((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
 }
 
 // Street names sit ON the adjoining street next to the junction you can turn at — anchored to the
