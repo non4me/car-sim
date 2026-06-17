@@ -968,10 +968,21 @@ function pointInPoly(x, y, poly) {
 // never slides as you drive, it just scrolls), de-overlapped via the shared guard (no dupes / pile-ups), with
 // the road-number badge right beside the name (msg 3045). Thresholds scale with zoom: close up labels every
 // street; zoomed out only the wider roads so it stays legible. The CURRENT road is in the HUD → skipped.
+// The arterial network — classes that carry a road number / form the through-route skeleton. At minimum zoom we
+// label these by CLASS, not by width: an OSM "primary" can bake to width 8–10 and a pure width gate (msg 3059)
+// silently dropped Studentská/Sokolovská/Turistická, leaving only the very widest road named on the whole screen.
+const MAJOR_CLS = new Set(["motorway", "trunk", "primary", "secondary",
+                           "motorway_link", "trunk_link", "primary_link", "secondary_link"]);
+
 function drawStreetLabels(ctx, view, edges, currentStreet, guard, nameRefs) {
   const z = view.zoom, R = view.visR();
   const fs = z >= 8 ? 11 : 13;                          // a touch larger when zoomed out
-  const widthMin = z >= 8 ? 3 : (z >= 4 ? 8 : 11);      // close: most streets; far: only the wider roads
+  // Which streets are worth a label at this zoom. Close in: anything with real width. Zoomed right out: the
+  // arterial skeleton only — classified roads + anything carrying a number — so the main network always reads,
+  // even though those edges aren't the widest on screen (msg 3059). Mid band bridges the two.
+  const worthy = (e) => z >= 8 ? (e.width || 0) >= 3
+                      : z >= 4 ? ((e.width || 0) >= 7 || !!e.ref || !!e.iref || MAJOR_CLS.has(e.cls) || e.cls === "tertiary")
+                               : (!!e.ref || !!e.iref || MAJOR_CLS.has(e.cls));
   const minLen = z >= 8 ? 20 : 38;                      // skip interchange connector stubs
   const GAP = z >= 8 ? 10 : 16;                         // metres the text keeps clear of the junction
   const NEAR2 = (R * 1.15) ** 2;                        // anchor within the view → covers the screen at any zoom
@@ -984,7 +995,7 @@ function drawStreetLabels(ctx, view, edges, currentStreet, guard, nameRefs) {
   const best = new Map();
   for (const e of edges) {
     if (!e.name) continue;
-    if ((e.width || 0) < widthMin) continue;
+    if (!worthy(e)) continue;
     const g = e.geom;
     if (g.length < 2) continue;
     const len = edgeLen(e);

@@ -164,3 +164,22 @@ and the leftover faint solid line read as a thin "fake road". Fixed: `drawRails`
 + periodic transverse ties ("поперечные риски", zoom ≥ 7) — Google-style, so they read unmistakably as track
 and run continuously through the intersection. Verified on prod (a tram line crosses the Studentská core):
 continuous, tie-marked, no fake-road effect.
+
+## msg 3059 — at minimum zoom, label arterials by class, not width
+
+At zoom 1 (full bird's-eye) only one road on the whole screen was named (Gerská 1808); the parallel
+arterials (Studentská, Karlovarská, …) had no name/number, although Vlad annotated four of them
+"ТУТ ДОЛЖНО БЫТЬ название улицы и номер". Root cause in `drawStreetLabels`: the candidate filter was a
+pure width gate — `widthMin = z>=8?3 : z>=4?8 : 11`. An OSM `primary` like Studentská bakes to width 8–10,
+so the low-zoom threshold of 11 silently dropped it, leaving only the single widest road labelled.
+
+Fix: at low zoom, select roads by CLASS / number rather than width. New module-level `MAJOR_CLS` set
+(motorway/trunk/primary/secondary + their `_link`s) and a `worthy(e)` predicate:
+`z>=8 → width>=3`; `4<=z<8 → width>=7 || ref || iref || MAJOR_CLS || tertiary`;
+`z<4 → ref || iref || MAJOR_CLS`. So fully zoomed out the whole arterial skeleton (and anything carrying a
+number) is labelled even though those edges aren't the widest on screen; the close-zoom path is unchanged
+(no regression). Verified on prod at zoom 1: Gerská 1808 (yellow), Studentská 20 (blue) + E49 (green) and
+Karlovarská all read name+number, off-junction, de-overlapped, no console errors.
+
+Pattern: on overview zooms, pick label-worthy roads by class/number (the arterial skeleton), not by width;
+width is a gate only for close zooms.
