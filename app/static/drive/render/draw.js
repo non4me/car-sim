@@ -70,16 +70,11 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   //     so the suggested path reads clearly while the lane markings still show through at the edges.
   if (route && route.length > 1) drawRoute(ctx, view, route, zoom);
 
-  // 2) dashed centre line on two-way roads
-  ctx.setLineDash([zoom * 1.4, zoom * 1.6]);
-  ctx.strokeStyle = "rgba(235,205,90,.45)";
-  ctx.lineWidth = Math.max(1, zoom * 0.12);
-  for (const e of vis) {
-    if (e.oneway || e.width < 5.5) continue;
-    path(ctx, view, e.geom);
-    ctx.stroke();
-  }
-  ctx.setLineDash([]);
+  // 2) carriageway markings (msg 2997): edge lines + dashed lane dividers + centre line, in white
+  //    (CZ markings are white). Drawn on the geometry trimmed back from each end so the marks stop
+  //    before the junction box — realistic, and it keeps the intersection interior clean for the
+  //    approach markings (stop bar / give-way teeth) below. Close zoom only.
+  if (zoom >= 10) drawLaneMarkings(ctx, view, vis, zoom);
 
   // 2b) one-way arrows along the flow direction (geometry order = direction of travel)
   if (zoom >= 7) {
@@ -93,7 +88,7 @@ export function draw(ctx, view, map, car, rules, route, districts) {
 
   // 2c) stop lines — a white transverse bar across each approach to a controlled junction
   //     (a road marking, so it's drawn on the asphalt and rotates with the road).
-  if (zoom >= 9) drawStopLines(ctx, view, vis, map.junctions, zoom);
+  if (zoom >= 9) drawApproachMarkings(ctx, view, vis, map.junctions, zoom);
 
   // 2d) pedestrian crossings — a zebra ladder laid square across the road (road marking).
   if (zoom >= 8) drawCrossings(ctx, view, map, zoom);
@@ -426,33 +421,154 @@ function drawChevron(ctx, view, wx, wy, dirx, diry, half) {
   ctx.stroke();
 }
 
-// Stop lines: a white bar across the road on each approach to a controlled junction. For every
-// controlled junction we find the visible edges that touch it and lay a transverse bar a few
-// metres in from that end (projected from world space, so it sits on the asphalt and turns with it).
-function drawStopLines(ctx, view, vis, junctions, zoom) {
+// --- carriageway markings (msg 2997) ----------------------------------------------------------
+const MARK = "rgba(226,231,241,.55)";       // lane markings are WHITE in CZ; kept faint so the map stays calm
+// road-class priority rank (lower = higher priority); used to pick the MINOR approaches at a
+// derived-priority junction (those must yield → get a give-way line), matching the ▽ signs.
+const CLASS_RANK = {
+  motorway: 0, motorway_link: 1, trunk: 1, trunk_link: 2, primary: 2, primary_link: 3,
+  secondary: 3, secondary_link: 4, tertiary: 4, tertiary_link: 5, unclassified: 6,
+  residential: 6, living_street: 8, service: 8,
+};
+const classRank = (cls) => (cls in CLASS_RANK ? CLASS_RANK[cls] : 7);
+
+// Offset a polyline by `off` metres along the per-vertex normal (average of adjacent segment
+// normals). +off / -off give the two sides. Good enough for the gentle curves of road centerlines.
+function offsetGeom(geom, off) {
+  const n = geom.length, out = new Array(n);
+  for (let i = 0; i < n; i++) {
+    let nx = 0, ny = 0;
+    if (i > 0) { const dx = geom[i][0] - geom[i - 1][0], dy = geom[i][1] - geom[i - 1][1], L = Math.hypot(dx, dy) || 1; nx += -dy / L; ny += dx / L; }
+    if (i < n - 1) { const dx = geom[i + 1][0] - geom[i][0], dy = geom[i + 1][1] - geom[i][1], L = Math.hypot(dx, dy) || 1; nx += -dy / L; ny += dx / L; }
+    const L = Math.hypot(nx, ny) || 1;
+    out[i] = [geom[i][0] + (nx / L) * off, geom[i][1] + (ny / L) * off];
+  }
+  return out;
+}
+
+// Trim `margin` metres off both ends of a polyline (so markings stop before the junction box).
+// Returns null when the segment is too short to bother marking.
+function trimGeom(geom, margin) {
+  const segs = []; let L = 0;
+  for (let i = 1; i < geom.length; i++) { const d = Math.hypot(geom[i][0] - geom[i - 1][0], geom[i][1] - geom[i - 1][1]); segs.push(d); L += d; }
+  if (L <= 2 * margin + 1) return null;
+  const at = (s) => {
+    let acc = 0;
+    for (let i = 1; i < geom.length; i++) { const d = segs[i - 1]; if (acc + d >= s) { const t = (s - acc) / (d || 1); return [geom[i - 1][0] + (geom[i][0] - geom[i - 1][0]) * t, geom[i - 1][1] + (geom[i][1] - geom[i - 1][1]) * t, i]; } acc += d; }
+    return [geom[geom.length - 1][0], geom[geom.length - 1][1], geom.length - 1];
+  };
+  const p0 = at(margin), p1 = at(L - margin);
+  const out = [[p0[0], p0[1]]];
+  for (let i = p0[2]; i <= p1[2] - 1; i++) out.push(geom[i]);
+  out.push([p1[0], p1[1]]);
+  return out;
+}
+
+// Lane markings per drivable edge: solid faint edge lines at ±W/2, dashed lane dividers, and (two-way)
+// a centre line. World-space offsets → they rotate with the heading-up camera; geometry trimmed so the
+// marks stop short of the junctions.
+function drawLaneMarkings(ctx, view, vis, zoom) {
+  ctx.save();
+  ctx.lineCap = "butt";
+  ctx.strokeStyle = MARK;
+  const lw = Math.max(1, zoom * 0.09);
+  for (const e of vis) {
+    if (e.cls === "service" || e.cls === "living_street") continue;   // unmarked in reality
+    const W = e.width || 0;
+    if (W < 3) continue;
+    if (e.bb && !view.boxVisible(e.bb)) continue;
+    const g = trimGeom(e.geom, 5);
+    if (!g) continue;
+    const lanes = Math.max(1, e.lanes || 1);
+    ctx.lineWidth = lw;
+    // edge lines (solid), just inside the kerb
+    ctx.setLineDash([]);
+    path(ctx, view, offsetGeom(g, W / 2 - 0.2)); ctx.stroke();
+    path(ctx, view, offsetGeom(g, -(W / 2 - 0.2))); ctx.stroke();
+    if (e.oneway) {
+      ctx.setLineDash([zoom * 1.6, zoom * 1.4]);                       // dashed dividers between same-dir lanes
+      const laneW = W / lanes;
+      for (let k = 1; k < lanes; k++) { path(ctx, view, offsetGeom(g, -W / 2 + k * laneW)); ctx.stroke(); }
+    } else {
+      const perDir = Math.max(1, Math.floor(lanes / 2));
+      const laneW = (W / 2) / perDir;
+      ctx.setLineDash([zoom * 2.4, zoom * 1.2]);                       // centre line (longer dashes)
+      path(ctx, view, offsetGeom(g, 0)); ctx.stroke();
+      ctx.setLineDash([zoom * 1.6, zoom * 1.4]);                       // lane dividers within each direction
+      for (let k = 1; k < perDir; k++) { path(ctx, view, offsetGeom(g, k * laneW)); ctx.stroke(); path(ctx, view, offsetGeom(g, -k * laneW)); ctx.stroke(); }
+    }
+  }
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+// Approach markings at a junction, by control type: a solid STOP BAR for stop/signals, a row of
+// give-way "shark teeth" for give_way — and, at a derived-priority junction, shark teeth only on the
+// MINOR approaches (lower road class) so they match the ▽ give-way signs; the priority road gets none.
+function drawApproachMarkings(ctx, view, vis, junctions, zoom) {
   const R = view.visR();
   ctx.save();
-  ctx.strokeStyle = "rgba(236,239,246,.72)";
   ctx.lineCap = "butt";
-  ctx.lineWidth = Math.max(2, zoom * 0.55);          // ~0.55 m thick
   for (const j of junctions) {
-    if (j.ctrl === "priority" || !view.near(j.x, j.y, R)) continue;
+    if (!view.near(j.x, j.y, R)) continue;
+    const inc = [];
     for (const e of vis) {
       const g = e.geom, last = g.length - 1;
       const atStart = Math.hypot(g[0][0] - j.x, g[0][1] - j.y) < 3.5;
       const atEnd = !atStart && Math.hypot(g[last][0] - j.x, g[last][1] - j.y) < 3.5;
-      if (!atStart && !atEnd) continue;
+      if (atStart || atEnd) inc.push({ e, atStart });
+    }
+    if (!inc.length) continue;
+    const minRank = Math.min(...inc.map((o) => classRank(o.e.cls)));
+    for (const { e, atStart } of inc) {
+      let kind = null;
+      if (j.ctrl === "stop" || j.ctrl === "signals") kind = "bar";
+      else if (j.ctrl === "give_way") kind = "teeth";
+      else if (j.ctrl === "priority" && classRank(e.cls) > minRank) kind = "teeth";  // minor road yields
+      if (!kind) continue;
+      const g = e.geom;
       let L = 0;
       for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
       const wp = walkAlong(g, atStart, Math.min(4, L * 0.4));   // a few m in from the junction
-      const px = -wp.diry, py = wp.dirx;               // world-space perpendicular (unit)
       const half = Math.max(1.5, e.width / 2);
-      const [ax, ay] = view.project(wp.x + px * half, wp.y + py * half);
-      const [bx, by] = view.project(wp.x - px * half, wp.y - py * half);
-      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+      if (kind === "bar") drawStopBar(ctx, view, wp, half, zoom);
+      else drawSharkTeeth(ctx, view, wp, half);
     }
   }
   ctx.restore();
+}
+
+function drawStopBar(ctx, view, wp, half, zoom) {
+  const px = -wp.diry, py = wp.dirx;                 // world-space across-road perpendicular (unit)
+  ctx.strokeStyle = "rgba(236,239,246,.72)";
+  ctx.lineWidth = Math.max(2, zoom * 0.55);          // ~0.55 m thick
+  const [ax, ay] = view.project(wp.x + px * half, wp.y + py * half);
+  const [bx, by] = view.project(wp.x - px * half, wp.y - py * half);
+  ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+}
+
+// Give-way "shark teeth": a row of white triangles across the approach, apex pointing AWAY from the
+// junction (toward the yielding driver). All in world space so they sit on the asphalt and rotate.
+function drawSharkTeeth(ctx, view, wp, half) {
+  const tx = wp.dirx, ty = wp.diry;                  // along the road, away from the junction
+  const px = -ty, py = tx;                            // across the road
+  const TW = 0.55, GAP = 0.55, DEPTH = 0.7;          // metres: tooth base, gap, depth (apex length)
+  const span = half * 2;
+  const n = Math.max(2, Math.floor(span / (TW + GAP)));
+  const start = -half + (span - n * (TW + GAP) + GAP) / 2 + TW / 2;
+  ctx.fillStyle = "rgba(236,239,246,.82)";
+  for (let i = 0; i < n; i++) {
+    const c = start + i * (TW + GAP);                // tooth-base centre across the road
+    const bx = wp.x + px * c, by = wp.y + py * c;
+    const pts = [
+      [bx + px * (TW / 2), by + py * (TW / 2)],      // base corner
+      [bx - px * (TW / 2), by - py * (TW / 2)],      // base corner
+      [bx + tx * DEPTH, by + ty * DEPTH],            // apex (toward the driver)
+    ];
+    ctx.beginPath();
+    for (let k = 0; k < 3; k++) { const [X, Y] = view.project(pts[k][0], pts[k][1]); k ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
+    ctx.closePath(); ctx.fill();
+  }
 }
 
 // Pedestrian crossings: a zebra ladder. Each crossing carries its centre, the road tangent
