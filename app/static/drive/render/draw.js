@@ -164,13 +164,14 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // call order = priority: street names → landmark names → POI names → house numbers (least important).
   const guard = makeLabelGuard();
 
+  // 4a) road-number shields on motorways/main roads (msg 3015) — CZ-coloured (red D, blue I, yellow II/III,
+  //     green E). Drawn FIRST so the sparse, important road numbers reliably win the shared guard; anchored
+  //     to the nearest on-road point → stable across zoom/pan (msg 3030). Current road's number → HUD.
+  if (zoom >= 4) drawRoadRefs(ctx, view, vis, zoom, guard, rules && rules.street);
+
   // 4) street-name labels ON the connecting roads at intersections (NOT the current
   //    street — that name lives in the HUD info block now). Shows the names of adjoining streets.
   drawStreetLabels(ctx, view, vis, rules && rules.street, guard);
-
-  // 4a2) road-number shields on motorways/main roads (msg 3015) — CZ-coloured (red D, blue I, yellow II/III,
-  //      green E). Drawn early so they win the guard over POI/landmark labels.
-  if (zoom >= 4) drawRoadRefs(ctx, view, vis, zoom, guard);
 
   // 4b) overview (bird's-eye): translucent district names + names of the major nearby streets,
   //     so you can orient while zoomed right out (msg 2763).
@@ -535,43 +536,61 @@ function drawRefBadge(ctx, X, Y, text, st, h) {
   ctx.fillStyle = st.fg; ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(text, X, Y + h * 0.04);
 }
-// Google places ONE shield per road, ON the road, spaced out — NOT a cluster at the junction (msg 3017).
-// So: skip short connector edges (the interchange interior is all stubs), put the shield at a long edge's
-// midpoint (away from the junction nodes), process longest-first, and keep same-ref shields ≥ MINSEP apart.
-function drawRoadRefs(ctx, view, vis, zoom, guard) {
-  const R = view.visR();
+// ONE shield per road number, anchored to the point on that road NEAREST the camera. Previously the shield
+// sat at an edge MIDPOINT gated by view.near() — so as the camera panned, the midpoint vertex flipped in/out
+// of range and the shield popped on/off and jumped between connector edges of the same road (msg 3030). The
+// nearest on-road point slides smoothly and is always in view while the road is, so the shield stays put.
+// The CURRENT road's number is shown in the HUD next to the street name (msg 3030) → skipped here.
+function drawRoadRefs(ctx, view, vis, zoom, guard, currentStreet) {
+  const R2 = (view.visR() * 1.05) ** 2;
   const h = Math.max(11, Math.min(17, zoom * 0.95));     // badge height in px
-  const MINLEN = 45;                                     // only substantial road stretches → off the junction box
-  const MINSEP2 = 150 * 150;                             // min world spacing between two shields of the SAME ref
-  const placed = new Map();                              // ref -> [[x,y]…] already-placed world positions
-  const cand = vis.filter((e) => e.ref || e.iref).map((e) => ({ e, L: edgeLen(e) }))
-    .filter((o) => o.L >= MINLEN).sort((a, b) => b.L - a.L);
+  const cx = view.cx, cy = view.cy;
+  const best = new Map();                                 // ref / E-key -> nearest-to-camera on-road anchor
+  for (const e of vis) {
+    const key = e.ref || (e.iref ? "E" + e.iref.replace(/\s+/g, "") : null);
+    if (!key) continue;
+    if (currentStreet && e.name === currentStreet) continue;   // current road → HUD badge, not the map
+    if (edgeLen(e) < 8) continue;                              // ignore tiny artefacts
+    const p = nearestOnGeom(e.geom, cx, cy);
+    if (p.d2 > R2) continue;
+    const prev = best.get(key);
+    if (!prev || p.d2 < prev.d2) best.set(key, { e, x: p.x, y: p.y, d2: p.d2 });
+  }
+  // nearest first → the most relevant numbers win the shared de-overlap guard
+  const cands = [...best.values()].sort((a, b) => a.d2 - b.d2);
   ctx.save();
   ctx.lineJoin = "round";
-  for (const { e } of cand) {
-    const g = e.geom, m = g[Math.floor(g.length / 2)];
-    if (!view.near(m[0], m[1], R)) continue;
-    const key = e.ref || ("E" + e.iref);
-    const prevs = placed.get(key) || [];
-    if (prevs.some((p) => (p[0] - m[0]) ** 2 + (p[1] - m[1]) ** 2 < MINSEP2)) continue;  // space them along the road
-    const [X, Y] = view.project(m[0], m[1]);
+  for (const B of cands) {
+    const e = B.e;
+    const [X, Y] = view.project(B.x, B.y);
     const items = [];
     if (e.ref) items.push({ t: e.ref, st: refStyle(e.ref, e.cls) });
-    if (e.iref && e.iref.replace(/\s+/g, "") !== (e.ref || "")) items.push({ t: e.iref.replace(/\s+/g, ""), st: refStyle("E", e.cls) });
-    let oy = -(items.length - 1) * (h * 0.62);            // stack the ref + E-route badges vertically
-    let drew = false;
+    const ie = e.iref ? e.iref.replace(/\s+/g, "") : "";
+    if (ie && ie !== (e.ref || "")) items.push({ t: ie, st: refStyle("E", e.cls) });
+    let oy = -(items.length - 1) * (h * 0.62);            // stack the national + E-route badges vertically
     for (const it of items) {
       ctx.font = `800 ${Math.round(h * 0.6)}px ui-sans-serif,system-ui,sans-serif`;
       const w = Math.max(h * 1.05, ctx.measureText(it.t).width + h * 0.5);
-      const cy = Y + oy;
-      oy += h * 1.24;
-      if (guard && !guard.tryPlace(X - w / 2, cy - h / 2, X + w / 2, cy + h / 2)) continue;
-      drawRefBadge(ctx, X, cy, it.t, it.st, h);
-      drew = true;
+      const cyy = Y + oy; oy += h * 1.24;
+      if (guard && !guard.tryPlace(X - w / 2, cyy - h / 2, X + w / 2, cyy + h / 2)) continue;
+      drawRefBadge(ctx, X, cyy, it.t, it.st, h);
     }
-    if (drew) { prevs.push([m[0], m[1]]); placed.set(key, prevs); }
   }
   ctx.restore();
+}
+
+// Nearest point on a polyline to (cx,cy): projects the camera onto each segment (clamped) — continuous as
+// the camera moves, so anything anchored here slides smoothly instead of snapping between vertices.
+function nearestOnGeom(g, cx, cy) {
+  let bx = g[0][0], by = g[0][1], bd = Infinity;
+  for (let i = 1; i < g.length; i++) {
+    const ax = g[i - 1][0], ay = g[i - 1][1], dx = g[i][0] - ax, dy = g[i][1] - ay;
+    const L2 = dx * dx + dy * dy || 1;
+    let t = ((cx - ax) * dx + (cy - ay) * dy) / L2; t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const px = ax + dx * t, py = ay + dy * t, dd = (px - cx) ** 2 + (py - cy) ** 2;
+    if (dd < bd) { bd = dd; bx = px; by = py; }
+  }
+  return { x: bx, y: by, d2: bd };
 }
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close

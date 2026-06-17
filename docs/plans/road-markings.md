@@ -91,6 +91,16 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
   interchange (same anti-pattern as the names). Fixed to Google-style: skip short connector edges
   (len < 45 m, so shields stay OFF the junction box), place at a long edge's midpoint, process longest-first,
   and keep same-`ref` shields ≥ 150 m apart. Verified: junction interior clean, one neat blue "20" per road.
+- **3030 stability + HUD badge:** the midpoint+`view.near` anchor was the bug — as the camera panned, the
+  chosen midpoint vertex flipped in/out of range and the shield popped on/off and jumped between connector
+  edges of one road. Rewrote `drawRoadRefs` to keep ONE shield per ref anchored to the point on the road
+  NEAREST the camera (`nearestOnGeom`, a clamped segment projection → continuous, always in view while the
+  road is) and draw refs BEFORE street names so the sparse numbers win the shared guard. Verified: panning
+  ~19 m keeps the identical shield set with only smooth (~pan-sized) anchor movement, none appearing/vanishing.
+  Also (msg 3030 pt 2) the CURRENT road's number now rides next to the street name in the top HUD: `evalRules`
+  returns `ref`/`iref`/`cls`, `hud.js` renders a CZ-coloured `.refbadge` (built via DOM nodes, not innerHTML,
+  so an OSM name can't inject markup); the current road is therefore skipped on the map (it's in the HUD).
+  Verified on prod: car on Gerská shows "Gerská [1808]" (yellow II/III badge).
 
 ## Junction interior fill + sign de-overlap (msg 3022) — render-only, no re-bake
 Three asks on the same Studentská/Gerská interchange: (1) no signs inside the junction box; (2) no sign

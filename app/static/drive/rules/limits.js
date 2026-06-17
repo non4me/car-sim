@@ -32,6 +32,9 @@ export function evalRules(map, car) {
     boundary: !inBounds,
     offRoad: inBounds && !onSurface,
     street: edge ? (edge.name || "") : "",
+    ref: edge ? (edge.ref || "") : "",           // road number(s) for the HUD badge (msg 3030)
+    iref: edge ? (edge.iref || "") : "",         // E-route number, if any
+    cls: edge ? (edge.cls || "") : "",           // highway class → badge colour
     width: edge ? edge.width : 7,
     lv: edge ? (edge.lv || 0) : (car.layer || 0),     // carriageway level the car is on (msg 2980)
     kmh,

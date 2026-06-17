@@ -6,6 +6,15 @@ const STR = {
   oncoming: "V protisměru!",
 };
 
+// CZ road-number badge colour (mirrors render/draw.js refStyle): red dálnice (D), blue I. třída
+// (trunk/primary), yellow II/III, green E-routes. Shown in the HUD next to the street name (msg 3030).
+function refClass(ref, cls) {
+  if (/^E\s?\d/i.test(ref)) return { bg: "#2f8f43", fg: "#fff", bd: "rgba(255,255,255,.92)" };
+  if (/^D\d/.test(ref) || cls === "motorway" || cls === "motorway_link") return { bg: "#c1272d", fg: "#fff", bd: "rgba(255,255,255,.92)" };
+  if (cls === "trunk" || cls === "primary" || cls === "trunk_link" || cls === "primary_link") return { bg: "#1f6fd6", fg: "#fff", bd: "rgba(255,255,255,.92)" };
+  return { bg: "#f2b21a", fg: "#241803", bd: "rgba(90,66,6,.95)" };
+}
+
 export function makeHud() {
   const $ = (id) => document.getElementById(id);
   const speedo = $("speedo"), speed = $("speed");
@@ -14,7 +23,7 @@ export function makeHud() {
   const streetEl = $("street"); // current-street block (below) — always visible, translucent
   const big = $("bigspeed"), bigVal = $("bigval");   // centre fading speed readout
   const now = () => (typeof performance !== "undefined" ? performance.now() : Date.now());
-  let lastKmh = null, changedAt = 0;
+  let lastKmh = null, changedAt = 0, lastStreetKey = null;
 
   return {
     update(r, hideWarn) {
@@ -36,8 +45,25 @@ export function makeHud() {
         limitVal.textContent = "—";
       }
 
-      // current street — its own always-on translucent block (never hidden by warnings)
-      streetEl.textContent = r.street || "—";
+      // current street + its road number(s) — an always-on translucent block (never hidden by warnings).
+      // The number rides next to the name in CZ colours (msg 3030). Rebuilt only when it actually changes,
+      // and via DOM nodes (not innerHTML) so an OSM street name can never inject markup.
+      const ie = r.iref ? r.iref.replace(/\s+/g, "") : "";
+      const skey = `${r.street || ""}|${r.ref || ""}|${ie}|${r.cls || ""}`;
+      if (skey !== lastStreetKey) {
+        lastStreetKey = skey;
+        streetEl.textContent = "";
+        streetEl.appendChild(document.createTextNode(r.street || "—"));
+        const badges = [];
+        if (r.ref) badges.push({ t: r.ref, st: refClass(r.ref, r.cls) });
+        if (ie && ie !== (r.ref || "")) badges.push({ t: ie, st: refClass("E", r.cls) });
+        for (const b of badges) {
+          const span = document.createElement("span");
+          span.className = "refbadge"; span.textContent = b.t;
+          span.style.background = b.st.bg; span.style.color = b.st.fg; span.style.borderColor = b.st.bd;
+          streetEl.appendChild(span);
+        }
+      }
 
       // warnings/violations block (above the street) — shown only when something is active, so
       // it never covers the street name. Priority: boundary > off-road > oncoming > over-limit.
