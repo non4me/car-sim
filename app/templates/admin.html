@@ -111,7 +111,7 @@
                 <input type="hidden" name="disabled" value="{{ '0' if u.disabled else '1' }}">
                 <button type="submit">{{ 'odblokovat' if u.disabled else 'blokovat' }}</button></form>
               {% if u.id != user.id %}
-              <form method="post" action="/admin/users/{{ u.id }}/delete" onsubmit="return confirm('Smazat {{ u.email }} a jeho jízdy?')">
+              <form method="post" action="/admin/users/{{ u.id }}/delete" data-email="{{ u.email }}" onsubmit="return confirm('Smazat ' + this.dataset.email + ' a jeho jízdy?')">
                 <button class="danger" type="submit">smazat</button></form>
               {% endif %}
             </div>
@@ -176,7 +176,7 @@
           <td class="prov">{{ '%.5f'|format(o.lat) }}, {{ '%.5f'|format(o.lon) }}</td>
           <td>
             <div class="acts">
-              <form method="post" action="/admin/objects/{{ o.id }}/delete" onsubmit="return confirm('Smazat objekt {{ o.name }}?')">
+              <form method="post" action="/admin/objects/{{ o.id }}/delete" data-name="{{ o.name }}" onsubmit="return confirm('Smazat objekt ' + this.dataset.name + '?')">
                 <button class="danger" type="submit">smazat</button></form>
             </div>
           </td>
