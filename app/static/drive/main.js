@@ -6,6 +6,7 @@ import { makeInput } from "./vehicle/input.js";
 import { draw } from "./render/draw.js";
 import { evalRules } from "./rules/limits.js";
 import { makeHud } from "./hud/hud.js";
+import { makeHoverInfo } from "./hud/hover.js";
 import { makeMinimap } from "./hud/minimap.js";
 import { loadSearchIndex, makeSearchBox } from "./hud/search.js";
 import { runLoop } from "./engine/loop.js";
@@ -78,6 +79,9 @@ async function boot() {
   };
   const input = makeInput();
   const hud = makeHud();
+  // hover → native title tooltip describing the map object under the cursor (msg 3074). landmarks load
+  // async, so pass a getter that reads the live closure value rather than a snapshot of the empty array.
+  makeHoverInfo(canvas, view, map, () => ({ landmarks }));
   const minimap = makeMinimap(
     document.getElementById("mini"),
     document.getElementById("miniPlus"),

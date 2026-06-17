@@ -258,3 +258,18 @@ segments around the roundabout all resolve to Sukova. No console errors.
 Pattern: a numbered OSM route often has its `name` on only SOME segments (dual-carriageways / roundabout
 approaches are ref-without-name); fix by inheriting the name from the nearest same-ref named edge at tile
 assembly, so HUD + labels + length all benefit together.
+
+## msg 3074 — hover tooltips (native title) for map objects
+
+"когда я навожу мышь на любой объект на карте о котором есть информация она бы показывалась в title" — yes.
+New module `hud/hover.js`: on canvas `mousemove`, hit-test whatever is under the cursor and set `canvas.title`
+(the native tooltip Vlad asked for). Priority: admin objects (name + description) → named POIs (name + kind) →
+landmarks → traffic signs → pedestrian crossings → the street (name · č. ref/iref · speed · jednosměrka ·
+most/tunel from `lv`) → house number → park/water area (plain buildings are skipped). Pick radii are in screen
+px ÷ zoom so they're constant on screen; resolution is coalesced to one per animation frame; cursor → world via
+`view.unproject(clientX − rect.left, …)`. Wired in main.js: `makeHoverInfo(canvas, view, map, () => ({landmarks}))`
+— landmarks via a getter because they load async.
+
+Verified on prod (synthetic mousemove → canvas.title): POI "Patronka Na Hvězdě · občerstvení", sign "Dej přednost
+v jízdě", street "Sukova · č. 27, E53 · 50 km/h · jednosměrka", house "č. p. 2200/58". Native title tooltips are
+OS-drawn so they don't appear in page screenshots, but the attribute is set correctly. No console errors.
