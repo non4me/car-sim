@@ -67,3 +67,17 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
       → no minimap regression). Verified on prod: Plzeň turn-lane approach shows left/right arrows; squares
       (Husovo náměstí …) render with ⛲. turn:lanes coverage is sparse (~3% of edges) but real, esp. on ramps.
       Closes the pending msg 2983 squares item.
+
+## Refinements (msg 3007/3008/3009 — same Studentská interchange, render-only)
+- **3007 street names off the junction:** `drawStreetLabels` rewritten — ONE label per street NAME (was
+  one per edge-end → a complex interchange = one street split into dozens of "Studentská" connector edges
+  that swarmed the junction). Keep the nearest candidate per name, on a real approach edge (len ≥ 20 m, so
+  the short connectors inside the junction box are skipped), placed ≥10 m INTO the street from the node.
+- **3008 remove give-way shark teeth:** they cluttered complex junctions → removed entirely; only stop/signal
+  approaches get a solid stop bar now. The ▽ give-way sign still marks give-way junctions. (`drawSharkTeeth`,
+  `CLASS_RANK`/`classRank` deleted.)
+- **3009 multi-level visibility:** strengthened the bridge/tunnel surface cues so "which is higher/lower"
+  reads — bridges: wider dark drop-shadow (pad 11) + clearly lighter deck (#475164) + bright **parapet edge
+  lines** (railings); tunnels: dimmer (#1d222c) + dashed; bridges/tunnels sorted by `lv` so higher decks paint
+  last. Verified: most U Jána reads as an elevated bridge over the river; interchange decks read above the
+  ground roads.

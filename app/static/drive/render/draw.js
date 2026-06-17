@@ -52,6 +52,8 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   ctx.lineCap = "round"; ctx.lineJoin = "round";
   const ground = [], bridges = [], tunnels = [];
   for (const e of vis) { const lv = e.lv || 0; (lv > 0 ? bridges : lv < 0 ? tunnels : ground).push(e); }
+  bridges.sort((a, b) => (a.lv || 0) - (b.lv || 0));   // lower decks first → a higher deck paints on top (msg 3009)
+  tunnels.sort((a, b) => (b.lv || 0) - (a.lv || 0));   // deepest tunnel first
   const casings = (eds, col, pad) => {
     ctx.strokeStyle = col;
     for (const e of eds) { path(ctx, view, e.geom); ctx.lineWidth = e.width * zoom + pad; ctx.stroke(); }
@@ -62,9 +64,23 @@ export function draw(ctx, view, map, car, rules, route, districts) {
     for (const e of eds) { path(ctx, view, e.geom); ctx.lineWidth = Math.max(2, e.width * zoom); ctx.stroke(); }
     ctx.setLineDash([]);
   };
-  casings(tunnels, "#0a0c11", 4); surfaces(tunnels, "#23272f", [zoom * 1.3, zoom * 0.9]);  // below: dim + dashed
-  casings(ground, "#0a0c11", 4); surfaces(ground, ASPHALT);                                 // at grade
-  casings(bridges, "#05070a", 7); surfaces(bridges, "#3a424f");                             // above: shadow + lighter deck
+  // tunnels BELOW: dimmer than asphalt + dashed → reads as covered/under (ground roads paint over them)
+  casings(tunnels, "#0a0c11", 4); surfaces(tunnels, "#1d222c", [zoom * 1.3, zoom * 0.9]);
+  // ground AT GRADE
+  casings(ground, "#0a0c11", 4); surfaces(ground, ASPHALT);
+  // bridges ABOVE: a WIDE dark drop-shadow + a clearly lighter deck → lifts above the road below (msg 3009)
+  casings(bridges, "#05070a", 11); surfaces(bridges, "#475164");
+  // parapet edge lines (the bridge railings) — the strongest "this carriageway is elevated" cue
+  if (bridges.length && zoom >= 3) {
+    ctx.setLineDash([]);
+    ctx.strokeStyle = "rgba(158,174,202,.92)";
+    ctx.lineWidth = Math.max(1, zoom * 0.13);
+    for (const e of bridges) {
+      const half = (e.width || 6) / 2;
+      path(ctx, view, offsetGeom(e.geom, half)); ctx.stroke();
+      path(ctx, view, offsetGeom(e.geom, -half)); ctx.stroke();
+    }
+  }
 
   // 1b) computed route — a glowing blue ribbon laid over the asphalt (under markings/signs/car),
   //     so the suggested path reads clearly while the lane markings still show through at the edges.
@@ -501,14 +517,6 @@ function drawChevron(ctx, view, wx, wy, dirx, diry, half) {
 
 // --- carriageway markings (msg 2997) ----------------------------------------------------------
 const MARK = "rgba(226,231,241,.55)";       // lane markings are WHITE in CZ; kept faint so the map stays calm
-// road-class priority rank (lower = higher priority); used to pick the MINOR approaches at a
-// derived-priority junction (those must yield → get a give-way line), matching the ▽ signs.
-const CLASS_RANK = {
-  motorway: 0, motorway_link: 1, trunk: 1, trunk_link: 2, primary: 2, primary_link: 3,
-  secondary: 3, secondary_link: 4, tertiary: 4, tertiary_link: 5, unclassified: 6,
-  residential: 6, living_street: 8, service: 8,
-};
-const classRank = (cls) => (cls in CLASS_RANK ? CLASS_RANK[cls] : 7);
 
 // Offset a polyline by `off` metres along the per-vertex normal (average of adjacent segment
 // normals). +off / -off give the two sides. Good enough for the gentle curves of road centerlines.
@@ -580,37 +588,24 @@ function drawLaneMarkings(ctx, view, vis, zoom) {
   ctx.restore();
 }
 
-// Approach markings at a junction, by control type: a solid STOP BAR for stop/signals, a row of
-// give-way "shark teeth" for give_way — and, at a derived-priority junction, shark teeth only on the
-// MINOR approaches (lower road class) so they match the ▽ give-way signs; the priority road gets none.
+// Approach markings: a solid STOP BAR on each approach to a stop/signal junction. (Give-way "shark
+// teeth" were removed per msg 3008 — they cluttered complex junctions; the ▽ give-way sign still marks it.)
 function drawApproachMarkings(ctx, view, vis, junctions, zoom) {
   const R = view.visR();
   ctx.save();
   ctx.lineCap = "butt";
   for (const j of junctions) {
+    if (j.ctrl !== "stop" && j.ctrl !== "signals") continue;
     if (!view.near(j.x, j.y, R)) continue;
-    const inc = [];
     for (const e of vis) {
       const g = e.geom, last = g.length - 1;
       const atStart = Math.hypot(g[0][0] - j.x, g[0][1] - j.y) < 3.5;
       const atEnd = !atStart && Math.hypot(g[last][0] - j.x, g[last][1] - j.y) < 3.5;
-      if (atStart || atEnd) inc.push({ e, atStart });
-    }
-    if (!inc.length) continue;
-    const minRank = Math.min(...inc.map((o) => classRank(o.e.cls)));
-    for (const { e, atStart } of inc) {
-      let kind = null;
-      if (j.ctrl === "stop" || j.ctrl === "signals") kind = "bar";
-      else if (j.ctrl === "give_way") kind = "teeth";
-      else if (j.ctrl === "priority" && classRank(e.cls) > minRank) kind = "teeth";  // minor road yields
-      if (!kind) continue;
-      const g = e.geom;
+      if (!atStart && !atEnd) continue;
       let L = 0;
       for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
       const wp = walkAlong(g, atStart, Math.min(4, L * 0.4));   // a few m in from the junction
-      const half = Math.max(1.5, e.width / 2);
-      if (kind === "bar") drawStopBar(ctx, view, wp, half, zoom);
-      else drawSharkTeeth(ctx, view, wp, half);
+      drawStopBar(ctx, view, wp, Math.max(1.5, e.width / 2), zoom);
     }
   }
   ctx.restore();
@@ -623,30 +618,6 @@ function drawStopBar(ctx, view, wp, half, zoom) {
   const [ax, ay] = view.project(wp.x + px * half, wp.y + py * half);
   const [bx, by] = view.project(wp.x - px * half, wp.y - py * half);
   ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
-}
-
-// Give-way "shark teeth": a row of white triangles across the approach, apex pointing AWAY from the
-// junction (toward the yielding driver). All in world space so they sit on the asphalt and rotate.
-function drawSharkTeeth(ctx, view, wp, half) {
-  const tx = wp.dirx, ty = wp.diry;                  // along the road, away from the junction
-  const px = -ty, py = tx;                            // across the road
-  const TW = 0.55, GAP = 0.55, DEPTH = 0.7;          // metres: tooth base, gap, depth (apex length)
-  const span = half * 2;
-  const n = Math.max(2, Math.floor(span / (TW + GAP)));
-  const start = -half + (span - n * (TW + GAP) + GAP) / 2 + TW / 2;
-  ctx.fillStyle = "rgba(236,239,246,.82)";
-  for (let i = 0; i < n; i++) {
-    const c = start + i * (TW + GAP);                // tooth-base centre across the road
-    const bx = wp.x + px * c, by = wp.y + py * c;
-    const pts = [
-      [bx + px * (TW / 2), by + py * (TW / 2)],      // base corner
-      [bx - px * (TW / 2), by - py * (TW / 2)],      // base corner
-      [bx + tx * DEPTH, by + ty * DEPTH],            // apex (toward the driver)
-    ];
-    ctx.beginPath();
-    for (let k = 0; k < 3; k++) { const [X, Y] = view.project(pts[k][0], pts[k][1]); k ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y); }
-    ctx.closePath(); ctx.fill();
-  }
 }
 
 // Pedestrian crossings: a zebra ladder. Each crossing carries its centre, the road tangent
@@ -804,35 +775,38 @@ function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
   if (view.zoom < 8) return;                  // too zoomed out to be legible/useful
   const cx = view.cx, cy = view.cy;           // camera centre = car, used ONLY to gate which junctions show
   const NEAR2 = 62 * 62;                       // a junction must be within ~62 m of the car to label its streets
-  const GAP = 7;                               // metres the text keeps clear of the junction
+  const GAP = 10;                              // metres the text keeps clear of the junction (msg 3007)
   const z = view.zoom;
   ctx.font = "600 11px ui-sans-serif,system-ui,sans-serif";   // a touch smaller (msg 2956)
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   const HH = 7;                               // half text height incl. halo
 
-  const cands = [];
-  const seen = new Set();
+  // ONE label per street NAME (msg 3007): a complex interchange is one street ("Studentská") split into
+  // dozens of short connector edges — labelling each one swarmed the junction. Instead keep the single
+  // nearest candidate per name, placed on a real APPROACH edge (length ≥ MINLEN, so the short connectors
+  // inside the junction box are skipped) a clear distance INTO the street from the nearest node.
+  const MINLEN = 20;
+  const best = new Map();
   for (const e of vis) {
     if (!e.name || e.name === currentStreet) continue;
     const g = e.geom;
     if (g.length < 2) continue;
+    const len = edgeLen(e);
+    if (len < MINLEN) continue;                               // skip interchange connectors → names go on streets
     const J0 = g[0], J1 = g[g.length - 1];
     const d0 = (J0[0] - cx) ** 2 + (J0[1] - cy) ** 2, d1 = (J1[0] - cx) ** 2 + (J1[1] - cy) ** 2;
     const near0 = d0 < NEAR2, near1 = d1 < NEAR2;
     if (!near0 && !near1) continue;
     const halfW = ctx.measureText(e.name).width / 2 / z;      // half label width in WORLD metres
-    const off = GAP + halfW;                                  // centre this far from a junction → text clears it
-    const len = edgeLen(e);
-    if (len < 2 * GAP + 4 * halfW) {
-      // too short to clear both ends → one label at the middle (so two names don't overlap)
-      addLabel(cands, seen, e.name, walkAlong(g, true, len / 2), Math.min(d0, d1));
-    } else {
-      if (near0) addLabel(cands, seen, e.name, walkAlong(g, true, off), d0);
-      if (near1) addLabel(cands, seen, e.name, walkAlong(g, false, off), d1);
-    }
+    const off = Math.min(GAP + halfW, len * 0.5);             // this far INTO the street from the nearer node
+    const fromStart = near0 && (!near1 || d0 <= d1);          // label off the end nearest the car
+    const p = walkAlong(g, fromStart, off);
+    const d = fromStart ? d0 : d1;
+    const prev = best.get(e.name);
+    if (!prev || d < prev.d) best.set(e.name, { name: e.name, x: p.x, y: p.y, dirx: p.dirx, diry: p.diry, d });
   }
   // closest-junction labels first → the most relevant ones win the shared de-overlap guard (msg 2786)
-  cands.sort((a, b) => a.d - b.d);
+  const cands = [...best.values()].sort((a, b) => a.d - b.d);
   for (const L of cands) {
     const [sx, sy] = view.project(L.x, L.y);
     // direction in screen space so text runs along the street. project() rotates by camera rot then
@@ -853,13 +827,6 @@ function drawStreetLabels(ctx, view, vis, currentStreet, guard) {
     ctx.fillText(L.name, 0, 0);
     ctx.restore();
   }
-}
-
-function addLabel(cands, seen, name, p, d) {
-  const key = name + "|" + Math.round(p.x / 4) + "|" + Math.round(p.y / 4);   // drop near-identical placements
-  if (seen.has(key)) return;
-  seen.add(key);
-  cands.push({ name, x: p.x, y: p.y, dirx: p.dirx, diry: p.diry, d });
 }
 
 // Overview labels (bird's-eye): translucent DISTRICT/quarter names for orientation, plus the
