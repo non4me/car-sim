@@ -301,6 +301,12 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         oneway = ow_raw in ("yes", "true", "1", "-1") or cdef.get("oneway_implied", False)
         maxspeed = parse_maxspeed(t.get("maxspeed"), cdef["context"], profile)
         lv = road_level(t)                        # carriageway level for multi-level interchanges (msg 2980)
+        # per-lane turn designations (msg 2997 ph2) — captured when OSM has them (sparse but real); used to
+        # draw turn arrows on approach lanes. Forward = geom order; backward = opposite. "|"-separated spec.
+        tl = t.get("turn:lanes:forward") or (t.get("turn:lanes") if oneway else None)
+        tlb = t.get("turn:lanes:backward")
+        lf = int(t["lanes:forward"]) if str(t.get("lanes:forward", "")).isdigit() else None
+        lb = int(t["lanes:backward"]) if str(t.get("lanes:backward", "")).isdigit() else None
         nlist = wy["nodes"]
         if ow_raw == "-1":
             nlist = list(reversed(nlist))   # oneway=-1: reverse so geom order = traffic-flow direction
@@ -320,6 +326,14 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
                         }
                         if lv:
                             ed["lv"] = lv         # omit when 0 → keeps tiles small, old tiles default 0
+                        if tl:
+                            ed["tl"] = tl         # turn:lanes (forward/flow) — omitted when absent (sparse)
+                        if tlb:
+                            ed["tlb"] = tlb       # turn:lanes:backward
+                        if lf:
+                            ed["lf"] = lf         # lanes:forward (per-direction lane count, if tagged)
+                        if lb:
+                            ed["lb"] = lb         # lanes:backward
                         edges.append(ed)
                 seg = [nid]
     print(f"  edges (junction-to-junction): {len(edges)}")

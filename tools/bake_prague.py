@@ -31,9 +31,11 @@ PLACE_KINDS = ("city", "borough", "suburb", "quarter", "neighbourhood", "town", 
 
 
 def label_for(tags) -> tuple | None:
-    """Named station OR major landmark → (kind, name), else None (msg 2771)."""
+    """Named station OR major landmark OR square → (kind, name), else None (msg 2771; squares msg 2983/2997)."""
     if tags.get("railway") in ("station", "halt") and tags.get("name"):
         return ("station", tags["name"])
+    if tags.get("place") == "square" and tags.get("name"):
+        return ("square", tags["name"])          # náměstí — rendered with the ⛲ icon (draw.js ICON_GLYPH)
     lk = landmark_kind(tags)
     return (lk, tags["name"]) if lk else None
 

@@ -90,6 +90,9 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   //     (a road marking, so it's drawn on the asphalt and rotates with the road).
   if (zoom >= 9) drawApproachMarkings(ctx, view, vis, map.junctions, zoom);
 
+  // 2c2) per-lane turn arrows where OSM has turn:lanes (msg 2997 ph2) — close zoom only
+  if (zoom >= 12) drawTurnArrows(ctx, view, vis, map.junctions, zoom);
+
   // 2d) pedestrian crossings — a zebra ladder laid square across the road (road marking).
   if (zoom >= 8) drawCrossings(ctx, view, map, zoom);
 
@@ -351,6 +354,81 @@ function drawObjects(ctx, view, map, zoom, guard) {
     ctx.fillStyle = "rgba(233,239,249,.98)"; ctx.fillText(o.name, tx, Y);
   }
   ctx.textAlign = "center";   // restore default for subsequent text
+}
+
+// Per-lane turn arrows (msg 2997 ph2): where OSM has turn:lanes, draw the arrow(s) in each approach
+// lane a few metres before the junction. `tl` = forward (geom-order) turn:lanes, `tlb` = backward;
+// "|"-separated lanes ordered left→right, each lane a ";"-separated set of turns (left/through/right…).
+function drawTurnArrows(ctx, view, vis, junctions, zoom) {
+  const R = view.visR();
+  ctx.save();
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  const seen = new Set();
+  for (const j of junctions) {
+    if (!view.near(j.x, j.y, R)) continue;
+    for (const e of vis) {
+      if (!e.tl && !e.tlb) continue;
+      const g = e.geom, last = g.length - 1;
+      const atStart = Math.hypot(g[0][0] - j.x, g[0][1] - j.y) < 3.5;
+      const atEnd = !atStart && Math.hypot(g[last][0] - j.x, g[last][1] - j.y) < 3.5;
+      if (!atStart && !atEnd) continue;
+      const spec = atEnd ? e.tl : e.tlb;          // the direction APPROACHING this junction
+      if (!spec) continue;
+      const key = `${e.a}_${e.b}_${atEnd ? 1 : 0}`;
+      if (seen.has(key)) continue;                // one edge can touch two junctions; mark each end once
+      seen.add(key);
+      const lanesArr = spec.split("|");
+      const n = lanesArr.length;
+      if (!n) continue;
+      let L = 0;
+      for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
+      const wp = walkAlong(g, atStart, Math.min(8, L * 0.5));
+      const tx = -wp.dirx, ty = -wp.diry;          // travel direction (toward the junction)
+      const Lx = wp.diry, Ly = -wp.dirx;           // left-of-travel normal in world
+      const W = e.width || n * 3;
+      const Wdir = e.oneway ? W : W / 2;           // two-way: this direction gets the right half (RHT)
+      const laneW = Wdir / n;
+      const asz = Math.min(laneW * 0.4, 2.0);      // arrow half-size, metres (kept inside the lane)
+      for (let i = 0; i < n; i++) {
+        // lane centre offset along the LEFT normal: leftmost lane (i=0) first. One-way spans the full
+        // width; two-way occupies the right half (negative = right of travel).
+        const off = e.oneway ? (W / 2 - (i + 0.5) * laneW) : -((i + 0.5) * laneW);
+        drawLaneArrow(ctx, view, wp.x + Lx * off, wp.y + Ly * off, tx, ty, lanesArr[i], asz * zoom);
+      }
+    }
+  }
+  ctx.restore();
+}
+
+// One lane arrow at world (wx,wy), travelling along world dir (tx,ty), for a ";"-set of turns. Drawn in
+// screen space (billboarded with the heading-up camera) — a shaft that bends toward each turn + a head.
+function drawLaneArrow(ctx, view, wx, wy, tx, ty, turns, S) {
+  if (S < 5) return;                               // too small to read
+  const [X, Y] = view.project(wx, wy);
+  const c = Math.cos(view.rot), s = Math.sin(view.rot);
+  const ux = tx * c - ty * s, uy = -(tx * s + ty * c);   // travel dir in screen space (unit)
+  const rx = -uy, ry = ux;                          // right-of-travel in screen space
+  ctx.strokeStyle = "rgba(232,237,247,.82)";
+  ctx.fillStyle = "rgba(232,237,247,.82)";
+  ctx.lineWidth = Math.max(1.5, S * 0.13);
+  const base = [X - ux * S, Y - uy * S];            // tail, behind the centre
+  for (const tok of (turns || "through").split(";")) {
+    let lat = 0;                                    // lateral turn amount: -1 left … +1 right
+    if (tok.includes("sharp_left")) lat = -1; else if (tok.includes("slight_left")) lat = -0.45; else if (tok.includes("left")) lat = -0.8;
+    else if (tok.includes("sharp_right")) lat = 1; else if (tok.includes("slight_right")) lat = 0.45; else if (tok.includes("right")) lat = 0.8;
+    // bend point + tip: shaft runs forward, then heads off toward the turn
+    const dirx = ux + rx * lat, diry = uy + ry * lat, dl = Math.hypot(dirx, diry) || 1;
+    const hx = dirx / dl, hy = diry / dl;           // head direction (unit)
+    const bend = [X + ux * S * 0.15, Y + uy * S * 0.15];
+    const tip = [bend[0] + hx * S * 0.95, bend[1] + hy * S * 0.95];
+    ctx.beginPath(); ctx.moveTo(base[0], base[1]); ctx.lineTo(bend[0], bend[1]); ctx.lineTo(tip[0], tip[1]); ctx.stroke();
+    const hpx = -hy, hpy = hx, hs = S * 0.42;       // arrowhead
+    ctx.beginPath();
+    ctx.moveTo(tip[0], tip[1]);
+    ctx.lineTo(tip[0] - hx * hs + hpx * hs * 0.6, tip[1] - hy * hs + hpy * hs * 0.6);
+    ctx.lineTo(tip[0] - hx * hs - hpx * hs * 0.6, tip[1] - hy * hs - hpy * hs * 0.6);
+    ctx.closePath(); ctx.fill();
+  }
 }
 
 // House numbers (msg 2771 phase 2): faint number at the building centroid, only when very close

@@ -58,4 +58,12 @@ All in `render/draw.js`, world-space offsets (rotate with the heading-up camera)
       junctions (matches the ▽ signs). White (CZ). Verified on prod: Plzeň Studentská interchange (teeth
       on yielding approaches, junction interior clean, marks stop before the box) + Jateční arterial
       (edge + lane dividers + centre line). No console errors. (Render-only, no re-bake.)
-- [ ] Phase 2 — turn:lanes capture + per-lane arrows + place=square (one re-bake)
+- [x] Phase 2 — turn:lanes capture + per-lane arrows + place=square (one re-bake) — DONE 2026-06-17:
+      bake now captures `tl`/`tlb` (turn:lanes forward/backward) + `lf`/`lb` (lanes:forward/backward) per
+      edge (free — the way tags were already preserved by read_pbf), and `label_for` emits `place=square`
+      as a `square` label (⛲, already in ICON_GLYPH). `drawTurnArrows()`/`drawLaneArrow()` render per-lane
+      arrows on the approaching direction a few m before the junction (zoom≥12, billboarded). Re-baked all
+      4 cities + re-ran the 3 search.json patch tools (admin/road_refs/landmarks counts identical to before
+      → no minimap regression). Verified on prod: Plzeň turn-lane approach shows left/right arrows; squares
+      (Husovo náměstí …) render with ⛲. turn:lanes coverage is sparse (~3% of edges) but real, esp. on ramps.
+      Closes the pending msg 2983 squares item.
