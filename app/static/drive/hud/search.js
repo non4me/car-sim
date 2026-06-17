@@ -1,6 +1,7 @@
 // Street + district search with autocomplete. The index is a separate baked file (search.json)
 // because map tiles STREAM — not all street names are resident in memory. On pick, the caller
 // teleports the map (streaming the destination tiles, then snapping onto the nearest road).
+import { T } from "../i18n.js";
 
 export async function loadSearchIndex(base) {
   try {
@@ -50,7 +51,7 @@ export function makeSearchBox(input, results, items, onPick) {
       el.className = "sr-item" + (i === hi ? " hi" : "");
       const nm = document.createElement("span"); nm.className = "sr-name"; nm.textContent = it.name;
       const kd = document.createElement("span"); kd.className = "sr-kind";
-      kd.textContent = it.kind === "district" ? "čtvrť" : "ulice";
+      kd.textContent = it.kind === "district" ? T("k_district", "čtvrť") : T("k_street", "ulice");
       el.append(nm, kd);
       el.addEventListener("mousedown", (e) => { e.preventDefault(); pick(it); });
       results.appendChild(el);

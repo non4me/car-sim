@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>car-sim — Quizzes</title>
+  <title>car-sim — {{ t.q_title }}</title>
   <style>
     :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff}
     html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
@@ -29,25 +29,25 @@
 <body>
   {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <h1>🧠 <span class="accent">Quizzes</span></h1>
-    <div class="sub">Learn Czech road rules on real street photos — free, no login.</div>
+    <h1>🧠 <span class="accent">{{ t.q_title }}</span></h1>
+    <div class="sub">{{ t.q_sub }}</div>
 
     <div class="cards">
       <a class="card" href="/quiz/photo">
-        <div class="t">📷 Photo quiz <span class="tag live">live</span></div>
-        <div class="d">Real street photos, 10 languages. Lives game — 3 ❤, XP &amp; ranks, leaderboard.</div>
+        <div class="t">📷 {{ t.q_photo_t }} <span class="tag live">{{ t.tag_live }}</span></div>
+        <div class="d">{{ t.q_photo_d }}</div>
       </a>
       <a class="card" href="/quiz/situations">
-        <div class="t">🚦 Situation simulator <span class="tag live">live</span></div>
-        <div class="d">Top-down intersection scenarios — who goes first, when to stop. 8 junctions, freeze-and-explain.</div>
+        <div class="t">🚦 {{ t.q_sit_t }} <span class="tag live">{{ t.tag_live }}</span></div>
+        <div class="d">{{ t.q_sit_d }}</div>
       </a>
-      <div class="card soon"><div class="t">🛑 Sign trainer <span class="tag">soon</span></div>
-        <div class="d">Flashcards for every Czech road sign, spaced repetition.</div></div>
-      <div class="card soon"><div class="t">📜 Rules flashcards <span class="tag">soon</span></div>
-        <div class="d">Key §§ of zákon 361/2000 Sb., bite-sized and searchable.</div></div>
+      <div class="card soon"><div class="t">🛑 {{ t.q_sign_t }} <span class="tag">{{ t.tag_soon }}</span></div>
+        <div class="d">{{ t.q_sign_d }}</div></div>
+      <div class="card soon"><div class="t">📜 {{ t.q_rules_t }} <span class="tag">{{ t.tag_soon }}</span></div>
+        <div class="d">{{ t.q_rules_d }}</div></div>
     </div>
 
-    <footer>Foto: Panoramax (CC-BY-SA) · Map data © OpenStreetMap contributors (ODbL). Educational project.</footer>
+    <footer>{{ t.q_footer }}</footer>
   </div>
 </body>
 </html>

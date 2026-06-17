@@ -1,9 +1,10 @@
 // HUD: speedometer, current speed-limit sign, contextual warnings, street name.
+import { T } from "../i18n.js";
 const STR = {
-  over: "Překročení rychlosti",
-  boundary: "Dál cesta nevede — otočte se",
-  offroad: "Mimo vozovku",
-  oncoming: "V protisměru!",
+  over: T("w_over", "Překročení rychlosti"),
+  boundary: T("w_boundary", "Dál cesta nevede — otočte se"),
+  offroad: T("w_offroad", "Mimo vozovku"),
+  oncoming: T("w_oncoming", "V protisměru!"),
 };
 
 // CZ road-number badge colour (mirrors render/draw.js refStyle): red dálnice (D), blue I. třída

@@ -3,6 +3,7 @@
 //   • city   — the WHOLE city: main districts (ranked by size) + major objects, de-overlapped.
 //   • route  — the selected route, scaled to fit; localities graded by distance to the route
 //              (adjacent = full, next ring = semi-transparent, third ring = 20%, farther = hidden).
+import { T } from "../i18n.js";
 const RADII = [110, 240, 430];   // world metres shown each way (local mode), for levels +1, +2, +3
 
 // district ranking (OSM place kind) — smaller rank = more important = bigger/brighter label.
@@ -339,7 +340,7 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
     const [px, py] = toM(car.x, car.y);
     ctx.fillStyle = "#ffd24a"; ctx.beginPath(); ctx.arc(px, py, 3.2, 0, 7); ctx.fill();
     ctx.lineWidth = 1; ctx.strokeStyle = "#0a0d13"; ctx.stroke();
-    tag("TRASA");
+    tag(T("d_mini_route_tag", "TRASA"));
   }
 
   // expose the current mode so the caller can keep its own button state in sync if needed

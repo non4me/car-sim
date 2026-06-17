@@ -10,6 +10,7 @@ import { makeHoverInfo } from "./hud/hover.js";
 import { makeMinimap } from "./hud/minimap.js";
 import { loadSearchIndex, makeSearchBox } from "./hud/search.js";
 import { runLoop } from "./engine/loop.js";
+import { T } from "./i18n.js";
 
 const ZMIN = 1, ZMAX = 25;      // absolute zoom bounds in px/metre (msg 2768 halved min 2→1 for a wider overview)
 const ZMIN_FIT = 0.25;          // route-overview may zoom out further so the whole route fits (msg 2768)
@@ -257,15 +258,15 @@ async function boot() {
     // capture {x,y} of the picked street instead of teleporting (3rd arg = onPick coords). Picking a
     // street explicitly clears the "current position" default.
     makeSearchBox(fromEl, document.getElementById("routeFromRes"), items,
-      (x, y) => { from = { x, y }; fromIsCurrent = false; info.textContent = to ? "připraveno" : "vyber cíl"; info.className = ""; syncGo(); });
+      (x, y) => { from = { x, y }; fromIsCurrent = false; info.textContent = to ? T("d_ready", "připraveno") : T("d_pickdest", "vyber cíl"); info.className = ""; syncGo(); });
     makeSearchBox(toEl, document.getElementById("routeToRes"), items,
-      (x, y) => { to = { x, y }; info.textContent = from ? "připraveno" : "vyber start"; info.className = ""; syncGo(); });
+      (x, y) => { to = { x, y }; info.textContent = from ? T("d_ready", "připraveno") : T("d_pickstart", "vyber start"); info.className = ""; syncGo(); });
     // default "Odkud" to the street the car is on now, so the common case is "route from here"
     const prefillFrom = () => {
       if (fromEl.value || !(rules && rules.street)) return;
       fromEl.value = rules.street;
       from = { x: car.x, y: car.y }; fromIsCurrent = true;
-      info.textContent = to ? "připraveno" : "vyber cíl"; info.className = ""; syncGo();
+      info.textContent = to ? T("d_ready", "připraveno") : T("d_pickdest", "vyber cíl"); info.className = ""; syncGo();
     };
     btn.addEventListener("click", () => {
       const opening = panel.classList.contains("hidden");
@@ -276,7 +277,7 @@ async function boot() {
     goBtn.addEventListener("click", async () => {
       if (fromIsCurrent) from = { x: car.x, y: car.y };   // refresh to the car's live position at search time
       if (!from || !to) return;
-      info.textContent = "hledám trasu…"; info.className = "";
+      info.textContent = T("d_searching", "hledám trasu…"); info.className = "";
       try {
         const u = `/route?city=${encodeURIComponent(window.CARSIM.city)}`
           + `&district=${encodeURIComponent(window.CARSIM.district)}`
@@ -286,20 +287,20 @@ async function boot() {
           routeLine = res.polyline; routeI = 0; routeBox = bboxOf(routeLine);
           followEl.disabled = false;                    // auto-pilot now available
           routeFollowOn = followEl.checked;             // honour a pre-ticked toggle (minimap "Trasa" auto-enables)
-          info.textContent = `trasa ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
+          info.textContent = `${T("d_route", "trasa")} ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
           goTo(routeLine[0][0], routeLine[0][1]);       // drop the car at the route's start, on the road
         } else {
-          routeLine = null; routeFollowOn = false; info.textContent = "trasa nenalezena"; info.className = "err";
+          routeLine = null; routeFollowOn = false; info.textContent = T("d_notfound", "trasa nenalezena"); info.className = "err";
         }
       } catch (err) {
-        routeLine = null; info.textContent = "chyba spojení"; info.className = "err";
+        routeLine = null; info.textContent = T("d_connerr", "chyba spojení"); info.className = "err";
       }
     });
     document.getElementById("routeClear").addEventListener("click", () => {
       routeLine = null; routeBox = null; from = null; to = null; fromIsCurrent = false;
       routeFollowOn = false; followEl.checked = false; followEl.disabled = true;
       fromEl.value = ""; toEl.value = "";
-      info.textContent = "vyber dvě ulice"; info.className = ""; syncGo();
+      info.textContent = T("d_pick2", "vyber dvě ulice"); info.className = ""; syncGo();
     });
   }
 
@@ -395,7 +396,7 @@ async function boot() {
     routeFollowOn = false;
     const f = document.getElementById("routeFollow"); if (f) f.checked = false;
     const info = document.getElementById("routeInfo");
-    if (info) { info.textContent = "cíl ✓"; info.className = "ok"; }
+    if (info) { info.textContent = T("d_arrived", "cíl ✓"); info.className = "ok"; }
   }
 
   const zoomEl = document.getElementById("zoomind");

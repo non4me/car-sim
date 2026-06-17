@@ -170,12 +170,12 @@
     <canvas id="game"></canvas>
 
     <div class="hud" id="drivebar">
-      <button id="helpBtn" title="Ovládání">?</button>
+      <button id="helpBtn" title="{{ t.d_help_title }}">?</button>
       <div id="searchWrap">
-        <input id="searchInput" type="text" placeholder="Hledat ulici / čtvrť…" autocomplete="off" spellcheck="false">
+        <input id="searchInput" type="text" placeholder="{{ t.d_search_ph }}" autocomplete="off" spellcheck="false">
         <div id="searchResults" class="sr-results hidden"></div>
       </div>
-      <button id="routeBtn" title="Trasa mezi ulicemi">🛣 Trasa</button>
+      <button id="routeBtn" title="{{ t.d_route_btn_title }}">🛣 {{ t.d_route_btn }}</button>
       <span class="db-meta ah-hide-sm">{{ city_name }}{% if snapshot %} · OSM {{ snapshot }}{% endif %}</span>
     </div>
 
@@ -183,42 +183,42 @@
     <div class="mini-top">
       <span class="lvl" id="miniLevel">+1</span>
       <span class="mini-tools">
-        <input type="range" id="miniOpacity" min="10" max="100" value="100" title="Průhlednost">
-        <button id="miniCollapse" title="Sbalit mapu">▁</button>
+        <input type="range" id="miniOpacity" min="10" max="100" value="100" title="{{ t.d_mini_opacity }}">
+        <button id="miniCollapse" title="{{ t.d_mini_collapse }}">▁</button>
       </span>
     </div>
     <canvas id="mini" width="276" height="276"></canvas>
     <div class="mini-bar">
       <span class="mini-z">
-        <button id="miniMinus" title="Oddálit">−</button>
-        <button id="miniPlus" title="Přiblížit">+</button>
+        <button id="miniMinus" title="{{ t.d_mini_zoomout }}">−</button>
+        <button id="miniPlus" title="{{ t.d_mini_zoomin }}">+</button>
       </span>
       <span class="mini-modes">
-        <button id="miniCity" title="Celé město: hlavní čtvrti a objekty">City</button>
-        <button id="miniRoute" title="Celá trasa na minimapě" disabled>Trasa</button>
+        <button id="miniCity" title="{{ t.d_mini_city_title }}">{{ t.d_mini_city }}</button>
+        <button id="miniRoute" title="{{ t.d_mini_route_title }}" disabled>{{ t.d_mini_route }}</button>
       </span>
     </div>
   </div>
-  <button id="miniRestore" class="hud hidden" title="Zobrazit mapu">🗺</button>
+  <button id="miniRestore" class="hud hidden" title="{{ t.d_mini_restore }}">🗺</button>
 
   <div id="routePanel" class="hidden">
     <div class="rp-row">
-      <input id="routeFrom" class="rp-in" type="text" placeholder="Odkud (ulice)…" autocomplete="off" spellcheck="false">
+      <input id="routeFrom" class="rp-in" type="text" placeholder="{{ t.d_from_ph }}" autocomplete="off" spellcheck="false">
       <div id="routeFromRes" class="sr-results hidden"></div>
     </div>
     <div class="rp-row">
-      <input id="routeTo" class="rp-in" type="text" placeholder="Kam (ulice)…" autocomplete="off" spellcheck="false">
+      <input id="routeTo" class="rp-in" type="text" placeholder="{{ t.d_to_ph }}" autocomplete="off" spellcheck="false">
       <div id="routeToRes" class="sr-results hidden"></div>
     </div>
     <div class="rp-actions">
-      <button id="routeGo" disabled>Najít trasu</button>
-      <span id="routeInfo">vyber dvě ulice</span>
-      <button id="routeClear" title="Zrušit trasu">✕</button>
+      <button id="routeGo" disabled>{{ t.d_find }}</button>
+      <span id="routeInfo">{{ t.d_pick2 }}</span>
+      <button id="routeClear" title="{{ t.d_clear_title }}">✕</button>
     </div>
-    <label id="routeFollowRow" title="Auto-jízda po trase: řízení automatické, plyn/brzda na tobě">
-      <input type="checkbox" id="routeFollow" disabled> 🚗 Automatické sledování trasy
+    <label id="routeFollowRow" title="{{ t.d_follow_title }}">
+      <input type="checkbox" id="routeFollow" disabled> 🚗 {{ t.d_follow }}
     </label>
-    <div class="route-hint">Celou trasu zobrazíš tlačítkem <b>Trasa</b> na minimapě →</div>
+    <div class="route-hint">{{ t.d_route_hint }}</div>
   </div>
 
   <div class="hud" id="bigspeed"><span id="bigval">0</span><span class="u">km/h</span></div>
@@ -230,22 +230,23 @@
 
   <div id="helpOverlay">
     <div id="helpCard">
-      <h2>Ovládání</h2>
-      <div class="krow"><kbd>↑</kbd> plyn (rychlost drží) · <kbd>↓</kbd> brzda / zpátečka</div>
-      <div class="krow"><kbd>←</kbd> <kbd>→</kbd> otáčení na místě / řízení</div>
-      <div class="krow"><kbd>Space</kbd> prudké brzdění · <kbd>Esc</kbd> pauza</div>
-      <div class="krow">kolečko myši = přiblížení · táhni levým = posun mapy · pravým = otáčení · dvojklik = přesun auta</div>
-      <button id="helpClose">Jet →</button>
+      <h2>{{ t.d_help_title }}</h2>
+      <div class="krow"><kbd>↑</kbd> {{ t.d_help_throttle }} · <kbd>↓</kbd> {{ t.d_help_brake }}</div>
+      <div class="krow"><kbd>←</kbd> <kbd>→</kbd> {{ t.d_help_steer }}</div>
+      <div class="krow"><kbd>Space</kbd> {{ t.d_help_hardbrake }} · <kbd>Esc</kbd> {{ t.d_help_pause }}</div>
+      <div class="krow">{{ t.d_help_mouse }}</div>
+      <button id="helpClose">{{ t.d_help_go }}</button>
     </div>
   </div>
 
   <div id="pauseOverlay" class="hidden">
-    <div id="pauseCard"><div class="ttl">Pauza</div><div class="sub"><kbd>Esc</kbd> pokračovat</div></div>
+    <div id="pauseCard"><div class="ttl">{{ t.d_pause }}</div><div class="sub"><kbd>Esc</kbd> {{ t.d_pause_sub }}</div></div>
   </div>
   </div><!-- /#stage -->
 
   <script>
-    window.CARSIM = { dataBase: "{{ data_base }}", city: "{{ city }}", cityName: "{{ city_name }}", district: "{{ district }}" };
+    window.CARSIM = { dataBase: "{{ data_base }}", city: "{{ city }}", cityName: "{{ city_name }}", district: "{{ district }}",
+      lang: "{{ lang }}", i18n: {{ i18n_json|safe }} };
     // returning visitors: don't flash the controls overlay (it's shown by default for first-timers).
     // All overlay / pause / persistence behaviour is wired in main.js.
     if (localStorage.getItem("carsim_help_seen")) {

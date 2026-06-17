@@ -3,25 +3,30 @@
 // traffic sign, a pedestrian crossing, a house number, or a park/water area. Pure read of the streamed map;
 // nothing is drawn. The native `title` shows after the usual hover delay, exactly what Vlad asked for.
 
+import { T } from "../i18n.js";
+
+// Localised to the header language (msg 3080/3083); the second arg is the Czech fallback if a key is missing.
 const SIGN_LABEL = {
-  signal: "Semafor", signals: "Semafor",
-  stop: "Stůj, dej přednost v jízdě",
-  give_way: "Dej přednost v jízdě",
-  priority_road: "Hlavní pozemní komunikace",
-  priority: "Hlavní pozemní komunikace",
+  signal: T("sign_signal", "Semafor"), signals: T("sign_signal", "Semafor"),
+  stop: T("sign_stop", "Stůj, dej přednost v jízdě"),
+  give_way: T("sign_giveway", "Dej přednost v jízdě"),
+  priority_road: T("sign_priority", "Hlavní pozemní komunikace"),
+  priority: T("sign_priority", "Hlavní pozemní komunikace"),
 };
 const POI_KIND = {
-  food: "občerstvení", restaurant: "restaurace", cafe: "kavárna", fuel: "čerpací stanice",
-  atm: "bankomat", bank: "banka", pharmacy: "lékárna", post: "pošta", shop: "obchod",
-  supermarket: "supermarket", police: "policie", fire: "hasiči", hospital: "nemocnice",
-  school: "škola", hotel: "hotel", church: "kostel", station: "stanice", parking: "parkoviště",
+  food: T("poi_food", "občerstvení"), restaurant: T("poi_food", "občerstvení"), cafe: T("poi_cafe", "kavárna"),
+  fuel: T("poi_fuel", "čerpací stanice"), atm: T("poi_atm", "bankomat"), bank: T("poi_bank", "banka"),
+  pharmacy: T("poi_pharmacy", "lékárna"), post: T("poi_post", "pošta"), shop: T("poi_shop", "obchod"),
+  supermarket: T("poi_shop", "obchod"), police: T("poi_police", "policie"), fire: T("poi_fire", "hasiči"),
+  hospital: T("poi_hospital", "nemocnice"), school: T("poi_school", "škola"),
+  station: T("poi_station", "stanice"), parking: T("poi_parking", "parkoviště"),
 };
-const AREA_KIND = { green: "Zeleň", water: "Voda", park: "Park", forest: "Les", square: "Náměstí" };
+const AREA_KIND = { green: T("area_green", "Zeleň"), water: T("area_water", "Voda") };
 const CLS_LABEL = {
-  motorway: "dálnice", trunk: "silnice I. třídy", primary: "silnice I. třídy",
-  secondary: "silnice II. třídy", tertiary: "silnice III. třídy", residential: "místní ulice",
-  living_street: "obytná zóna", service: "účelová komunikace", unclassified: "místní silnice",
-  pedestrian: "pěší zóna", track: "polní cesta", footway: "chodník", cycleway: "cyklostezka",
+  motorway: T("cls_motorway", "dálnice"), trunk: T("cls_trunk", "silnice I. třídy"),
+  primary: T("cls_primary", "silnice I. třídy"), secondary: T("cls_secondary", "silnice II. třídy"),
+  tertiary: T("cls_tertiary", "silnice III. třídy"), residential: T("cls_residential", "místní ulice"),
+  service: T("cls_service", "účelová komunikace"),
 };
 
 function pointInPoly(x, y, poly) {
@@ -45,15 +50,15 @@ function nearestPoint(arr, x, y, maxD) {
 }
 
 function streetInfo(edge) {
-  const parts = [edge.name || CLS_LABEL[edge.cls] || "silnice"];
+  const parts = [edge.name || CLS_LABEL[edge.cls] || T("cls_other", "silnice")];
   const nums = [];
   if (edge.ref) nums.push(edge.ref);
   if (edge.iref) nums.push(edge.iref.replace(/\s+/g, ""));
-  if (nums.length) parts.push("č. " + nums.join(", "));
+  if (nums.length) parts.push(T("hov_num", "č.") + " " + nums.join(", "));
   if (edge.maxspeed) parts.push(edge.maxspeed + " km/h");
-  if (edge.oneway) parts.push("jednosměrka");
-  if (edge.lv > 0) parts.push("most");
-  else if (edge.lv < 0) parts.push("tunel");
+  if (edge.oneway) parts.push(T("hov_oneway", "jednosměrka"));
+  if (edge.lv > 0) parts.push(T("hov_bridge", "most"));
+  else if (edge.lv < 0) parts.push(T("hov_tunnel", "tunel"));
   return parts.join(" · ");
 }
 
@@ -73,15 +78,15 @@ export function makeHoverInfo(canvas, view, map, getExtra) {
     if (lm) return lm.name;
     // 2) traffic signs / crossings
     const sign = nearestPoint(map.signs, wx, wy, rPx(11));
-    if (sign) return SIGN_LABEL[sign.kind] || ("Dopravní značka: " + sign.kind);
+    if (sign) return SIGN_LABEL[sign.kind] || sign.kind;
     const cr = nearestPoint(map.crossings, wx, wy, rPx(9));
-    if (cr) return "Přechod pro chodce";
+    if (cr) return T("hov_crossing", "Přechod pro chodce");
     // 3) the street under the cursor
     const ne = map.nearestEdge(wx, wy);
     if (ne.edge && ne.dist <= ne.edge.width / 2 + rPx(6)) return streetInfo(ne.edge);
     // 4) house number
     const ad = nearestPoint(map.addrs, wx, wy, rPx(8));
-    if (ad) return "č. p. " + ad.n;
+    if (ad) return T("hov_house", "č. p.") + " " + ad.n;
     // 5) a named or natural area (park / water) — never a plain building
     for (const a of map.areas || []) {
       if (a.kind === "building") continue;
