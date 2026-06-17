@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>car-sim — Můj profil</title>
+  <title>car-sim — {{ t.me_title }}</title>
   <style>
     :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--bad:#ff6b6b;--good:#37d67a}
     html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
@@ -40,29 +40,29 @@
   {{ hdr.header(lang, user) }}
   <div class="wrap">
 
-    <h1>Můj profil
+    <h1>{{ t.me_title }}
       <span class="role {{ 'admin' if user.role == 'admin' else '' }}">{{ user.role }}</span>
     </h1>
 
     <div class="card">
       <div class="kv">
-        <div class="k">Jméno</div><div>{{ user.display_name or '—' }}</div>
-        <div class="k">E-mail</div><div>{{ user.email }}</div>
-        <div class="k">Přihlášení</div><div>{{ 'Google' if user.provider == 'google' else 'E-mail + heslo' }}</div>
-        <div class="k">Účet od</div><div>{{ user.created_at[:10] }}</div>
+        <div class="k">{{ t.me_name }}</div><div>{{ user.display_name or '—' }}</div>
+        <div class="k">{{ t.l_email }}</div><div>{{ user.email }}</div>
+        <div class="k">{{ t.me_login_method }}</div><div>{{ 'Google' if user.provider == 'google' else t.me_email_pw }}</div>
+        <div class="k">{{ t.me_account_since }}</div><div>{{ user.created_at[:10] }}</div>
       </div>
     </div>
 
     <div class="card">
-      <b>Statistiky</b>
+      <b>{{ t.me_stats }}</b>
       <div class="stats">
-        <div class="stat"><div class="n">{{ trips|length }}</div><div class="l">Jízd</div></div>
-        <div class="stat"><div class="n">{{ '%.1f'|format((trips|sum(attribute='distance_m'))/1000) }}</div><div class="l">km celkem</div></div>
-        <div class="stat"><div class="n">{{ trips|sum(attribute='n_violations') }}</div><div class="l">Přestupků</div></div>
+        <div class="stat"><div class="n">{{ trips|length }}</div><div class="l">{{ t.me_trips }}</div></div>
+        <div class="stat"><div class="n">{{ '%.1f'|format((trips|sum(attribute='distance_m'))/1000) }}</div><div class="l">{{ t.me_km_total }}</div></div>
+        <div class="stat"><div class="n">{{ trips|sum(attribute='n_violations') }}</div><div class="l">{{ t.me_violations }}</div></div>
       </div>
       {% if trips %}
       <table>
-        <tr><th>Datum</th><th>Čtvrť</th><th>km</th><th>Čas</th><th>Přestupků</th></tr>
+        <tr><th>{{ t.me_date }}</th><th>{{ t.me_district }}</th><th>km</th><th>{{ t.me_time }}</th><th>{{ t.me_violations }}</th></tr>
         {% for t in trips %}
         <tr>
           <td>{{ (t.started_at or '')[:16]|replace('T',' ') }}</td>
@@ -74,17 +74,17 @@
         {% endfor %}
       </table>
       {% else %}
-      <div class="empty">Zatím žádné uložené jízdy. Záznam jízd se zapne, jakmile budeš přihlášen a vyjedeš na <a href="/drive" style="color:var(--accent)">/drive</a>. (Brzy.)</div>
+      <div class="empty">{{ t.me_no_trips }}</div>
       {% endif %}
     </div>
 
     <div class="card">
-      <b>Tvá data (GDPR)</b>
-      <div class="empty">Stáhni si všechna svá data, nebo nech účet i s jízdami smazat.</div>
+      <b>{{ t.me_gdpr }}</b>
+      <div class="empty">{{ t.me_gdpr_sub }}</div>
       <div class="actions">
-        <a class="btn" href="/me/export">⬇️ Stáhnout má data (JSON)</a>
-        <form method="post" action="/me/delete" onsubmit="return confirm('Opravdu smazat účet a všechny jízdy? Nelze vrátit zpět.')">
-          <button class="btn danger" type="submit">🗑️ Smazat účet</button>
+        <a class="btn" href="/me/export">⬇️ {{ t.me_download }}</a>
+        <form method="post" action="/me/delete" onsubmit="return confirm('{{ t.me_delete_confirm }}')">
+          <button class="btn danger" type="submit">🗑️ {{ t.me_delete }}</button>
         </form>
       </div>
     </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>car-sim — {{ 'Registrace' if mode == 'register' else 'Přihlášení' }}</title>
+  <title>car-sim — {{ t.l_title_register if mode == 'register' else t.l_title_login }}</title>
   <style>
     :root{--panel:#141925;--line:#222a3a;--accent:#5b9cff;--bad:#ff6b6b;--good:#37d67a}
     html,body{margin:0;min-height:100%;background:#0b0e14;color:#e6e9f0;
@@ -37,8 +37,8 @@
 <body>
   {{ hdr.header(lang, user) }}
   <div class="wrap">
-    <h1>{{ 'Vytvořit účet' if mode == 'register' else 'Přihlásit se' }}</h1>
-    <div class="sub">Hraní je volné i bez účtu — účet jen ukládá tvé jízdy a statistiky.</div>
+    <h1>{{ t.l_h_register if mode == 'register' else t.l_h_login }}</h1>
+    <div class="sub">{{ t.l_sub }}</div>
 
     <div class="card">
       {% if error %}<div class="err">{{ error }}</div>{% endif %}
@@ -46,36 +46,35 @@
       {% if google_enabled %}
       <a class="gbtn" href="/auth/google{% if next %}?next={{ next|urlencode }}{% endif %}">
         <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.8 6.1C12.2 13.2 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7c4.3-4 6.9-9.9 6.9-17.4z"/><path fill="#FBBC05" d="M10.3 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.8-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.5-2 15.3-5.5l-7.3-5.7c-2 1.4-4.7 2.3-8 2.3-6.4 0-11.8-3.7-13.7-9l-7.8 6.1C6.4 42.6 14.6 48 24 48z"/></svg>
-        Pokračovat přes Google
+        {{ t.l_google }}
       </a>
-      <div class="sep">nebo e-mailem</div>
+      <div class="sep">{{ t.l_or_email }}</div>
       {% endif %}
 
       {% if mode == 'register' %}
       <form method="post" action="/auth/register{% if next %}?next={{ next|urlencode }}{% endif %}">
-        <label for="dn">Jméno (nepovinné)</label>
-        <input id="dn" name="display_name" type="text" autocomplete="name" placeholder="Jak ti říkat">
-        <label for="em">E-mail</label>
+        <label for="dn">{{ t.l_name_label }}</label>
+        <input id="dn" name="display_name" type="text" autocomplete="name" placeholder="{{ t.l_name_ph }}">
+        <label for="em">{{ t.l_email }}</label>
         <input id="em" name="email" type="email" autocomplete="email" required placeholder="ty@email.cz">
-        <label for="pw">Heslo (aspoň 8 znaků)</label>
+        <label for="pw">{{ t.l_pw_register }}</label>
         <input id="pw" name="password" type="password" autocomplete="new-password" required minlength="8">
-        <button class="primary" type="submit">Vytvořit účet</button>
+        <button class="primary" type="submit">{{ t.l_create }}</button>
       </form>
-      <div class="toggle">Už máš účet? <a href="/login?mode=login{% if next %}&next={{ next|urlencode }}{% endif %}">Přihlásit se</a></div>
+      <div class="toggle">{{ t.l_have_account }} <a href="/login?mode=login{% if next %}&next={{ next|urlencode }}{% endif %}">{{ t.l_signin }}</a></div>
       {% else %}
       <form method="post" action="/auth/login{% if next %}?next={{ next|urlencode }}{% endif %}">
-        <label for="em">E-mail</label>
+        <label for="em">{{ t.l_email }}</label>
         <input id="em" name="email" type="email" autocomplete="email" required placeholder="ty@email.cz">
-        <label for="pw">Heslo</label>
+        <label for="pw">{{ t.l_pw }}</label>
         <input id="pw" name="password" type="password" autocomplete="current-password" required>
-        <button class="primary" type="submit">Přihlásit se</button>
+        <button class="primary" type="submit">{{ t.l_signin }}</button>
       </form>
-      <div class="toggle">Nemáš účet? <a href="/login?mode=register{% if next %}&next={{ next|urlencode }}{% endif %}">Zaregistrovat se</a></div>
+      <div class="toggle">{{ t.l_no_account }} <a href="/login?mode=register{% if next %}&next={{ next|urlencode }}{% endif %}">{{ t.l_register_link }}</a></div>
       {% endif %}
     </div>
 
-    <div class="note">Přihlášením souhlasíš s uložením session cookie a tvých herních jízd. Data si můžeš
-      kdykoli stáhnout nebo účet smazat v sekci <b>Můj profil</b>.</div>
+    <div class="note">{{ t.l_note }}</div>
   </div>
 </body>
 </html>

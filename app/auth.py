@@ -120,9 +120,10 @@ def _render_login(request: Request, *, error: str | None = None, mode: str = "lo
     nxt = request.query_params.get("next", "")
     if nxt and not (nxt.startswith("/") and not nxt.startswith("//")):
         nxt = ""
+    lang = ui.resolve_lang(request)
     return templates.TemplateResponse(request, "login.html", {
         "google_enabled": GOOGLE_ENABLED, "error": error, "mode": mode, "next": nxt,
-        "user": current_user(request), "lang": ui.resolve_lang(request),
+        "user": current_user(request), "lang": lang, "t": ui.app_strings(lang),
     }, status_code=status, headers={"Cache-Control": "no-cache"})
 
 
