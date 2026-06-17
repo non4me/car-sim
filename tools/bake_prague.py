@@ -54,7 +54,7 @@ def _want_way(tags) -> bool:
     return False
 
 
-def read_pbf(path: str):
+def read_pbf(path: str, bbox=PRAGUE_BBOX):
     """pbf → (nodes, all_ways, places, labels, pois, addrs) in the Overpass element shapes build_artifact expects."""
     nodes: dict = {}      # id -> {"lat","lon","tags"}
     all_ways: list = []   # {"id","nodes":[ids],"tags":{}}
@@ -62,7 +62,7 @@ def read_pbf(path: str):
     labels: list = []     # {"lat","lon","kind","name"} — stations + major landmarks (msg 2771)
     pois: list = []       # {"lat","lon","kind","name"?} — pharmacies/ATMs/food/shops… (phase 2)
     addrs: list = []      # {"lat","lon","n"} — house numbers (phase 2)
-    s, w, n, e = PRAGUE_BBOX
+    s, w, n, e = bbox
     inbb = lambda la, lo: s <= la <= n and w <= lo <= e
     # with_locations() caches every node's coord in C++; EmptyTagFilter means Python only sees
     # TAGGED objects (all our ways + the control nodes) — untagged nodes are still cached for geometry.
@@ -132,12 +132,12 @@ def read_pbf(path: str):
     return nodes, all_ways, places, labels, pois, addrs
 
 
-def read_water_areas(path: str) -> list:
+def read_water_areas(path: str, bbox=PRAGUE_BBOX) -> list:
     """Assemble water bodies as lat/lon rings, INCLUDING multipolygon relations (big rivers like the
     Vltava are a relation: one outer riverbank ring + many island holes). pyosmium's area builder
     stitches closed ways AND multipolygons; we keep the outer ring + inner rings (holes). Restricted
     to natural/water/waterway-keyed input so the 246k building areas aren't assembled."""
-    s, w, n, e = PRAGUE_BBOX
+    s, w, n, e = bbox
     out = []
     fp = osmium.FileProcessor(path).with_areas(osmium.filter.KeyFilter("natural", "water", "waterway"))
     for o in fp:
@@ -157,6 +157,17 @@ def read_water_areas(path: str) -> list:
             holes = [[(nd.lat, nd.lon) for nd in ir] for ir in o.inner_rings(ring)]
             out.append({"outer": outer, "holes": holes})
     return out
+
+
+def dedup_points(items, keyfn):
+    """Drop co-located duplicates (a feature mapped as both a node and a building) by a rounded key."""
+    seen, uniq = set(), []
+    for it in items:
+        k = keyfn(it)
+        if k in seen:
+            continue
+        seen.add(k); uniq.append(it)
+    return uniq
 
 
 def _snapshot_from_header(path: str):
@@ -179,16 +190,8 @@ def main():
     print(f"[{args.name}] reading {args.pbf} (snapshot {snapshot})…")
     nodes, all_ways, places, labels, pois, addrs = read_pbf(args.pbf)
     # dedup labels/POIs co-located under the same name (mapped as both a node and a building)
-    def dedup(items, keyfn):
-        seen, uniq = set(), []
-        for it in items:
-            k = keyfn(it)
-            if k in seen:
-                continue
-            seen.add(k); uniq.append(it)
-        return uniq
-    labels = dedup(labels, lambda l: (l["kind"], l["name"], round(l["lat"], 3), round(l["lon"], 3)))
-    pois = dedup(pois, lambda p: (p["kind"], p.get("name", ""), round(p["lat"], 4), round(p["lon"], 4)))
+    labels = dedup_points(labels, lambda l: (l["kind"], l["name"], round(l["lat"], 3), round(l["lon"], 3)))
+    pois = dedup_points(pois, lambda p: (p["kind"], p.get("name", ""), round(p["lat"], 4), round(p["lon"], 4)))
     print(f"[{args.name}] parsed {len(all_ways)} ways, {len(nodes)} nodes, {len(places)} places, "
           f"{len(labels)} labels, {len(pois)} pois, {len(addrs)} house-numbers → processing…")
     water = read_water_areas(args.pbf)

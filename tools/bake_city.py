@@ -246,7 +246,7 @@ def _project_water(water_areas, to_xy, tol=4.0) -> list[dict]:
 
 def build_artifact(nodes, all_ways, bbox, country, name, out,
                    debug_only=False, snapshot=None, debug_png=True, place_nodes=None, water_areas=None,
-                   label_nodes=None, poi_nodes=None, addr_nodes=None):
+                   label_nodes=None, poi_nodes=None, addr_nodes=None, city="praha"):
     """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
     junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`).
     `water_areas` (optional) = pre-assembled multipolygon-aware water rings — used for all-Prague so
@@ -486,7 +486,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         (tdir / f"{k}.json").write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
 
     meta = {
-        "country": country, "city": "praha", "district": name,
+        "country": country, "city": city, "district": name,
         "bbox": bbox, "proj": proj, "tile_m": TILE_M, "bounds": bounds,
         "tiles": sorted(tiles.keys()), "n_edges": len(edges), "n_junctions": len(junctions),
         "n_areas": len(areas), "n_signs": len(signs), "n_crossings": len(crossings),
@@ -519,6 +519,47 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         json.dumps({"streets": street_list, "places": places}, ensure_ascii=False, separators=(",", ":")),
         encoding="utf-8")
     print(f"  [{name}] search index: {len(street_list)} streets, {len(places)} places")
+
+    # city-wide OVERVIEW for the minimap "City" mode (Vlad msg 2959): the whole-city landscape that
+    # the streaming tiles can't show at once — the river/major water, the main road network, and big
+    # parks. Heavily decimated (the minimap is ~276 px) so it stays small and loads once.
+    def _decim(poly, min_d):
+        """Keep endpoints + any vertex ≥ min_d m from the last kept one (cheap polyline simplify)."""
+        if len(poly) <= 2:
+            return [[round(p[0], 1), round(p[1], 1)] for p in poly]
+        out = [poly[0]]
+        lx, ly = poly[0]
+        for p in poly[1:-1]:
+            if (p[0] - lx) ** 2 + (p[1] - ly) ** 2 >= min_d * min_d:
+                out.append(p); lx, ly = p[0], p[1]
+        out.append(poly[-1])
+        return [[round(x, 1), round(y, 1)] for x, y in out]
+
+    def _span(poly):
+        xs = [p[0] for p in poly]; ys = [p[1] for p in poly]
+        return max(max(xs) - min(xs), max(ys) - min(ys))
+
+    # main road network only — motorway/trunk/primary (the arterials you see on a zoomed-out city map);
+    # secondary+ would just clutter a 276 px minimap.
+    MAJOR = {"motorway": 0, "motorway_link": 0, "trunk": 1, "trunk_link": 1, "primary": 2, "primary_link": 2}
+    ov_roads = [{"r": MAJOR[ed["cls"]], "g": _decim(ed["geom"], 45)}
+                for ed in edges if ed["cls"] in MAJOR and len(ed["geom"]) >= 2]
+    ov_water = []
+    for ar in areas:
+        if ar["kind"] != "water" or len(ar["poly"]) < 4 or _span(ar["poly"]) < 50:
+            continue                                       # skip puddles; keep the river + real ponds
+        w = {"poly": _decim(ar["poly"], 22)}
+        if ar.get("holes"):
+            hs = [_decim(h, 22) for h in ar["holes"] if len(h) >= 4]
+            if hs:
+                w["holes"] = hs
+        ov_water.append(w)
+    ov_green = [{"poly": _decim(ar["poly"], 45)} for ar in areas      # only sizeable parks/forests
+                if ar["kind"] == "green" and len(ar["poly"]) >= 4 and _span(ar["poly"]) >= 280]
+    (out / "overview.json").write_text(
+        json.dumps({"water": ov_water, "roads": ov_roads, "green": ov_green}, separators=(",", ":")),
+        encoding="utf-8")
+    print(f"  [{name}] overview: {len(ov_water)} water, {len(ov_roads)} roads, {len(ov_green)} green")
 
     # routing graph (for server-side shortest-path): one row per edge [a, b, oneway, geom].
     # Directedness (one-ways) is applied at route time; geom lets the route follow real roads.

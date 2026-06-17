@@ -10,7 +10,7 @@ import secrets
 from pathlib import Path
 
 from fastapi import FastAPI, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -76,6 +76,7 @@ templates = Jinja2Templates(directory=str(BASE / "templates"))
 templates.env.cache = None  # avoid a Jinja LRUCache key issue under Python 3.14 (prod uses 3.12)
 templates.env.globals["asset_base"] = f"/s/{BUILD}"  # versioned static prefix for all templates
 templates.env.globals["hdr"] = ui                     # shared common header (msg 2837)
+ui.ASSET_VER = BUILD                                  # version the favicon link so it busts on icon change
 auth.templates = templates                            # share the configured templates with the auth router
 app.include_router(auth.router)
 
@@ -107,49 +108,68 @@ from .quiz.situations import sim_app       # noqa: E402
 app.mount("/quiz/photo", photo_app)
 app.mount("/quiz/situations", sim_app)
 
-DEFAULT_CITY = ("cz", "praha", "vinohrady")
-PRAHA = CITIES / "cz" / "praha"
-_DISTRICT_RE = re.compile(r"[a-z0-9_-]{1,40}")
+# Cities offered on the homepage selector + /drive?city=. Each city's whole-city bake lives at
+# data/cities/<cc>/<slug>/<district>/ (one bake per city = the whole city). CZ traffic rules
+# (countries/cz.yaml) apply nationwide, so every CZ city reuses the same profile. To add a city:
+# bake it (tools/bake_city_pbf.py) then add one line here (Vlad msg 2931, by population).
+CITY_REGISTRY = [
+    {"cc": "cz", "slug": "praha",   "name": "Praha",   "district": "prague"},
+    {"cc": "cz", "slug": "brno",    "name": "Brno",    "district": "brno"},
+    {"cc": "cz", "slug": "ostrava", "name": "Ostrava", "district": "ostrava"},
+    {"cc": "cz", "slug": "plzen",   "name": "Plzeň",   "district": "plzen"},
+]
+DEFAULT_CITY_SLUG = "praha"
+_SLUG_RE = re.compile(r"[a-z0-9_-]{1,40}")
 
 
-def _district_dir(district: str) -> Path | None:
-    """Resolve a baked-district directory from a user-supplied name, refusing path traversal.
-    Returns the directory only if `district` is a safe slug, resolves inside data/cities/cz/praha,
-    and is actually a baked district (has meta.json). Otherwise None."""
-    if not _DISTRICT_RE.fullmatch(district):
+def _resolve_dir(cc: str, city: str, district: str) -> Path | None:
+    """Baked-district directory under data/cities/<cc>/<city>/, refusing path traversal. Returns the
+    dir only if cc/city/district are safe slugs, the path stays inside the city dir, and the district
+    is actually baked (has meta.json). Otherwise None."""
+    if not all(_SLUG_RE.fullmatch(s or "") for s in (cc, city, district)):
         return None
-    base = PRAHA.resolve()
+    base = (CITIES / cc / city).resolve()
     d = (base / district).resolve()
     if d.parent != base or not (d / "meta.json").is_file():
         return None
     return d
 
 
-def _districts() -> list[dict]:
-    """Available baked districts (have a meta.json)."""
-    out = []
-    base = CITIES / "cz" / "praha"
-    if base.exists():
-        for d in sorted(base.iterdir()):
-            meta = d / "meta.json"
-            if meta.is_file():
-                m = json.loads(meta.read_text(encoding="utf-8"))
-                out.append({"district": d.name, "n_edges": m.get("n_edges", 0)})
-    return out
+def _city(slug: str) -> dict | None:
+    """Registry entry for a city slug IF its whole-city bake exists on disk, else None."""
+    for c in CITY_REGISTRY:
+        if c["slug"] == slug and _resolve_dir(c["cc"], c["slug"], c["district"]):
+            return c
+    return None
+
+
+def _available_cities() -> list[dict]:
+    """Registry cities whose bake is present — drives the homepage city selector."""
+    return [c for c in CITY_REGISTRY if _resolve_dir(c["cc"], c["slug"], c["district"])]
 
 
 @app.get("/healthz")
 def healthz():
-    return {"ok": True, "districts": _districts()}
+    return {"ok": True, "cities": [c["slug"] for c in _available_cities()]}
+
+
+@app.get("/favicon.svg", include_in_schema=False)
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    # 🚗 car mark (also the header logo). Served at the well-known paths so every page gets it.
+    return FileResponse(STATIC / "favicon.svg", media_type="image/svg+xml",
+                        headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.get("/route")
-def route(district: str = "prague", fx: float = 0, fy: float = 0, tx: float = 0, ty: float = 0):
+def route(city: str = DEFAULT_CITY_SLUG, district: str = "prague",
+          fx: float = 0, fy: float = 0, tx: float = 0, ty: float = 0):
     """Shortest drivable path (one-ways honoured) between two map points, as a polyline."""
     from .routing import get_router
-    d = _district_dir(district)
+    c = _city(city)
+    d = _resolve_dir(c["cc"], c["slug"], district) if c else None
     if d is None:
-        return JSONResponse({"polyline": [], "length_m": 0, "error": "unknown district"}, status_code=404)
+        return JSONResponse({"polyline": [], "length_m": 0, "error": "unknown city/district"}, status_code=404)
     r = get_router(d / "graph.json")
     if r is None:
         return JSONResponse({"polyline": [], "length_m": 0, "error": "no graph"}, status_code=404)
@@ -164,7 +184,7 @@ HTML_HEADERS = {"Cache-Control": "no-cache"}  # never cache the HTML that names 
 def intro(request: Request):
     lang = ui.resolve_lang(request)
     return templates.TemplateResponse(request, "intro.html", {
-        "lang": lang, "t": intro_strings(lang), "districts": _districts(),
+        "lang": lang, "t": intro_strings(lang), "cities": _available_cities(),
         "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
 
@@ -214,12 +234,12 @@ def docs_law(request: Request, law_id: str):
 
 
 @app.get("/drive", response_class=HTMLResponse)
-def drive(request: Request, district: str = "prague"):
-    cc, city, _ = DEFAULT_CITY
-    d = _district_dir(district)
-    if d is None:                       # unknown/invalid slug → fall back to the always-present district
-        district = "vinohrady"
-        d = _district_dir(district)
+def drive(request: Request, city: str = DEFAULT_CITY_SLUG):
+    # unknown/un-baked slug → fall back to the default city, then to the first registry entry so `c`
+    # is always a dict (a missing default bake degrades to an empty map, never a 500).
+    c = _city(city) or _city(DEFAULT_CITY_SLUG) or CITY_REGISTRY[0]
+    cc, city_slug, district = c["cc"], c["slug"], c["district"]
+    d = _resolve_dir(cc, city_slug, district)
     snapshot = None
     if d is not None:
         try:
@@ -227,10 +247,10 @@ def drive(request: Request, district: str = "prague"):
         except (ValueError, OSError):
             pass
     return templates.TemplateResponse(request, "drive.html", {
-        "country": cc, "city": city, "district": district,
-        "data_base": f"/citydata/{cc}/{city}/{district}",
+        "country": cc, "city": city_slug, "city_name": c["name"], "district": district,
+        "data_base": f"/citydata/{cc}/{city_slug}/{district}",
         "snapshot": snapshot,
-        "districts": _districts(),
+        "cities": _available_cities(),
         "lang": ui.resolve_lang(request),
         "user": auth.current_user(request),
     }, headers=HTML_HEADERS)
