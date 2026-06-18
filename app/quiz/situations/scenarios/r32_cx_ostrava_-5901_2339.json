@@ -1,0 +1,498 @@
+{
+  "id": "r32_cx_ostrava_-5901_2339",
+  "order": 32,
+  "city": "ostrava",
+  "junction": {
+    "name": "Ježkova × Slavíkova",
+    "district": "Ostrava",
+    "lat": 49.836162,
+    "lon": 18.177842,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Přednost zprava",
+    "en": "Priority from the right",
+    "ru": "Помеха справа"
+  },
+  "hint": {
+    "cs": "Neoznačená křižovatka. Zprava přijíždí vozidlo.",
+    "en": "Unmarked junction. A vehicle approaches from the right.",
+    "ru": "Нерегулируемый перекрёсток. Справа приближается автомобиль."
+  },
+  "view": {
+    "minx": -60,
+    "miny": -60,
+    "maxx": 60,
+    "maxy": 60
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Sokolovská",
+        "centerline": [
+          [
+            29.4,
+            -1.4
+          ],
+          [
+            34.0,
+            -1.6
+          ],
+          [
+            51.9,
+            -3.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Ježkova",
+        "centerline": [
+          [
+            -4.3,
+            -51.8
+          ],
+          [
+            -3.5,
+            -29.8
+          ],
+          [
+            -3.0,
+            -16.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Slavíkova",
+        "centerline": [
+          [
+            -51.9,
+            3.2
+          ],
+          [
+            -47.9,
+            2.7
+          ],
+          [
+            -42.2,
+            2.1
+          ],
+          [
+            -32.2,
+            1.2
+          ],
+          [
+            -24.2,
+            0.6
+          ],
+          [
+            -16.2,
+            0.4
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Sokolovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            29.4,
+            -1.4
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Sokolovská",
+        "centerline": [
+          [
+            -8.3,
+            51.3
+          ],
+          [
+            0.4,
+            29.0
+          ],
+          [
+            5.9,
+            17.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Sokolovská",
+        "centerline": [
+          [
+            5.9,
+            17.3
+          ],
+          [
+            4.8,
+            7.8
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Sokolovská",
+        "centerline": [
+          [
+            5.9,
+            17.3
+          ],
+          [
+            19.5,
+            3.7
+          ],
+          [
+            29.4,
+            -1.4
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Sokolovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -7.8,
+            26.0
+          ],
+          [
+            -16.9,
+            49.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Ježkova",
+        "centerline": [
+          [
+            -4.3,
+            -51.8
+          ],
+          [
+            -3.5,
+            -29.8
+          ],
+          [
+            -3.0,
+            -16.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [
+      {
+        "center": [
+          34.0,
+          -1.6
+        ],
+        "dir": [
+          0.997,
+          -0.074
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -3.5,
+          -29.8
+        ],
+        "dir": [
+          0.038,
+          0.999
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -16.2,
+          0.4
+        ],
+        "dir": [
+          1.0,
+          -0.024
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          0.4,
+          29.0
+        ],
+        "dir": [
+          0.38,
+          -0.925
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -7.8,
+          26.0
+        ],
+        "dir": [
+          -0.341,
+          0.94
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": -9.3,
+        "y": 29.8,
+        "text": "Sokolovská",
+        "rot": -1.197
+      },
+      {
+        "x": -3.5,
+        "y": -30.9,
+        "text": "Ježkova",
+        "rot": 1.534
+      },
+      {
+        "x": -31.2,
+        "y": 1.1,
+        "text": "Slavíkova",
+        "rot": -0.075
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -15.3,
+          49.8
+        ],
+        [
+          -6.1,
+          26.5
+        ],
+        [
+          -4.7,
+          20.0
+        ],
+        [
+          -3.5,
+          13.9
+        ],
+        [
+          -2.6,
+          8.1
+        ],
+        [
+          -1.8,
+          2.5
+        ],
+        [
+          -1.3,
+          -2.7
+        ],
+        [
+          -1.1,
+          -7.5
+        ],
+        [
+          -1.1,
+          -12.1
+        ],
+        [
+          -1.3,
+          -16.4
+        ],
+        [
+          -1.8,
+          -29.9
+        ],
+        [
+          -2.6,
+          -51.9
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          29.3,
+          -4.0
+        ],
+        [
+          22.2,
+          -3.1
+        ],
+        [
+          15.5,
+          -2.3
+        ],
+        [
+          9.2,
+          -1.8
+        ],
+        [
+          3.3,
+          -1.3
+        ],
+        [
+          -2.2,
+          -1.1
+        ],
+        [
+          -7.3,
+          -1.0
+        ],
+        [
+          -12.0,
+          -1.1
+        ],
+        [
+          -16.2,
+          -1.3
+        ],
+        [
+          -24.3,
+          -1.1
+        ],
+        [
+          -32.4,
+          -0.5
+        ],
+        [
+          -42.4,
+          0.4
+        ],
+        [
+          -48.1,
+          1.0
+        ],
+        [
+          -52.1,
+          1.5
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.1
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Křižovatka bez dopravních značek. Zprava přijíždí vozidlo. Jak budete pokračovat?",
+    "en": "A junction with no signs. A vehicle is coming from the right. How do you proceed?",
+    "ru": "Перекрёсток без знаков. Справа приближается автомобиль. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Mám přednost, projedu první",
+        "en": "I have priority, I go first",
+        "ru": "У меня приоритет, проезжаю первым"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost vozidlu zprava",
+        "en": "Give way to the vehicle on the right",
+        "ru": "Уступлю автомобилю справа"
+      },
+      "correct": true,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím a projedu",
+        "en": "I honk and go",
+        "ru": "Сигналю и проезжаю"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    }
+  ],
+  "explain": {
+    "cs": "Na křižovatce bez dopravních značek platí přednost zprava (pravidlo pravé ruky). Vozidlu přijíždějícímu zprava musíte dát přednost v jízdě.",
+    "en": "At a junction with no signs, priority-to-the-right applies. You must give way to the vehicle coming from your right.",
+    "ru": "На перекрёстке без знаков действует «помеха справа». Автомобилю, приближающемуся справа, нужно уступить."
+  },
+  "rule": "prednost_zprava",
+  "citation": "§ 22 odst. 1 z. 361/2000 Sb."
+}

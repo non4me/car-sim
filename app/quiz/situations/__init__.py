@@ -55,8 +55,25 @@ def load_scenarios() -> dict:
     return out
 
 
+def interleave_by_type(scenarios: dict) -> list:
+    """Play order that varies the rule type before it repeats (msg 3126): greedily take the type with the
+    most remaining situations that isn't the one just played, so two same-type cases never sit adjacent
+    while any other type is still available. Within a type, the authored `order` is preserved."""
+    from collections import defaultdict
+    buckets = defaultdict(list)
+    for d in sorted(scenarios.values(), key=lambda x: x.get("order", 0)):
+        buckets[d.get("rule") or d["id"]].append(d["id"])
+    out, last = [], None
+    while any(buckets.values()):
+        avail = sorted((b for b in buckets if buckets[b]), key=lambda b: -len(buckets[b]))
+        pick = next((b for b in avail if b != last), avail[0])
+        out.append(buckets[pick].pop(0))
+        last = pick
+    return out
+
+
 SCENARIOS = load_scenarios()
-ORDER = [d["id"] for d in sorted(SCENARIOS.values(), key=lambda x: x.get("order", 0))]
+ORDER = interleave_by_type(SCENARIOS)
 ATTEMPTS: list[dict] = []
 
 

@@ -55,6 +55,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": true
       },
       {
@@ -80,6 +81,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": true
       },
       {
@@ -97,6 +99,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -122,6 +125,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -139,6 +143,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": true
       },
       {
@@ -164,6 +169,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": true
       },
       {
@@ -189,6 +195,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -214,6 +221,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": true
       },
       {
@@ -239,6 +247,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -260,6 +269,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -285,6 +295,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": true
       }
     ],
@@ -661,6 +672,7 @@
     "en": "You are on the minor road (a “give way” sign), so you must yield to all traffic on the main road — including the tram. Pull out only when the main road is clear.",
     "ru": "Вы едете по второстепенной дороге (знак «Уступи дорогу»), поэтому обязаны уступить всему движению по главной — включая трамвай. Выезжать можно только когда главная свободна."
   },
+  "rule": "give_way",
   "citation": "značka P4, § 22 z. 361/2000 Sb.",
   "stats": {
     "accidents": 84,

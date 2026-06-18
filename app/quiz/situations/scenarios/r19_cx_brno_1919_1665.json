@@ -1,0 +1,670 @@
+{
+  "id": "r19_cx_brno_1919_1665",
+  "order": 19,
+  "city": "brno",
+  "junction": {
+    "name": "Cimburkova × Reissigova",
+    "district": "Brno",
+    "lat": 49.216565,
+    "lon": 16.604388,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Zelená a chodci",
+    "en": "Green and pedestrians",
+    "ru": "Зелёный и пешеходы"
+  },
+  "hint": {
+    "cs": "Křižovatka se semafory. Máte zelenou a odbočujete vpravo.",
+    "en": "A signalized junction. You have green and are turning right.",
+    "ru": "Перекрёсток со светофором. У вас зелёный, вы поворачиваете направо."
+  },
+  "view": {
+    "minx": -60,
+    "miny": -60,
+    "maxx": 60,
+    "maxy": 60
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Sportovní",
+        "centerline": [
+          [
+            18.3,
+            48.7
+          ],
+          [
+            10.0,
+            26.1
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": true
+      },
+      {
+        "name": "Sportovní",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -7.7,
+            -20.7
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": true
+      },
+      {
+        "name": "Reissigova",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -17.7,
+            6.1
+          ],
+          [
+            -21.0,
+            7.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Reissigova",
+        "centerline": [
+          [
+            -21.0,
+            7.3
+          ],
+          [
+            -43.2,
+            14.9
+          ],
+          [
+            -49.2,
+            17.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Sportovní",
+        "centerline": [
+          [
+            18.3,
+            48.7
+          ],
+          [
+            10.0,
+            26.1
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": true
+      },
+      {
+        "name": "Sportovní",
+        "centerline": [
+          [
+            10.0,
+            26.1
+          ],
+          [
+            8.8,
+            22.8
+          ],
+          [
+            6.7,
+            17.1
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": true
+      },
+      {
+        "name": "Cimburkova",
+        "centerline": [
+          [
+            46.1,
+            -24.1
+          ],
+          [
+            44.7,
+            -22.6
+          ],
+          [
+            38.7,
+            -16.9
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Cimburkova",
+        "centerline": [
+          [
+            34.4,
+            -14.3
+          ],
+          [
+            21.6,
+            -11.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Cimburkova",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            6.4,
+            0.6
+          ],
+          [
+            10.7,
+            0.2
+          ],
+          [
+            14.9,
+            -0.9
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            21.6,
+            -11.4
+          ],
+          [
+            14.4,
+            -11.6
+          ],
+          [
+            8.2,
+            -12.1
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            8.2,
+            -12.1
+          ],
+          [
+            4.2,
+            -13.2
+          ],
+          [
+            0.6,
+            -14.9
+          ],
+          [
+            -3.5,
+            -17.5
+          ],
+          [
+            -7.7,
+            -20.7
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            6.7,
+            17.1
+          ],
+          [
+            7.9,
+            9.4
+          ],
+          [
+            8.6,
+            7.2
+          ],
+          [
+            9.3,
+            5.3
+          ],
+          [
+            10.4,
+            3.5
+          ],
+          [
+            11.9,
+            1.9
+          ],
+          [
+            14.9,
+            -0.9
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Sportovní",
+        "centerline": [
+          [
+            6.7,
+            17.1
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": true
+      },
+      {
+        "name": "Cimburkova",
+        "centerline": [
+          [
+            21.6,
+            -11.4
+          ],
+          [
+            15.4,
+            -9.4
+          ],
+          [
+            9.0,
+            -7.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Cimburkova",
+        "centerline": [
+          [
+            9.0,
+            -7.0
+          ],
+          [
+            4.3,
+            -3.8
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Sportovní",
+        "centerline": [
+          [
+            -8.8,
+            -23.8
+          ],
+          [
+            -17.2,
+            -49.1
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": true
+      },
+      {
+        "name": "Cimburkova",
+        "centerline": [
+          [
+            14.9,
+            -0.9
+          ],
+          [
+            24.1,
+            -5.4
+          ],
+          [
+            34.4,
+            -14.3
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [
+      {
+        "code": "P4",
+        "x": -5.4,
+        "y": 7.1
+      },
+      {
+        "code": "P4",
+        "x": 6.1,
+        "y": -2.7
+      },
+      {
+        "code": "P4",
+        "x": 2.3,
+        "y": -8.8
+      },
+      {
+        "code": "P2",
+        "x": -9.5,
+        "y": -6.4
+      },
+      {
+        "code": "P2",
+        "x": 9.7,
+        "y": 6.1
+      },
+      {
+        "code": "signal",
+        "x": -8.8,
+        "y": -23.8
+      },
+      {
+        "code": "signal",
+        "x": 10.0,
+        "y": 26.1
+      },
+      {
+        "code": "signal",
+        "x": 9.0,
+        "y": -7.0
+      },
+      {
+        "code": "signal",
+        "x": -21.0,
+        "y": 7.3
+      },
+      {
+        "code": "signal",
+        "x": 8.2,
+        "y": -12.1
+      },
+      {
+        "code": "P2",
+        "x": 1.9,
+        "y": -14.4
+      },
+      {
+        "code": "P2",
+        "x": -17.1,
+        "y": -27.2
+      },
+      {
+        "code": "P2",
+        "x": 16.2,
+        "y": 23.5
+      },
+      {
+        "code": "P2",
+        "x": -3.0,
+        "y": 11.0
+      },
+      {
+        "code": "signal",
+        "x": -16.6,
+        "y": 9.4
+      },
+      {
+        "code": "signal",
+        "x": -18.9,
+        "y": 2.5
+      },
+      {
+        "code": "signal",
+        "x": 2.2,
+        "y": 25.2
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          -17.7,
+          6.1
+        ],
+        "dir": [
+          -0.945,
+          0.328
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          8.8,
+          22.8
+        ],
+        "dir": [
+          -0.35,
+          -0.937
+        ],
+        "halfW": 5.25
+      },
+      {
+        "center": [
+          42.3,
+          -5.7
+        ],
+        "dir": [
+          -0.355,
+          -0.935
+        ],
+        "halfW": 1.75
+      }
+    ],
+    "labels": [
+      {
+        "x": -14.7,
+        "y": -41.5,
+        "text": "Sportovní",
+        "rot": 1.25
+      },
+      {
+        "x": -40.7,
+        "y": 14.1,
+        "text": "Reissigova",
+        "rot": -0.33
+      },
+      {
+        "x": 29.0,
+        "y": -9.6,
+        "text": "Cimburkova",
+        "rot": -0.713
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          9.1,
+          16.1
+        ],
+        [
+          7.1,
+          12.4
+        ],
+        [
+          5.5,
+          9.2
+        ],
+        [
+          4.5,
+          6.5
+        ],
+        [
+          3.9,
+          4.4
+        ],
+        [
+          3.8,
+          2.8
+        ],
+        [
+          4.2,
+          1.8
+        ],
+        [
+          5.1,
+          1.4
+        ],
+        [
+          6.5,
+          1.5
+        ],
+        [
+          10.9,
+          1.0
+        ],
+        [
+          15.1,
+          -0.1
+        ]
+      ],
+      "v": 5,
+      "spawn": 0.0
+    },
+    {
+      "kind": "ped",
+      "path": [
+        [
+          44.9,
+          -6.7
+        ],
+        [
+          39.7,
+          -4.7
+        ]
+      ],
+      "v": 1.3,
+      "spawn": 0.6
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Máte zelenou a odbočujete vpravo. Do ulice, kam odbočujete, vstupují na přechod chodci. Jak budete pokračovat?",
+    "en": "You have green and are turning right. Pedestrians are stepping onto the crossing of the street you turn into. How do you proceed?",
+    "ru": "У вас зелёный, вы поворачиваете направо. На переход улицы, куда вы поворачиваете, выходят пешеходы. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Mám zelenou, projedu",
+        "en": "I have green, I go",
+        "ru": "У меня зелёный, проезжаю"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost chodcům na přechodu",
+        "en": "Give way to the pedestrians on the crossing",
+        "ru": "Уступлю пешеходам на переходе"
+      },
+      "correct": true,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím, ať uhnou",
+        "en": "Honk so they move",
+        "ru": "Сигналю, чтобы ушли"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    }
+  ],
+  "explain": {
+    "cs": "I na zelenou musíte při odbočování dát přednost chodcům přecházejícím vozovku, do níž odbočujete — mají zpravidla zelenou současně s vámi. Nesmíte je ohrozit ani omezit.",
+    "en": "Even on green, when turning you must give way to pedestrians crossing the road you turn into — they usually have green at the same time as you. You must not endanger or obstruct them.",
+    "ru": "Даже на зелёный при повороте вы обязаны уступить пешеходам, переходящим дорогу, куда вы поворачиваете — у них обычно зелёный одновременно с вами. Нельзя создавать им помеху или опасность."
+  },
+  "rule": "signal_ped",
+  "citation": "§ 5 odst. 2 h) a § 70 odst. 2 z. 361/2000 Sb."
+}

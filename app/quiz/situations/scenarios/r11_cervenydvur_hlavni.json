@@ -51,6 +51,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -68,6 +69,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -89,6 +91,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -110,6 +113,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": true,
+        "flow": "out",
         "priority": false
       },
       {
@@ -127,6 +131,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -164,6 +169,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       }
     ],
@@ -394,5 +400,6 @@
     "en": "You're on the main road (the “priority road” sign), so you have priority. The car on the side road must yield to you — keep moving and watch it. Stopping on the main road for no reason confuses others and can cause a crash.",
     "ru": "Вы едете по главной дороге (знак «Главная дорога»), приоритет у вас. Автомобиль со второстепенной обязан уступить вам — продолжайте плавно и следите за ним. Беспричинная остановка на главной путает других и может привести к ДТП."
   },
+  "rule": "priority_road",
   "citation": "§ 22 z. 361/2000 Sb."
 }

@@ -1,0 +1,901 @@
+{
+  "id": "r25_cx_plzen_1211_-49",
+  "order": 25,
+  "city": "plzen",
+  "junction": {
+    "name": "Koterovská × Sladkovského",
+    "district": "Plzeň",
+    "lat": 49.739554,
+    "lon": 13.39183,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Na semaforu vlevo",
+    "en": "Turning left at lights",
+    "ru": "Налево на светофоре"
+  },
+  "hint": {
+    "cs": "Křižovatka se semafory. Máte zelenou a odbočujete vlevo.",
+    "en": "A signalized junction. You have green and are turning left.",
+    "ru": "Перекрёсток со светофором. У вас зелёный, вы поворачиваете налево."
+  },
+  "view": {
+    "minx": -60,
+    "miny": -60,
+    "maxx": 60,
+    "maxy": 60
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            -33.8,
+            39.5
+          ],
+          [
+            -11.3,
+            16.5
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            -11.3,
+            16.5
+          ],
+          [
+            -9.4,
+            13.9
+          ],
+          [
+            -6.2,
+            9.6
+          ],
+          [
+            -4.4,
+            7.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -12.8,
+            -11.9
+          ],
+          [
+            -15.1,
+            -14.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            -15.1,
+            -14.0
+          ],
+          [
+            -29.9,
+            -27.8
+          ],
+          [
+            -38.1,
+            -35.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            -15.1,
+            -14.0
+          ],
+          [
+            -29.9,
+            -27.8
+          ],
+          [
+            -38.1,
+            -35.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            12.6,
+            -12.6
+          ],
+          [
+            15.0,
+            -14.9
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            15.0,
+            -14.9
+          ],
+          [
+            22.0,
+            -21.9
+          ],
+          [
+            36.4,
+            -37.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            -11.3,
+            16.5
+          ],
+          [
+            -9.4,
+            13.9
+          ],
+          [
+            -6.2,
+            9.6
+          ],
+          [
+            -4.4,
+            7.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            -4.4,
+            7.1
+          ],
+          [
+            -2.5,
+            4.2
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -12.8,
+            -11.9
+          ],
+          [
+            -15.1,
+            -14.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            42.4,
+            30.1
+          ],
+          [
+            25.0,
+            14.9
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            25.0,
+            14.9
+          ],
+          [
+            21.3,
+            11.7
+          ],
+          [
+            9.7,
+            4.1
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            2.4,
+            4.0
+          ],
+          [
+            3.9,
+            6.6
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Koterovská",
+        "centerline": [
+          [
+            3.9,
+            6.6
+          ],
+          [
+            5.4,
+            8.9
+          ],
+          [
+            9.1,
+            14.8
+          ],
+          [
+            13.7,
+            19.8
+          ],
+          [
+            34.3,
+            39.1
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Sladkovského",
+        "centerline": [
+          [
+            15.0,
+            -14.9
+          ],
+          [
+            22.0,
+            -21.9
+          ],
+          [
+            36.4,
+            -37.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      }
+    ],
+    "rails": [
+      [
+        [
+          -36.8,
+          36.7
+        ],
+        [
+          -21.6,
+          20.9
+        ]
+      ],
+      [
+        [
+          -17.9,
+          12.6
+        ],
+        [
+          -23.2,
+          18.1
+        ],
+        [
+          -38.9,
+          34.5
+        ]
+      ],
+      [
+        [
+          -21.6,
+          20.9
+        ],
+        [
+          -17.2,
+          16.7
+        ],
+        [
+          -14.2,
+          14.3
+        ],
+        [
+          -11.3,
+          12.3
+        ],
+        [
+          -6.2,
+          9.6
+        ],
+        [
+          -1.7,
+          8.7
+        ],
+        [
+          2.8,
+          8.5
+        ],
+        [
+          8.5,
+          9.9
+        ],
+        [
+          13.6,
+          12.4
+        ]
+      ],
+      [
+        [
+          21.8,
+          14.5
+        ],
+        [
+          15.8,
+          9.1
+        ],
+        [
+          12.6,
+          7.0
+        ],
+        [
+          9.3,
+          5.5
+        ],
+        [
+          6.0,
+          4.5
+        ],
+        [
+          2.4,
+          4.0
+        ],
+        [
+          -2.5,
+          4.2
+        ],
+        [
+          -5.8,
+          4.9
+        ],
+        [
+          -11.1,
+          7.3
+        ],
+        [
+          -14.4,
+          9.7
+        ],
+        [
+          -17.9,
+          12.6
+        ]
+      ],
+      [
+        [
+          40.9,
+          32.1
+        ],
+        [
+          21.8,
+          14.5
+        ]
+      ],
+      [
+        [
+          22.0,
+          19.2
+        ],
+        [
+          38.8,
+          34.7
+        ]
+      ],
+      [
+        [
+          -21.6,
+          20.9
+        ],
+        [
+          -17.2,
+          16.7
+        ],
+        [
+          -14.2,
+          14.3
+        ],
+        [
+          -11.3,
+          12.3
+        ],
+        [
+          -6.2,
+          9.6
+        ],
+        [
+          -1.7,
+          8.7
+        ],
+        [
+          2.8,
+          8.5
+        ],
+        [
+          8.5,
+          9.9
+        ],
+        [
+          13.6,
+          12.4
+        ]
+      ],
+      [
+        [
+          21.8,
+          14.5
+        ],
+        [
+          15.8,
+          9.1
+        ],
+        [
+          12.6,
+          7.0
+        ],
+        [
+          9.3,
+          5.5
+        ],
+        [
+          6.0,
+          4.5
+        ],
+        [
+          2.4,
+          4.0
+        ],
+        [
+          -2.5,
+          4.2
+        ],
+        [
+          -5.8,
+          4.9
+        ],
+        [
+          -11.1,
+          7.3
+        ],
+        [
+          -14.4,
+          9.7
+        ],
+        [
+          -17.9,
+          12.6
+        ]
+      ],
+      [
+        [
+          13.6,
+          12.4
+        ],
+        [
+          17.9,
+          15.4
+        ],
+        [
+          22.0,
+          19.2
+        ]
+      ],
+      [
+        [
+          40.9,
+          32.1
+        ],
+        [
+          21.8,
+          14.5
+        ]
+      ]
+    ],
+    "signs": [
+      {
+        "code": "signal",
+        "x": -15.1,
+        "y": -14.0
+      },
+      {
+        "code": "signal",
+        "x": -11.3,
+        "y": 16.5
+      },
+      {
+        "code": "signal",
+        "x": 25.0,
+        "y": 14.9
+      },
+      {
+        "code": "signal",
+        "x": 15.0,
+        "y": -14.9
+      },
+      {
+        "code": "signal",
+        "x": 0.0,
+        "y": -0.0
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          -12.8,
+          -11.9
+        ],
+        "dir": [
+          -0.732,
+          -0.682
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -12.9,
+          10.9
+        ],
+        "dir": [
+          0.799,
+          -0.601
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          12.6,
+          -12.6
+        ],
+        "dir": [
+          0.71,
+          -0.704
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -9.4,
+          13.9
+        ],
+        "dir": [
+          0.594,
+          -0.804
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          21.3,
+          11.7
+        ],
+        "dir": [
+          -0.817,
+          -0.577
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          13.7,
+          19.8
+        ],
+        "dir": [
+          0.725,
+          0.688
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          18.8,
+          14.4
+        ],
+        "dir": [
+          0.738,
+          0.675
+        ],
+        "halfW": 1.75
+      }
+    ],
+    "labels": [
+      {
+        "x": -27.0,
+        "y": 32.6,
+        "text": "Sladkovského",
+        "rot": -0.796
+      },
+      {
+        "x": 24.4,
+        "y": 29.8,
+        "text": "Koterovská",
+        "rot": 0.753
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -9.9,
+          17.5
+        ],
+        [
+          -8.0,
+          14.9
+        ],
+        [
+          -4.8,
+          10.6
+        ],
+        [
+          -3.0,
+          8.1
+        ],
+        [
+          -2.5,
+          6.0
+        ],
+        [
+          -2.4,
+          3.7
+        ],
+        [
+          -2.8,
+          1.3
+        ],
+        [
+          -3.6,
+          -1.3
+        ],
+        [
+          -5.0,
+          -4.0
+        ],
+        [
+          -6.7,
+          -6.9
+        ],
+        [
+          -8.9,
+          -10.0
+        ],
+        [
+          -11.6,
+          -13.2
+        ],
+        [
+          -13.9,
+          -15.3
+        ]
+      ],
+      "v": 6,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          13.8,
+          -16.2
+        ],
+        [
+          11.4,
+          -13.8
+        ],
+        [
+          8.6,
+          -10.5
+        ],
+        [
+          6.0,
+          -7.4
+        ],
+        [
+          3.6,
+          -4.6
+        ],
+        [
+          1.4,
+          -1.9
+        ],
+        [
+          -0.7,
+          0.4
+        ],
+        [
+          -2.6,
+          2.6
+        ],
+        [
+          -4.3,
+          4.4
+        ],
+        [
+          -5.8,
+          6.1
+        ],
+        [
+          -7.6,
+          8.6
+        ],
+        [
+          -10.8,
+          12.9
+        ],
+        [
+          -12.7,
+          15.5
+        ]
+      ],
+      "v": 8,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Máte zelenou a odbočujete vlevo. Proti vám jede vozidlo rovně, také na zelenou. Jak budete pokračovat?",
+    "en": "You have green and are turning left. An oncoming vehicle goes straight, also on green. How do you proceed?",
+    "ru": "У вас зелёный, вы поворачиваете налево. Навстречу на зелёный едет автомобиль прямо. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Zelená je zelená, odbočím",
+        "en": "Green is green, I turn",
+        "ru": "Зелёный есть зелёный, поворачиваю"
+      },
+      "correct": false,
+      "rule": "signal_left"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost protijedoucímu vozidlu",
+        "en": "Give way to the oncoming vehicle",
+        "ru": "Уступлю встречному автомобилю"
+      },
+      "correct": true,
+      "rule": "signal_left"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím a odbočím",
+        "en": "Honk and turn",
+        "ru": "Сигналю и поворачиваю"
+      },
+      "correct": false,
+      "rule": "signal_left"
+    }
+  ],
+  "explain": {
+    "cs": "Zelený signál vás opravňuje vjet do křižovatky, ale při odbočování vlevo musíte dát přednost protijedoucím vozidlům, která mají také zelenou a jedou rovně nebo odbočují vpravo.",
+    "en": "A green light lets you enter the junction, but when turning left you must give way to oncoming vehicles that also have green and go straight or turn right.",
+    "ru": "Зелёный сигнал разрешает въезд на перекрёсток, но при повороте налево вы обязаны уступить встречным, у которых тоже зелёный и которые едут прямо или поворачивают направо."
+  },
+  "rule": "signal_left",
+  "citation": "§ 21 odst. 5 a § 70 z. 361/2000 Sb."
+}

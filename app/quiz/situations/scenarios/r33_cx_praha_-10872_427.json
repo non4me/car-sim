@@ -1,0 +1,1064 @@
+{
+  "id": "r33_cx_praha_-10872_427",
+  "order": 33,
+  "city": "praha",
+  "junction": {
+    "name": "Makovského × Plzeňská",
+    "district": "Praha",
+    "lat": 50.062859,
+    "lon": 14.313369,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Zelená a chodci",
+    "en": "Green and pedestrians",
+    "ru": "Зелёный и пешеходы"
+  },
+  "hint": {
+    "cs": "Křižovatka se semafory. Máte zelenou a odbočujete vpravo.",
+    "en": "A signalized junction. You have green and are turning right.",
+    "ru": "Перекрёсток со светофором. У вас зелёный, вы поворачиваете направо."
+  },
+  "view": {
+    "minx": -60,
+    "miny": -60,
+    "maxx": 60,
+    "maxy": 60
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            -28.0,
+            10.8
+          ],
+          [
+            -48.8,
+            18.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            -43.7,
+            28.2
+          ],
+          [
+            -12.4,
+            16.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Makovského",
+        "centerline": [
+          [
+            40.8,
+            -22.1
+          ],
+          [
+            24.2,
+            -16.7
+          ],
+          [
+            15.8,
+            -15.2
+          ],
+          [
+            9.4,
+            -15.5
+          ],
+          [
+            0.0,
+            -17.8
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            -7.8,
+            15.1
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            -20.9,
+            -15.7
+          ],
+          [
+            -19.6,
+            -11.8
+          ],
+          [
+            -18.6,
+            -7.7
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            -18.6,
+            -7.7
+          ],
+          [
+            -19.0,
+            -5.4
+          ],
+          [
+            -19.4,
+            -2.9
+          ],
+          [
+            -20.4,
+            0.7
+          ],
+          [
+            -21.9,
+            4.3
+          ],
+          [
+            -28.0,
+            10.8
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            20.7,
+            4.6
+          ],
+          [
+            51.5,
+            -7.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            40.8,
+            -22.1
+          ],
+          [
+            19.8,
+            -10.5
+          ],
+          [
+            13.9,
+            -7.5
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Makovského",
+        "centerline": [
+          [
+            -20.9,
+            -15.7
+          ],
+          [
+            -13.5,
+            -9.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Makovského",
+        "centerline": [
+          [
+            -13.5,
+            -9.2
+          ],
+          [
+            -11.8,
+            -7.7
+          ],
+          [
+            -10.5,
+            -6.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Makovského",
+        "centerline": [
+          [
+            0.0,
+            -17.8
+          ],
+          [
+            -7.4,
+            -22.1
+          ],
+          [
+            -13.6,
+            -26.4
+          ],
+          [
+            -31.0,
+            -41.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Makovského",
+        "centerline": [
+          [
+            -40.5,
+            -32.6
+          ],
+          [
+            -20.9,
+            -15.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            -7.8,
+            15.1
+          ],
+          [
+            20.7,
+            4.6
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            -28.0,
+            10.8
+          ],
+          [
+            -48.8,
+            18.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            1.5,
+            -6.4
+          ],
+          [
+            1.4,
+            -10.5
+          ],
+          [
+            1.0,
+            -14.1
+          ],
+          [
+            0.0,
+            -17.8
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Makovského",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            20.7,
+            4.6
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -12.0,
+            4.6
+          ],
+          [
+            -28.0,
+            10.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            -43.7,
+            28.2
+          ],
+          [
+            -12.4,
+            16.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Plzeňská",
+        "centerline": [
+          [
+            20.7,
+            4.6
+          ],
+          [
+            51.5,
+            -7.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      }
+    ],
+    "rails": [
+      [
+        [
+          49.0,
+          -17.4
+        ],
+        [
+          46.9,
+          -16.4
+        ],
+        [
+          40.0,
+          -13.4
+        ],
+        [
+          33.8,
+          -12.0
+        ],
+        [
+          27.9,
+          -10.9
+        ],
+        [
+          19.8,
+          -10.5
+        ],
+        [
+          15.9,
+          -10.6
+        ],
+        [
+          7.7,
+          -11.9
+        ],
+        [
+          1.0,
+          -14.1
+        ],
+        [
+          -2.0,
+          -15.2
+        ],
+        [
+          -8.6,
+          -18.5
+        ],
+        [
+          -13.9,
+          -21.6
+        ],
+        [
+          -21.8,
+          -28.1
+        ],
+        [
+          -34.4,
+          -39.0
+        ]
+      ],
+      [
+        [
+          -36.8,
+          -36.7
+        ],
+        [
+          -24.3,
+          -25.9
+        ],
+        [
+          -15.4,
+          -18.8
+        ],
+        [
+          -10.4,
+          -15.8
+        ],
+        [
+          -4.1,
+          -12.6
+        ],
+        [
+          1.4,
+          -10.5
+        ],
+        [
+          8.2,
+          -8.7
+        ],
+        [
+          13.9,
+          -7.5
+        ],
+        [
+          22.1,
+          -7.3
+        ],
+        [
+          30.2,
+          -8.0
+        ],
+        [
+          36.4,
+          -9.2
+        ],
+        [
+          41.1,
+          -10.6
+        ],
+        [
+          47.9,
+          -13.1
+        ],
+        [
+          50.1,
+          -14.1
+        ]
+      ],
+      [
+        [
+          49.0,
+          -17.4
+        ],
+        [
+          46.9,
+          -16.4
+        ],
+        [
+          40.0,
+          -13.4
+        ],
+        [
+          33.8,
+          -12.0
+        ],
+        [
+          27.9,
+          -10.9
+        ],
+        [
+          19.8,
+          -10.5
+        ],
+        [
+          15.9,
+          -10.6
+        ],
+        [
+          7.7,
+          -11.9
+        ],
+        [
+          1.0,
+          -14.1
+        ],
+        [
+          -2.0,
+          -15.2
+        ],
+        [
+          -8.6,
+          -18.5
+        ],
+        [
+          -13.9,
+          -21.6
+        ],
+        [
+          -21.8,
+          -28.1
+        ],
+        [
+          -34.4,
+          -39.0
+        ]
+      ],
+      [
+        [
+          -36.8,
+          -36.7
+        ],
+        [
+          -24.3,
+          -25.9
+        ],
+        [
+          -15.4,
+          -18.8
+        ],
+        [
+          -10.4,
+          -15.8
+        ],
+        [
+          -4.1,
+          -12.6
+        ],
+        [
+          1.4,
+          -10.5
+        ],
+        [
+          8.2,
+          -8.7
+        ],
+        [
+          13.9,
+          -7.5
+        ],
+        [
+          22.1,
+          -7.3
+        ],
+        [
+          30.2,
+          -8.0
+        ],
+        [
+          36.4,
+          -9.2
+        ],
+        [
+          41.1,
+          -10.6
+        ],
+        [
+          47.9,
+          -13.1
+        ],
+        [
+          50.1,
+          -14.1
+        ]
+      ],
+      [
+        [
+          49.0,
+          -17.4
+        ],
+        [
+          46.9,
+          -16.4
+        ],
+        [
+          40.0,
+          -13.4
+        ],
+        [
+          33.8,
+          -12.0
+        ],
+        [
+          27.9,
+          -10.9
+        ],
+        [
+          19.8,
+          -10.5
+        ],
+        [
+          15.9,
+          -10.6
+        ],
+        [
+          7.7,
+          -11.9
+        ],
+        [
+          1.0,
+          -14.1
+        ],
+        [
+          -2.0,
+          -15.2
+        ],
+        [
+          -8.6,
+          -18.5
+        ],
+        [
+          -13.9,
+          -21.6
+        ],
+        [
+          -21.8,
+          -28.1
+        ],
+        [
+          -34.4,
+          -39.0
+        ]
+      ],
+      [
+        [
+          -36.8,
+          -36.7
+        ],
+        [
+          -24.3,
+          -25.9
+        ],
+        [
+          -15.4,
+          -18.8
+        ],
+        [
+          -10.4,
+          -15.8
+        ],
+        [
+          -4.1,
+          -12.6
+        ],
+        [
+          1.4,
+          -10.5
+        ],
+        [
+          8.2,
+          -8.7
+        ],
+        [
+          13.9,
+          -7.5
+        ],
+        [
+          22.1,
+          -7.3
+        ],
+        [
+          30.2,
+          -8.0
+        ],
+        [
+          36.4,
+          -9.2
+        ],
+        [
+          41.1,
+          -10.6
+        ],
+        [
+          47.9,
+          -13.1
+        ],
+        [
+          50.1,
+          -14.1
+        ]
+      ]
+    ],
+    "signs": [
+      {
+        "code": "signal",
+        "x": 43.3,
+        "y": -23.4
+      },
+      {
+        "code": "signal",
+        "x": 46.9,
+        "y": -16.4
+      },
+      {
+        "code": "signal",
+        "x": -10.4,
+        "y": -15.8
+      },
+      {
+        "code": "signal",
+        "x": -12.4,
+        "y": 16.8
+      },
+      {
+        "code": "signal",
+        "x": -13.5,
+        "y": -9.2
+      },
+      {
+        "code": "P4",
+        "x": 12.3,
+        "y": 7.9
+      },
+      {
+        "code": "P2",
+        "x": 25.9,
+        "y": -2.7
+      },
+      {
+        "code": "P2",
+        "x": 15.4,
+        "y": 11.9
+      },
+      {
+        "code": "P4",
+        "x": 36.3,
+        "y": -17.2
+      },
+      {
+        "code": "P2",
+        "x": 36.6,
+        "y": -14.1
+      },
+      {
+        "code": "signal",
+        "x": -18.6,
+        "y": -7.7
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          0.0,
+          -17.8
+        ],
+        "dir": [
+          -0.973,
+          -0.233
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -7.8,
+          15.1
+        ],
+        "dir": [
+          0.46,
+          -0.888
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -19.4,
+          -2.9
+        ],
+        "dir": [
+          -0.221,
+          0.975
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -10.5,
+          -6.3
+        ],
+        "dir": [
+          0.84,
+          0.543
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          0.5,
+          21.2
+        ],
+        "dir": [
+          0.944,
+          -0.33
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -12.0,
+          4.6
+        ],
+        "dir": [
+          -0.933,
+          0.359
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": 27.5,
+        "y": -14.7,
+        "text": "Plzeňská",
+        "rot": -0.505
+      },
+      {
+        "x": 28.8,
+        "y": -18.2,
+        "text": "Makovského",
+        "rot": -0.315
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          40.0,
+          -23.6
+        ],
+        [
+          19.0,
+          -12.1
+        ],
+        [
+          13.1,
+          -9.0
+        ],
+        [
+          10.0,
+          -7.0
+        ],
+        [
+          7.5,
+          -5.5
+        ],
+        [
+          5.4,
+          -4.4
+        ],
+        [
+          3.9,
+          -3.9
+        ],
+        [
+          2.8,
+          -3.8
+        ],
+        [
+          2.2,
+          -4.2
+        ],
+        [
+          2.0,
+          -5.1
+        ],
+        [
+          2.4,
+          -6.4
+        ],
+        [
+          2.3,
+          -10.6
+        ],
+        [
+          1.8,
+          -14.3
+        ],
+        [
+          0.8,
+          -18.0
+        ]
+      ],
+      "v": 5,
+      "spawn": 0.0
+    },
+    {
+      "kind": "ped",
+      "path": [
+        [
+          0.6,
+          -20.5
+        ],
+        [
+          -0.6,
+          -15.1
+        ]
+      ],
+      "v": 1.3,
+      "spawn": 0.6
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Máte zelenou a odbočujete vpravo. Do ulice, kam odbočujete, vstupují na přechod chodci. Jak budete pokračovat?",
+    "en": "You have green and are turning right. Pedestrians are stepping onto the crossing of the street you turn into. How do you proceed?",
+    "ru": "У вас зелёный, вы поворачиваете направо. На переход улицы, куда вы поворачиваете, выходят пешеходы. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Mám zelenou, projedu",
+        "en": "I have green, I go",
+        "ru": "У меня зелёный, проезжаю"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost chodcům na přechodu",
+        "en": "Give way to the pedestrians on the crossing",
+        "ru": "Уступлю пешеходам на переходе"
+      },
+      "correct": true,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím, ať uhnou",
+        "en": "Honk so they move",
+        "ru": "Сигналю, чтобы ушли"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    }
+  ],
+  "explain": {
+    "cs": "I na zelenou musíte při odbočování dát přednost chodcům přecházejícím vozovku, do níž odbočujete — mají zpravidla zelenou současně s vámi. Nesmíte je ohrozit ani omezit.",
+    "en": "Even on green, when turning you must give way to pedestrians crossing the road you turn into — they usually have green at the same time as you. You must not endanger or obstruct them.",
+    "ru": "Даже на зелёный при повороте вы обязаны уступить пешеходам, переходящим дорогу, куда вы поворачиваете — у них обычно зелёный одновременно с вами. Нельзя создавать им помеху или опасность."
+  },
+  "rule": "signal_ped",
+  "citation": "§ 5 odst. 2 h) a § 70 odst. 2 z. 361/2000 Sb."
+}

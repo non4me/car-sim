@@ -218,9 +218,14 @@ def build_geom(tdir, cx, cy, R, meta):
             length = sum(math.dist(cl[i - 1], cl[i]) for i in range(1, len(cl)))
             if length < 6:
                 continue
+            ow = bool(e.get("oneway"))
+            # the clipped centerline keeps OSM way order = travel direction; for a oneway arm that tells us
+            # whether traffic flows toward the core ("in") or away ("out"). Two-way arms allow both ("two").
+            d0, d1 = math.hypot(cl[0][0], cl[0][1]), math.hypot(cl[-1][0], cl[-1][1])
+            flow = "two" if not ow else ("in" if d0 > d1 else "out")
             roads.append({"name": e.get("name", ""), "centerline": cl,
                           "halfW": round(e.get("width", 6.0) / 2, 2), "lanes": e.get("lanes", 2),
-                          "oneway": bool(e.get("oneway")), "priority": e.get("cls") in PRIORITY_CLS})
+                          "oneway": ow, "flow": flow, "priority": e.get("cls") in PRIORITY_CLS})
             nm = e.get("name", "")
             if nm and (nm not in names or length > names[nm]["len"]):
                 names[nm] = {"len": length, "cl": cl}

@@ -47,6 +47,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -64,6 +65,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -81,6 +83,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -98,6 +101,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -115,6 +119,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       }
     ],
@@ -266,5 +271,6 @@
     "en": "When turning left you must give way to oncoming vehicles going straight or turning right. This holds even at an unmarked junction.",
     "ru": "При повороте налево вы обязаны уступить встречным, едущим прямо или поворачивающим направо. Правило действует и на нерегулируемом перекрёстке."
   },
+  "rule": "left_turn",
   "citation": "§ 21 odst. 5 z. 361/2000 Sb."
 }

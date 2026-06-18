@@ -55,6 +55,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -72,6 +73,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -97,6 +99,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -126,6 +129,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -143,6 +147,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -168,6 +173,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       }
     ],
@@ -337,5 +343,6 @@
     "en": "A driver must give way to a pedestrian who is on the crossing or stepping onto it. You must not endanger or obstruct them — stop and let them cross.",
     "ru": "Водитель обязан уступить пешеходу, который находится на переходе или вступает на него. Нельзя создавать ему помеху или опасность — остановитесь и пропустите."
   },
+  "rule": "pedestrian",
   "citation": "§ 5 odst. 2 h) a § 54 z. 361/2000 Sb."
 }

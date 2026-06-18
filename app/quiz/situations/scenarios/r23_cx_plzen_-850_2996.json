@@ -1,0 +1,1032 @@
+{
+  "id": "r23_cx_plzen_-850_2996",
+  "order": 23,
+  "city": "plzen",
+  "junction": {
+    "name": "Karlovarská × alej Svobody",
+    "district": "Plzeň",
+    "lat": 49.767155,
+    "lon": 13.363165,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Zelená a chodci",
+    "en": "Green and pedestrians",
+    "ru": "Зелёный и пешеходы"
+  },
+  "hint": {
+    "cs": "Křižovatka se semafory. Máte zelenou a odbočujete vpravo.",
+    "en": "A signalized junction. You have green and are turning right.",
+    "ru": "Перекрёсток со светофором. У вас зелёный, вы поворачиваете направо."
+  },
+  "view": {
+    "minx": -60,
+    "miny": -60,
+    "maxx": 60,
+    "maxy": 60
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            -25.7,
+            -45.2
+          ],
+          [
+            -19.4,
+            -25.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Střední",
+        "centerline": [
+          [
+            -50.8,
+            -11.0
+          ],
+          [
+            -27.8,
+            -21.5
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            4.2,
+            -19.9
+          ],
+          [
+            -1.6,
+            -38.8
+          ],
+          [
+            -4.5,
+            -51.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            -2.6,
+            28.5
+          ],
+          [
+            3.0,
+            45.5
+          ],
+          [
+            5.2,
+            51.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            -10.3,
+            4.0
+          ],
+          [
+            -6.6,
+            15.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            13.4,
+            7.8
+          ],
+          [
+            9.9,
+            -2.9
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            26.2,
+            44.9
+          ],
+          [
+            19.6,
+            26.2
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            -17.6,
+            -19.5
+          ],
+          [
+            -16.0,
+            -14.3
+          ],
+          [
+            -10.3,
+            4.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            50.8,
+            -11.0
+          ],
+          [
+            28.2,
+            -7.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            28.2,
+            -7.2
+          ],
+          [
+            24.7,
+            -6.4
+          ],
+          [
+            9.9,
+            -2.9
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            -10.3,
+            4.0
+          ],
+          [
+            0.3,
+            5.7
+          ],
+          [
+            1.9,
+            6.0
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            1.9,
+            6.0
+          ],
+          [
+            3.7,
+            6.2
+          ],
+          [
+            13.4,
+            7.8
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            9.9,
+            -2.9
+          ],
+          [
+            3.4,
+            4.5
+          ],
+          [
+            1.9,
+            6.0
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            1.9,
+            6.0
+          ],
+          [
+            0.9,
+            7.2
+          ],
+          [
+            -6.6,
+            15.8
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            13.4,
+            7.8
+          ],
+          [
+            27.3,
+            3.9
+          ],
+          [
+            47.4,
+            -0.7
+          ],
+          [
+            52.0,
+            -1.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            9.9,
+            -2.9
+          ],
+          [
+            1.5,
+            -0.4
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -1.3,
+            0.6
+          ],
+          [
+            -10.3,
+            4.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            -6.6,
+            15.8
+          ],
+          [
+            2.3,
+            12.0
+          ],
+          [
+            3.6,
+            11.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            3.6,
+            11.4
+          ],
+          [
+            5.1,
+            10.8
+          ],
+          [
+            13.4,
+            7.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            19.6,
+            26.2
+          ],
+          [
+            18.3,
+            22.3
+          ],
+          [
+            13.4,
+            7.8
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            9.9,
+            -2.9
+          ],
+          [
+            4.2,
+            -19.9
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Karlovarská",
+        "centerline": [
+          [
+            -6.6,
+            15.8
+          ],
+          [
+            -2.6,
+            28.5
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            50.8,
+            -11.0
+          ],
+          [
+            28.2,
+            -7.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "alej Svobody",
+        "centerline": [
+          [
+            13.4,
+            7.8
+          ],
+          [
+            27.3,
+            3.9
+          ],
+          [
+            47.4,
+            -0.7
+          ],
+          [
+            52.0,
+            -1.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      }
+    ],
+    "rails": [
+      [
+        [
+          -3.9,
+          -17.6
+        ],
+        [
+          -7.5,
+          -29.1
+        ],
+        [
+          -9.3,
+          -35.6
+        ],
+        [
+          -10.9,
+          -42.0
+        ],
+        [
+          -12.6,
+          -50.4
+        ]
+      ],
+      [
+        [
+          -15.6,
+          -49.6
+        ],
+        [
+          -15.5,
+          -49.2
+        ],
+        [
+          -12.9,
+          -37.9
+        ],
+        [
+          -10.1,
+          -27.3
+        ],
+        [
+          -6.8,
+          -16.8
+        ]
+      ],
+      [
+        [
+          17.2,
+          49.1
+        ],
+        [
+          16.5,
+          46.8
+        ],
+        [
+          9.6,
+          24.8
+        ]
+      ],
+      [
+        [
+          9.6,
+          24.8
+        ],
+        [
+          5.1,
+          10.8
+        ],
+        [
+          3.7,
+          6.2
+        ],
+        [
+          1.5,
+          -0.4
+        ],
+        [
+          -3.9,
+          -17.6
+        ]
+      ],
+      [
+        [
+          -6.8,
+          -16.8
+        ],
+        [
+          -1.3,
+          0.6
+        ],
+        [
+          0.3,
+          5.7
+        ],
+        [
+          2.3,
+          12.0
+        ],
+        [
+          6.6,
+          25.7
+        ]
+      ],
+      [
+        [
+          6.6,
+          25.7
+        ],
+        [
+          12.8,
+          45.3
+        ],
+        [
+          14.4,
+          50.0
+        ]
+      ],
+      [
+        [
+          -3.9,
+          -17.6
+        ],
+        [
+          -7.5,
+          -29.1
+        ],
+        [
+          -9.3,
+          -35.6
+        ],
+        [
+          -10.9,
+          -42.0
+        ],
+        [
+          -12.6,
+          -50.4
+        ]
+      ],
+      [
+        [
+          -15.6,
+          -49.6
+        ],
+        [
+          -15.5,
+          -49.2
+        ],
+        [
+          -12.9,
+          -37.9
+        ],
+        [
+          -10.1,
+          -27.3
+        ],
+        [
+          -6.8,
+          -16.8
+        ]
+      ],
+      [
+        [
+          17.2,
+          49.1
+        ],
+        [
+          16.5,
+          46.8
+        ],
+        [
+          9.6,
+          24.8
+        ]
+      ],
+      [
+        [
+          17.2,
+          49.1
+        ],
+        [
+          16.5,
+          46.8
+        ],
+        [
+          9.6,
+          24.8
+        ]
+      ],
+      [
+        [
+          6.6,
+          25.7
+        ],
+        [
+          12.8,
+          45.3
+        ],
+        [
+          14.4,
+          50.0
+        ]
+      ],
+      [
+        [
+          -3.9,
+          -17.6
+        ],
+        [
+          -7.5,
+          -29.1
+        ],
+        [
+          -9.3,
+          -35.6
+        ],
+        [
+          -10.9,
+          -42.0
+        ],
+        [
+          -12.6,
+          -50.4
+        ]
+      ],
+      [
+        [
+          -15.6,
+          -49.6
+        ],
+        [
+          -15.5,
+          -49.2
+        ],
+        [
+          -12.9,
+          -37.9
+        ],
+        [
+          -10.1,
+          -27.3
+        ],
+        [
+          -6.8,
+          -16.8
+        ]
+      ]
+    ],
+    "signs": [
+      {
+        "code": "signal",
+        "x": 19.6,
+        "y": 26.2
+      },
+      {
+        "code": "signal",
+        "x": -17.6,
+        "y": -19.5
+      },
+      {
+        "code": "signal",
+        "x": 28.2,
+        "y": -7.2
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          4.2,
+          -19.9
+        ],
+        "dir": [
+          -0.291,
+          -0.957
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -2.6,
+          28.5
+        ],
+        "dir": [
+          0.313,
+          0.95
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -16.0,
+          -14.3
+        ],
+        "dir": [
+          0.298,
+          0.955
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          24.7,
+          -6.4
+        ],
+        "dir": [
+          -0.974,
+          0.226
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -5.4,
+          -17.2
+        ],
+        "dir": [
+          0.298,
+          0.954
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          27.3,
+          3.9
+        ],
+        "dir": [
+          0.97,
+          -0.241
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          8.0,
+          25.3
+        ],
+        "dir": [
+          0.308,
+          0.951
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          18.3,
+          22.3
+        ],
+        "dir": [
+          -0.317,
+          -0.948
+        ],
+        "halfW": 5.25
+      }
+    ],
+    "labels": [
+      {
+        "x": -2.3,
+        "y": -42.1,
+        "text": "Karlovarská",
+        "rot": 1.351
+      },
+      {
+        "x": -43.9,
+        "y": -14.2,
+        "text": "Střední",
+        "rot": -0.428
+      },
+      {
+        "x": 40.4,
+        "y": 0.9,
+        "text": "alej Svobody",
+        "rot": -0.225
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -5.9,
+          17.4
+        ],
+        [
+          3.0,
+          13.6
+        ],
+        [
+          4.3,
+          13.0
+        ],
+        [
+          3.4,
+          10.1
+        ],
+        [
+          2.7,
+          8.1
+        ],
+        [
+          2.3,
+          6.9
+        ],
+        [
+          2.1,
+          6.5
+        ],
+        [
+          2.3,
+          6.9
+        ],
+        [
+          2.7,
+          8.1
+        ],
+        [
+          3.3,
+          10.2
+        ],
+        [
+          4.2,
+          13.0
+        ],
+        [
+          5.7,
+          12.4
+        ],
+        [
+          14.0,
+          9.4
+        ]
+      ],
+      "v": 5,
+      "spawn": 0.0
+    },
+    {
+      "kind": "ped",
+      "path": [
+        [
+          24.2,
+          20.3
+        ],
+        [
+          12.4,
+          24.3
+        ]
+      ],
+      "v": 1.3,
+      "spawn": 0.6
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Máte zelenou a odbočujete vpravo. Do ulice, kam odbočujete, vstupují na přechod chodci. Jak budete pokračovat?",
+    "en": "You have green and are turning right. Pedestrians are stepping onto the crossing of the street you turn into. How do you proceed?",
+    "ru": "У вас зелёный, вы поворачиваете направо. На переход улицы, куда вы поворачиваете, выходят пешеходы. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Mám zelenou, projedu",
+        "en": "I have green, I go",
+        "ru": "У меня зелёный, проезжаю"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost chodcům na přechodu",
+        "en": "Give way to the pedestrians on the crossing",
+        "ru": "Уступлю пешеходам на переходе"
+      },
+      "correct": true,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím, ať uhnou",
+        "en": "Honk so they move",
+        "ru": "Сигналю, чтобы ушли"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    }
+  ],
+  "explain": {
+    "cs": "I na zelenou musíte při odbočování dát přednost chodcům přecházejícím vozovku, do níž odbočujete — mají zpravidla zelenou současně s vámi. Nesmíte je ohrozit ani omezit.",
+    "en": "Even on green, when turning you must give way to pedestrians crossing the road you turn into — they usually have green at the same time as you. You must not endanger or obstruct them.",
+    "ru": "Даже на зелёный при повороте вы обязаны уступить пешеходам, переходящим дорогу, куда вы поворачиваете — у них обычно зелёный одновременно с вами. Нельзя создавать им помеху или опасность."
+  },
+  "rule": "signal_ped",
+  "citation": "§ 5 odst. 2 h) a § 70 odst. 2 z. 361/2000 Sb."
+}

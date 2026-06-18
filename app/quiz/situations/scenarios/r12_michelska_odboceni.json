@@ -47,6 +47,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -72,6 +73,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -89,6 +91,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -114,6 +117,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -131,6 +135,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -152,6 +157,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -177,6 +183,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": true,
+        "flow": "in",
         "priority": false
       },
       {
@@ -198,6 +205,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": true,
+        "flow": "out",
         "priority": false
       },
       {
@@ -215,6 +223,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": true,
+        "flow": "in",
         "priority": false
       },
       {
@@ -240,6 +249,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": true,
+        "flow": "out",
         "priority": false
       },
       {
@@ -257,6 +267,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -274,6 +285,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -295,6 +307,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -312,6 +325,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -333,6 +347,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -354,6 +369,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -371,6 +387,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       },
       {
@@ -392,6 +409,7 @@
         "halfW": 3.5,
         "lanes": 2,
         "oneway": false,
+        "flow": "two",
         "priority": false
       }
     ],
@@ -751,5 +769,6 @@
     "en": "A green light lets you enter the junction, but when turning left you must give way to oncoming vehicles that also have green and go straight or turn right.",
     "ru": "Зелёный сигнал разрешает въезд на перекрёсток, но при повороте налево вы обязаны уступить встречным, у которых тоже зелёный и которые едут прямо или поворачивают направо."
   },
+  "rule": "signal_left",
   "citation": "§ 21 odst. 5 a § 70 z. 361/2000 Sb."
 }

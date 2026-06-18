@@ -1,0 +1,856 @@
+{
+  "id": "r34_cx_praha_3744_-516",
+  "order": 34,
+  "city": "praha",
+  "junction": {
+    "name": "Práčská × Švehlova",
+    "district": "Praha",
+    "lat": 50.054331,
+    "lon": 14.51789,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Zelená a chodci",
+    "en": "Green and pedestrians",
+    "ru": "Зелёный и пешеходы"
+  },
+  "hint": {
+    "cs": "Křižovatka se semafory. Máte zelenou a odbočujete vpravo.",
+    "en": "A signalized junction. You have green and are turning right.",
+    "ru": "Перекрёсток со светофором. У вас зелёный, вы поворачиваете направо."
+  },
+  "view": {
+    "minx": -60,
+    "miny": -60,
+    "maxx": 60,
+    "maxy": 60
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Práčská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            3.3,
+            -5.1
+          ],
+          [
+            4.5,
+            -8.3
+          ],
+          [
+            5.1,
+            -11.6
+          ],
+          [
+            5.2,
+            -14.2
+          ],
+          [
+            5.0,
+            -16.6
+          ],
+          [
+            4.4,
+            -18.2
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Práčská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -4.9,
+            6.4
+          ],
+          [
+            -6.7,
+            8.2
+          ],
+          [
+            -8.6,
+            9.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Práčská",
+        "centerline": [
+          [
+            -8.6,
+            9.4
+          ],
+          [
+            -10.8,
+            10.5
+          ],
+          [
+            -13.2,
+            11.6
+          ],
+          [
+            -34.4,
+            16.5
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Práčská",
+        "centerline": [
+          [
+            -34.4,
+            16.5
+          ],
+          [
+            -22.5,
+            16.8
+          ],
+          [
+            -12.7,
+            16.5
+          ],
+          [
+            -4.0,
+            15.8
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Práčská",
+        "centerline": [
+          [
+            -4.0,
+            15.8
+          ],
+          [
+            -0.8,
+            15.4
+          ],
+          [
+            2.3,
+            15.1
+          ],
+          [
+            6.4,
+            15.0
+          ],
+          [
+            12.3,
+            15.5
+          ],
+          [
+            21.8,
+            17.2
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "out",
+        "priority": false
+      },
+      {
+        "name": "Práčská",
+        "centerline": [
+          [
+            -34.4,
+            16.5
+          ],
+          [
+            -46.8,
+            16.6
+          ],
+          [
+            -49.3,
+            16.6
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": false,
+        "flow": "two",
+        "priority": false
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            21.8,
+            17.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            -41.6,
+            -31.2
+          ],
+          [
+            -19.0,
+            -14.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            4.4,
+            -18.2
+          ],
+          [
+            -3.4,
+            -23.7
+          ],
+          [
+            -30.7,
+            -42.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            -16.5,
+            -12.4
+          ],
+          [
+            -13.8,
+            -10.5
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            36.4,
+            4.7
+          ],
+          [
+            29.9,
+            2.2
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "",
+        "centerline": [
+          [
+            29.9,
+            2.2
+          ],
+          [
+            26.6,
+            0.9
+          ],
+          [
+            20.2,
+            -1.6
+          ],
+          [
+            16.1,
+            -2.0
+          ],
+          [
+            12.4,
+            -2.2
+          ],
+          [
+            7.6,
+            -2.0
+          ],
+          [
+            3.7,
+            -1.2
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 1.75,
+        "lanes": 1,
+        "oneway": true,
+        "flow": "in",
+        "priority": false
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            36.4,
+            4.7
+          ],
+          [
+            19.0,
+            -7.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            19.0,
+            -7.8
+          ],
+          [
+            16.0,
+            -9.9
+          ],
+          [
+            4.4,
+            -18.2
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            21.8,
+            17.2
+          ],
+          [
+            38.5,
+            29.5
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "flow": "out",
+        "priority": true
+      },
+      {
+        "name": "Švehlova",
+        "centerline": [
+          [
+            49.9,
+            14.8
+          ],
+          [
+            36.4,
+            4.7
+          ]
+        ],
+        "halfW": 5.25,
+        "lanes": 3,
+        "oneway": true,
+        "flow": "in",
+        "priority": true
+      }
+    ],
+    "rails": [
+      [
+        [
+          -38.0,
+          -35.4
+        ],
+        [
+          -12.0,
+          -16.2
+        ],
+        [
+          -8.1,
+          -13.4
+        ],
+        [
+          -3.7,
+          -10.3
+        ],
+        [
+          3.3,
+          -5.1
+        ],
+        [
+          7.6,
+          -2.0
+        ],
+        [
+          23.7,
+          9.9
+        ],
+        [
+          45.1,
+          25.8
+        ]
+      ],
+      [
+        [
+          46.6,
+          23.1
+        ],
+        [
+          25.6,
+          7.5
+        ],
+        [
+          12.4,
+          -2.2
+        ],
+        [
+          4.5,
+          -8.3
+        ],
+        [
+          -1.7,
+          -12.8
+        ],
+        [
+          -6.2,
+          -16.0
+        ],
+        [
+          -10.0,
+          -18.8
+        ],
+        [
+          -35.8,
+          -37.7
+        ]
+      ],
+      [
+        [
+          -38.0,
+          -35.4
+        ],
+        [
+          -12.0,
+          -16.2
+        ],
+        [
+          -8.1,
+          -13.4
+        ],
+        [
+          -3.7,
+          -10.3
+        ],
+        [
+          3.3,
+          -5.1
+        ],
+        [
+          7.6,
+          -2.0
+        ],
+        [
+          23.7,
+          9.9
+        ],
+        [
+          45.1,
+          25.8
+        ]
+      ],
+      [
+        [
+          46.6,
+          23.1
+        ],
+        [
+          25.6,
+          7.5
+        ],
+        [
+          12.4,
+          -2.2
+        ],
+        [
+          4.5,
+          -8.3
+        ],
+        [
+          -1.7,
+          -12.8
+        ],
+        [
+          -6.2,
+          -16.0
+        ],
+        [
+          -10.0,
+          -18.8
+        ],
+        [
+          -35.8,
+          -37.7
+        ]
+      ],
+      [
+        [
+          -38.0,
+          -35.4
+        ],
+        [
+          -12.0,
+          -16.2
+        ],
+        [
+          -8.1,
+          -13.4
+        ],
+        [
+          -3.7,
+          -10.3
+        ],
+        [
+          3.3,
+          -5.1
+        ],
+        [
+          7.6,
+          -2.0
+        ],
+        [
+          23.7,
+          9.9
+        ],
+        [
+          45.1,
+          25.8
+        ]
+      ],
+      [
+        [
+          46.6,
+          23.1
+        ],
+        [
+          25.6,
+          7.5
+        ],
+        [
+          12.4,
+          -2.2
+        ],
+        [
+          4.5,
+          -8.3
+        ],
+        [
+          -1.7,
+          -12.8
+        ],
+        [
+          -6.2,
+          -16.0
+        ],
+        [
+          -10.0,
+          -18.8
+        ],
+        [
+          -35.8,
+          -37.7
+        ]
+      ]
+    ],
+    "signs": [
+      {
+        "code": "signal",
+        "x": 29.9,
+        "y": 2.2
+      },
+      {
+        "code": "signal",
+        "x": -19.0,
+        "y": -14.2
+      },
+      {
+        "code": "signal",
+        "x": 19.0,
+        "y": -7.8
+      },
+      {
+        "code": "signal",
+        "x": -4.0,
+        "y": 15.8
+      },
+      {
+        "code": "signal",
+        "x": -8.6,
+        "y": 9.4
+      },
+      {
+        "code": "P4",
+        "x": 9.4,
+        "y": -14.0
+      },
+      {
+        "code": "P2",
+        "x": -4.6,
+        "y": -18.4
+      },
+      {
+        "code": "P2",
+        "x": 13.4,
+        "y": -17.9
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          19.1,
+          35.2
+        ],
+        "dir": [
+          0.898,
+          0.439
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -4.9,
+          6.4
+        ],
+        "dir": [
+          -0.638,
+          0.77
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          2.3,
+          15.1
+        ],
+        "dir": [
+          0.998,
+          -0.061
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -3.4,
+          -23.7
+        ],
+        "dir": [
+          -0.829,
+          -0.559
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -13.8,
+          -10.5
+        ],
+        "dir": [
+          0.802,
+          0.598
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": -25.3,
+        "y": 16.7,
+        "text": "Práčská",
+        "rot": 0.025
+      },
+      {
+        "x": -20.1,
+        "y": -34.9,
+        "text": "Švehlova",
+        "rot": 0.591
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -7.7,
+          10.9
+        ],
+        [
+          -5.5,
+          9.4
+        ],
+        [
+          -3.5,
+          7.5
+        ],
+        [
+          -2.4,
+          6.0
+        ],
+        [
+          -0.7,
+          5.4
+        ],
+        [
+          1.5,
+          5.5
+        ],
+        [
+          4.3,
+          6.5
+        ],
+        [
+          7.6,
+          8.3
+        ],
+        [
+          11.4,
+          10.9
+        ],
+        [
+          15.8,
+          14.3
+        ],
+        [
+          20.7,
+          18.6
+        ]
+      ],
+      "v": 5,
+      "spawn": 0.0
+    },
+    {
+      "kind": "ped",
+      "path": [
+        [
+          17.9,
+          37.7
+        ],
+        [
+          20.3,
+          32.7
+        ]
+      ],
+      "v": 1.3,
+      "spawn": 0.6
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Máte zelenou a odbočujete vpravo. Do ulice, kam odbočujete, vstupují na přechod chodci. Jak budete pokračovat?",
+    "en": "You have green and are turning right. Pedestrians are stepping onto the crossing of the street you turn into. How do you proceed?",
+    "ru": "У вас зелёный, вы поворачиваете направо. На переход улицы, куда вы поворачиваете, выходят пешеходы. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Mám zelenou, projedu",
+        "en": "I have green, I go",
+        "ru": "У меня зелёный, проезжаю"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost chodcům na přechodu",
+        "en": "Give way to the pedestrians on the crossing",
+        "ru": "Уступлю пешеходам на переходе"
+      },
+      "correct": true,
+      "rule": "signal_ped"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím, ať uhnou",
+        "en": "Honk so they move",
+        "ru": "Сигналю, чтобы ушли"
+      },
+      "correct": false,
+      "rule": "signal_ped"
+    }
+  ],
+  "explain": {
+    "cs": "I na zelenou musíte při odbočování dát přednost chodcům přecházejícím vozovku, do níž odbočujete — mají zpravidla zelenou současně s vámi. Nesmíte je ohrozit ani omezit.",
+    "en": "Even on green, when turning you must give way to pedestrians crossing the road you turn into — they usually have green at the same time as you. You must not endanger or obstruct them.",
+    "ru": "Даже на зелёный при повороте вы обязаны уступить пешеходам, переходящим дорогу, куда вы поворачиваете — у них обычно зелёный одновременно с вами. Нельзя создавать им помеху или опасность."
+  },
+  "rule": "signal_ped",
+  "citation": "§ 5 odst. 2 h) a § 70 odst. 2 z. 361/2000 Sb."
+}
