@@ -27,18 +27,18 @@
   </style>
 </head>
 <body>
-  {{ hdr.header(lang, user) }}
+  {{ hdr.header(lang, user, trail=hdr.crumbs("quiz", lang)) }}
   <div class="wrap">
     <h1>🧠 <span class="accent">{{ t.q_title }}</span></h1>
     <div class="sub">{{ t.q_sub }}</div>
 
     <div class="cards">
       <a class="card" href="/quiz/photo">
-        <div class="t">📷 {{ t.q_photo_t }} <span class="tag live">{{ t.tag_live }}</span></div>
+        <div class="t">📷 {{ t.q_photo_t }}</div>
         <div class="d">{{ t.q_photo_d }}</div>
       </a>
       <a class="card" href="/quiz/situations">
-        <div class="t">🚦 {{ t.q_sit_t }} <span class="tag live">{{ t.tag_live }}</span></div>
+        <div class="t">🚦 {{ t.q_sit_t }}</div>
         <div class="d">{{ t.q_sit_d }}</div>
       </a>
       <div class="card soon"><div class="t">🛑 {{ t.q_sign_t }} <span class="tag">{{ t.tag_soon }}</span></div>

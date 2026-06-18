@@ -46,7 +46,7 @@
   </style>
 </head>
 <body>
-  {{ hdr.header(lang, user) }}
+  {{ hdr.header(lang, user, trail=hdr.crumbs("docs", lang)) }}
   <div class="wrap">
     {% if lang != 'cs' %}<div class="disc">⚠️ {{ ui.disclaimer }}</div>{% endif %}
     <h1>📖 {{ ui.docs_title_a }} <span class="accent">{{ ui.docs_title_b }}</span></h1>

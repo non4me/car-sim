@@ -161,7 +161,7 @@
 <body>
   <!-- standalone header — identical bar to every other page (msg 2947); the map + HUD live below it -->
   <header class="ah-bar">
-    {{ hdr.logo() }}
+    {{ hdr.logo() }}{{ hdr.breadcrumbs(hdr.crumbs("drive", lang)) }}
     <div class="ah-spacer"></div>
     <div class="ah-right">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div>
   </header>

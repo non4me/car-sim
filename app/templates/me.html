@@ -37,7 +37,7 @@
   </style>
 </head>
 <body>
-  {{ hdr.header(lang, user) }}
+  {{ hdr.header(lang, user, trail=hdr.crumbs("me", lang)) }}
   <div class="wrap">
 
     <h1>{{ t.me_title }}

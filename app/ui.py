@@ -23,6 +23,12 @@ try:
 except (OSError, ValueError):
     _APP_I18N = {}
 
+try:    # home-page strings (drive/quiz/docs section names live here in all 10 langs) — used for breadcrumbs
+    _INTRO_I18N = json.loads((Path(__file__).resolve().parent.parent / "data" / "i18n" / "intro.json")
+                             .read_text(encoding="utf-8"))
+except (OSError, ValueError):
+    _INTRO_I18N = {}
+
 
 def app_strings(lang: str) -> dict:
     return _APP_I18N.get(lang) or _APP_I18N.get("en") or {}
@@ -76,6 +82,13 @@ _CSS = """
   font-size:17px;letter-spacing:-.02em;white-space:nowrap}
 .ah-mark{flex:none;font-size:21px;line-height:1}
 .ah-logo .ac{color:#5b9cff}
+.ah-crumbs{display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden}
+.ah-sep{color:#3a4356;font-size:13px;flex:none}
+.ah-crumb{color:#9aa4b8;text-decoration:none;font-size:14px;font-weight:600;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.ah-crumb:hover{color:#e6e9f0}
+.ah-crumb.ah-cur{color:#e6e9f0}
+@media(max-width:560px){.ah-crumbs .ah-crumb{max-width:96px}}
 .ah-spacer{flex:1}
 .ah-right{display:flex;align-items:center;gap:10px}
 .ah-lang{position:relative}
@@ -141,6 +154,49 @@ def logo(home: str = "/") -> Markup:
                   f'<span><span class="ac">car</span>-sim</span></a>')
 
 
+# Breadcrumb trail so the user can jump back to any level (msg 3106). The car-sim logo is level 0 (home);
+# these crumbs render after it. Each section knows its label key (in app_strings) + URL + parent.
+_SECTIONS = {
+    "quiz":       ("q_title",   "/quiz",            None),
+    "photo":      ("q_photo_t", "/quiz/photo",      "quiz"),
+    "situations": ("q_sit_t",   "/quiz/situations", "quiz"),
+    "drive":      ("drive_t",   "/drive",           None),
+    "me":         ("me_title",  "/me",              None),
+    "docs":       (None,        "/docs",            None),
+}
+_DOCS_LABEL = {"cs": "Dokumenty", "en": "Documents", "ru": "Документы", "uk": "Документи", "sk": "Dokumenty",
+               "vi": "Tài liệu", "de": "Dokumente", "pl": "Dokumenty", "kk": "Құжаттар", "ro": "Documente"}
+
+
+def crumbs(section: str, lang: str = "cs") -> list:
+    """Breadcrumb trail (list of [label, href]) for a section id. Labels come from app_strings(lang) so it
+    works in every template regardless of which local strings dict it carries (photo quiz, docs, …)."""
+    s = app_strings(lang)
+    intro = _INTRO_I18N.get(lang) or _INTRO_I18N.get("en") or {}
+    trail, cur = [], section
+    while cur:
+        key, href, parent = _SECTIONS[cur]
+        label = (s.get(key) if key else None)
+        if not label:                              # fall back: drive_t lives in intro.json; docs has its own map
+            label = intro.get(key) if key else None
+        if not label:
+            label = _DOCS_LABEL.get(lang, "Dokumenty") if cur == "docs" else cur
+        trail.insert(0, [label, href])
+        cur = parent
+    return trail
+
+
+def breadcrumbs(trail: list = None) -> Markup:
+    if not trail:
+        return Markup("")
+    last = len(trail) - 1
+    parts = "".join(
+        f'<span class="ah-sep" aria-hidden="true">›</span>'
+        f'<a class="ah-crumb{" ah-cur" if i == last else ""}" href="{escape(href)}">{escape(label)}</a>'
+        for i, (label, href) in enumerate(trail))
+    return Markup(f'<nav class="ah-crumbs" aria-label="breadcrumb">{parts}</nav>')
+
+
 def lang_dropdown(lang: str) -> Markup:
     lang = lang if lang in SUPPORTED else "cs"
     opts = "".join(
@@ -169,8 +225,8 @@ def user_menu(lang: str, user) -> Markup:
                   f'<a class="ah-link ah-cta" href="/login?mode=register">{s[1]}</a>')
 
 
-def header(lang: str, user=None, home: str = "/") -> Markup:
-    """Full top bar for page sections: logo · spacer · language selector · login/user menu."""
+def header(lang: str, user=None, home: str = "/", trail: list = None) -> Markup:
+    """Full top bar for page sections: logo · breadcrumbs · spacer · language selector · login/user menu."""
     return Markup(
-        f'{assets()}<header class="ah-bar">{logo(home)}<div class="ah-spacer"></div>'
+        f'{assets()}<header class="ah-bar">{logo(home)}{breadcrumbs(trail)}<div class="ah-spacer"></div>'
         f'<div class="ah-right">{lang_dropdown(lang)}{user_menu(lang, user)}</div></header>')

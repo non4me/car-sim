@@ -39,7 +39,7 @@
   </style>
 </head>
 <body>
-  {{ hdr.header(lang, user) }}
+  {{ hdr.header(lang, user, trail=hdr.crumbs("docs", lang)) }}
   <div class="wrap">
     <a class="back" href="/docs?lang={{ lang }}">← {{ ui.all_laws }}</a>
     {% if translated %}<div class="disc">⚠️ {{ ui.disclaimer }}</div>{% endif %}

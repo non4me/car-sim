@@ -16,7 +16,7 @@
 </head>
 <body class="h-full flex flex-col">
   <!-- standalone header — same bar as every other page (msg 2953); the game sits below it -->
-  <header class="ah-bar">{{ hdr.logo() }}<div class="ah-spacer"></div><div class="ah-right">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div></header>
+  <header class="ah-bar">{{ hdr.logo() }}{{ hdr.breadcrumbs(hdr.crumbs("situations", lang)) }}<div class="ah-spacer"></div><div class="ah-right">{{ hdr.lang_dropdown(lang) }}{{ hdr.user_menu(lang, user) }}</div></header>
 
   <div class="relative w-full flex-1 min-h-0 mx-auto max-w-3xl">
     <canvas id="game"></canvas>

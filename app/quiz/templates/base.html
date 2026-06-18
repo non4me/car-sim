@@ -28,7 +28,7 @@
   </style>
 </head>
 <body class="h-full min-h-full antialiased">
-  {{ hdr.header(lang, user) }}
+  {{ hdr.header(lang, user, trail=hdr.crumbs("photo", lang)) }}
   <div class="mx-auto max-w-xl min-h-full flex flex-col">
     <main class="flex-1 px-4 pb-6">
       {% block content %}{% endblock %}
