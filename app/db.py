@@ -59,9 +59,18 @@ CREATE TABLE IF NOT EXISTS map_objects (
   created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at  TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS attempts (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  domain     TEXT NOT NULL,                          -- 'quiz' | 'situation'
+  topic      TEXT,                                   -- quiz type or situation rule (for the per-topic breakdown)
+  correct    INTEGER NOT NULL DEFAULT 0,             -- 0/1
+  created_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_trips_user ON trips(user_id);
 CREATE INDEX IF NOT EXISTS idx_events_trip ON events(trip_id);
 CREATE INDEX IF NOT EXISTS idx_objects_city ON map_objects(city);
+CREATE INDEX IF NOT EXISTS idx_attempts_user ON attempts(user_id);
 """
 
 
@@ -246,10 +255,45 @@ def delete_object(oid: int) -> None:
         c.execute("DELETE FROM map_objects WHERE id=?", (oid,))
 
 
+# ---- quiz / situation attempts (accounts Phase 2 stats — msg 3128) ----
+
+def record_attempt(user_id: int, domain: str, topic: str | None, correct: bool) -> None:
+    with conn() as c:
+        c.execute(
+            "INSERT INTO attempts (user_id, domain, topic, correct, created_at) VALUES (?,?,?,?,?)",
+            (user_id, domain, (topic or "")[:64], 1 if correct else 0, now_iso()),
+        )
+
+
+def attempt_stats(user_id: int) -> dict:
+    """Per-domain totals + a per-topic breakdown: {'quiz': {n, ok, by_topic:[…]}, 'situation': {…}}."""
+    with conn() as c:
+        rows = c.execute(
+            "SELECT domain, topic, COUNT(*) AS n, COALESCE(SUM(correct),0) AS ok "
+            "FROM attempts WHERE user_id=? GROUP BY domain, topic", (user_id,)).fetchall()
+    out: dict = {}
+    for r in rows:
+        d = out.setdefault(r["domain"], {"n": 0, "ok": 0, "by_topic": []})
+        d["n"] += r["n"]
+        d["ok"] += r["ok"]
+        if r["topic"]:
+            d["by_topic"].append({"topic": r["topic"], "n": r["n"], "ok": r["ok"]})
+    for d in out.values():
+        d["by_topic"].sort(key=lambda x: -x["n"])
+    return out
+
+
+def list_attempts(user_id: int, limit: int = 100000) -> list[dict]:
+    with conn() as c:
+        return [dict(r) for r in c.execute(
+            "SELECT domain, topic, correct, created_at FROM attempts WHERE user_id=? "
+            "ORDER BY created_at DESC LIMIT ?", (user_id, limit)).fetchall()]
+
+
 def export_user(uid: int) -> dict:
     """All of a user's data (GDPR export)."""
     u = get_user(uid)
     trips = list_trips(uid, limit=100000)
     for t in trips:
         t["events"] = trip_events(t["id"])
-    return {"user": u, "trips": trips}
+    return {"user": u, "trips": trips, "attempts": list_attempts(uid)}

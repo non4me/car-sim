@@ -19,6 +19,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from .. import auth, db                                        # Phase-2 per-user quiz stats (msg 3128)
+
 BASE = Path(__file__).resolve().parent                       # app/quiz
 QUIZ_DATA = Path(os.environ.get("QUIZ_DATA_DIR", BASE.parents[1] / "data" / "quiz"))
 PHOTOS = Path(os.environ.get("QUIZ_PHOTOS_DIR", QUIZ_DATA / "photos"))
@@ -294,6 +296,9 @@ def answer(request: Request, choice: int = Form(...), sid: str | None = Cookie(d
     # lives-only game (msg 2827): no timer, so no timeout and no time bonus — a wrong answer costs a life.
     is_correct = (0 <= choice == q["correct_index"])
     timed_out = False
+    user = auth.current_user(request)                          # persist per-user for the profile (msg 3128)
+    if user:
+        db.record_attempt(user["id"], "quiz", QUESTION_BY_ID[s["cur_qid"]].get("type", ""), is_correct)
     prev_level = rank_info(s["xp"], lang)["level"]
 
     points = time_bonus = 0

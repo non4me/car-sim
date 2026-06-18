@@ -23,7 +23,7 @@ SC_DIR = Path(os.environ.get("SCENARIOS_DIR", BASE / "scenarios"))
 
 sim_app = FastAPI(title="car-sim · situation simulator")
 templates = Jinja2Templates(directory=str(BASE / "templates"))
-from ... import auth, ui as _ui                               # shared common header (msg 2837)
+from ... import auth, db, ui as _ui                           # shared common header (msg 2837) + Phase-2 stats
 templates.env.globals["hdr"] = _ui
 sim_app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
@@ -137,4 +137,9 @@ async def attempt(request: Request):
     ATTEMPTS.append({**body, "ts": time.time()})
     if len(ATTEMPTS) > 10000:
         del ATTEMPTS[:5000]
+    # persist per-user for the profile stats (msg 3128); guests stay anonymous
+    user = auth.current_user(request)
+    if user and isinstance(body.get("scenario"), str):
+        rule = (SCENARIOS.get(body["scenario"]) or {}).get("rule", "")
+        db.record_attempt(user["id"], "situation", rule, bool(body.get("ok")))
     return {"ok": True}

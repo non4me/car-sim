@@ -78,6 +78,40 @@
       {% endif %}
     </div>
 
+    {% set RL = {"prednost_zprava":"Přednost zprava","give_way":"Vedlejší · Dej přednost","signal_left":"Semafor · vlevo","signal_ped":"Semafor · chodci","pedestrian":"Přechod pro chodce","left_turn":"Odbočení vlevo","priority_road":"Hlavní silnice"} %}
+    {% set quiz = stats.get('quiz') %}
+    {% set sit = stats.get('situation') %}
+
+    <div class="card">
+      <b>{{ t.me_quiz }}</b>
+      {% if quiz and quiz.n %}
+      <div class="stats">
+        <div class="stat"><div class="n">{{ quiz.n }}</div><div class="l">{{ t.me_answered }}</div></div>
+        <div class="stat"><div class="n">{{ quiz.ok }}</div><div class="l">{{ t.me_correct }}</div></div>
+        <div class="stat"><div class="n">{{ (100*quiz.ok/quiz.n)|round|int }}%</div><div class="l">{{ t.me_accuracy }}</div></div>
+      </div>
+      {% else %}<div class="empty">{{ t.me_no_attempts }}</div>{% endif %}
+    </div>
+
+    <div class="card">
+      <b>{{ t.me_situations }}</b>
+      {% if sit and sit.n %}
+      <div class="stats">
+        <div class="stat"><div class="n">{{ sit.n }}</div><div class="l">{{ t.me_answered }}</div></div>
+        <div class="stat"><div class="n">{{ sit.ok }}</div><div class="l">{{ t.me_correct }}</div></div>
+        <div class="stat"><div class="n">{{ (100*sit.ok/sit.n)|round|int }}%</div><div class="l">{{ t.me_accuracy }}</div></div>
+      </div>
+      {% if sit.by_topic %}
+      <table>
+        <tr><th>{{ t.me_by_rule }}</th><th>{{ t.me_correct }}</th><th>%</th></tr>
+        {% for r in sit.by_topic %}
+        <tr><td>{{ RL.get(r.topic, r.topic or '—') }}</td><td>{{ r.ok }} / {{ r.n }}</td><td>{{ (100*r.ok/r.n)|round|int }}%</td></tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+      {% else %}<div class="empty">{{ t.me_no_attempts }}</div>{% endif %}
+    </div>
+
     <div class="card">
       <b>{{ t.me_gdpr }}</b>
       <div class="empty">{{ t.me_gdpr_sub }}</div>

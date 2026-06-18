@@ -328,7 +328,8 @@ def me(request: Request):
         return redirect
     lang = ui.resolve_lang(request)
     return templates.TemplateResponse(request, "me.html", {
-        "user": u, "trips": db.list_trips(u["id"], limit=50), "lang": lang, "t": app_strings(lang),
+        "user": u, "trips": db.list_trips(u["id"], limit=50), "stats": db.attempt_stats(u["id"]),
+        "lang": lang, "t": app_strings(lang),
     }, headers=HTML_HEADERS)
 
 
