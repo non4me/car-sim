@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="cs" class="h-full">
+<html lang="{{ lang }}" class="h-full">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Ulice Sim — dopravní situace z ptačí perspektivy</title>
+  <title>{{ t.sim_title }}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config={theme:{extend:{colors:{ink:'#0b0e14',panel:'#141925',line:'#222a3a',accent:'#5b9cff',good:'#34d399',bad:'#f87171',warn:'#fbbf24'}}}}</script>
   <style>
@@ -28,7 +28,7 @@
         <div id="hud-hint" class="text-xs text-slate-400 leading-snug mt-0.5"></div>
       </div>
       <div class="bg-panel/80 backdrop-blur rounded-lg px-3 py-2 text-right">
-        <div class="text-[10px] uppercase tracking-wide text-slate-500">Body</div>
+        <div class="text-[10px] uppercase tracking-wide text-slate-500">{{ t.sim_score }}</div>
         <div id="hud-score" class="font-bold tabular-nums text-lg leading-none">100</div>
         <div id="hud-speed" class="text-[10px] text-slate-500 tabular-nums mt-1">0 km/h</div>
       </div>
@@ -41,14 +41,14 @@
         <button data-turn="straight" class="btn ctrl w-14 h-14 rounded-xl bg-panel/90 border border-line text-2xl">↑</button>
         <button data-turn="right" class="btn ctrl w-14 h-14 rounded-xl bg-panel/90 border border-line text-2xl">↱</button>
       </div>
-      <button id="gas" class="btn w-28 h-16 rounded-2xl bg-accent text-ink font-extrabold text-lg shadow-lg shadow-accent/20">JEĎ ▶</button>
+      <button id="gas" class="btn w-28 h-16 rounded-2xl bg-accent text-ink font-extrabold text-lg shadow-lg shadow-accent/20">{{ t.sim_go }}</button>
     </div>
 
     <!-- start / scenario menu -->
     <div id="menu" class="absolute inset-0 bg-ink/95 backdrop-blur flex flex-col items-center justify-center p-6 text-center fade-in">
-      <a href="/quiz" class="absolute top-3 left-3 text-accent text-sm font-bold hover:opacity-80">← {{ 'Quizzes' }}</a>
+      <a href="/quiz" class="absolute top-3 left-3 text-accent text-sm font-bold hover:opacity-80">← {{ t.q_title }}</a>
       <h1 class="text-3xl font-extrabold tracking-tight">Ulice <span class="text-accent">Sim</span></h1>
-      <p class="mt-2 text-slate-400 text-sm max-w-sm">Dopravní situace z ptačí perspektivy. Projeď křižovatkou podle pravidel — a hned se dozvíš proč.</p>
+      <p class="mt-2 text-slate-400 text-sm max-w-sm">{{ t.sim_intro }}</p>
       <div id="scenario-list" class="mt-6 w-full max-w-sm grid gap-2"></div>
     </div>
 
@@ -59,15 +59,15 @@
         <div id="fb-rule" class="mt-2 text-sm text-slate-200 leading-relaxed"></div>
         <div id="fb-cite" class="mt-2 text-xs text-slate-500"></div>
         <div class="mt-4 flex gap-2">
-          <button id="fb-retry" class="btn flex-1 rounded-xl bg-accent text-ink font-bold py-3">Zkusit znovu</button>
-          <button id="fb-next" class="btn flex-1 rounded-xl bg-panel border border-line font-bold py-3 hidden">Další ▶</button>
+          <button id="fb-retry" class="btn flex-1 rounded-xl bg-accent text-ink font-bold py-3">{{ t.sim_retry }}</button>
+          <button id="fb-next" class="btn flex-1 rounded-xl bg-panel border border-line font-bold py-3 hidden">{{ t.sim_next }}</button>
         </div>
-        <button id="fb-menu" class="btn mt-2 w-full text-xs text-slate-400 py-1">← Menu</button>
+        <button id="fb-menu" class="btn mt-2 w-full text-xs text-slate-400 py-1">{{ t.sim_menu }}</button>
       </div>
     </div>
   </div>
 
-  <script>window.SIM_BASE = "{{ base }}";</script>
-  <script type="module" src="{{ base }}/static/js/game.js"></script>
+  <script>window.SIM_BASE = "{{ base }}"; window.SIM_LANG = "{{ lang }}"; window.SIM_I18N = {{ sim_i18n_json|safe }};</script>
+  <script type="module" src="{{ base }}/s/{{ build }}/js/game.js"></script>
 </body>
 </html>
