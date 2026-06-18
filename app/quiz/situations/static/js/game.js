@@ -1,7 +1,8 @@
-// Ulice Sim — REAL-junction decision quiz (msg 3093 redesign). No driving: a short animation of a
-// real, to-scale Czech junction plays out a tricky situation, freezes at the decision point, and the
-// user picks the one correct action from several. The pick is revealed with the rule + § citation.
-// Reuses render.js (drawScene/drawAgent), the Agent path-follower, and the shared i18n.
+// Ulice Sim — REAL-junction decision quiz (msg 3093 redesign; flow per msg 3112). No driving and no menu:
+// the page lands straight on the first situation, plays a short animation of a real Czech junction, freezes
+// at the decision point, the user picks the one correct action, sees the rule + § citation, then advances to
+// the next situation — straight through the series. A progress line of coloured dots (green=correct,
+// red=wrong) + a numeric tally rides along the top.
 import { makeViewBounds, densify } from "./world.js";
 import { buildScene } from "./scene.js";
 import { drawScene, drawAgent } from "./render.js";
@@ -11,6 +12,7 @@ import { STR, RULES, pickLang } from "./i18n.js";
 const B = window.SIM_BASE || "";            // mount prefix (/quiz/situations)
 const LANG = pickLang();
 const T = STR[LANG];
+const FIN = ({ cs: "Dokončit", en: "Finish", ru: "Завершить" })[LANG] || "Dokončit";
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const $ = (id) => document.getElementById(id);
@@ -24,24 +26,10 @@ const STATW = {
 };
 const SW = STATW[LANG] || STATW.cs;
 
-// show the REAL place (junction name + district) + accident-statistics badge so it's clearly a real case
-function setLocationAndStats() {
-  const j = scn.junction || {};
-  $("hud-loc").textContent = j.name ? "📍 " + j.name + (j.district ? " · " + j.district : "") : "";
-  const st = scn.stats, el = $("hud-stats");
-  if (st && st.accidents) {
-    el.textContent = `⚠ ${SW.real}: ${st.accidents} ${SW.acc}`
-      + (st.injured ? ` · ${st.injured} ${SW.inj}` : "")
-      + (st.period ? ` (${st.period})` : "");
-    el.title = st.source || "";
-    el.classList.remove("hidden");
-  } else el.classList.add("hidden");
-}
-
 let cssW = 0, cssH = 0, view = null;
 let scn = null, scene = null, actors = [], ego = null;
-let order = [], curIdx = 0, total = 0, correct = 0;
-let phase = "idle";                          // idle | play | decide | result
+let order = [], curIdx = 0, total = 0, results = [];
+let phase = "idle";                          // idle | play | decide | result | done
 let t = 0, lastTs = 0, raf = 0, answered = false;
 
 // ---------- canvas sizing ----------
@@ -57,21 +45,19 @@ function resize() {
 }
 window.addEventListener("resize", resize);
 
-// ---------- menu ----------
-async function loadMenu() {
-  const list = await (await fetch(B + "/scenarios")).json();
-  order = list.map((s) => s.id); total = list.length;
-  const box = $("scenario-list");
-  box.innerHTML = "";
-  list.forEach((s, i) => {
-    const b = document.createElement("button");
-    b.className = "btn text-left rounded-xl border border-line bg-panel p-3 hover:border-accent/60";
-    const ti = document.createElement("div"); ti.className = "font-bold text-sm"; ti.textContent = `${i + 1}. ${loc(s.title) || s.id}`;
-    const h = document.createElement("div"); h.className = "text-xs text-slate-400 mt-0.5"; h.textContent = loc(s.hint);
-    b.append(ti, h);
-    b.onclick = () => startScenario(i);
-    box.appendChild(b);
-  });
+// ---------- progress line (msg 3112) ----------
+function renderProgress() {
+  $("dots").innerHTML = order.map((_, i) => {
+    let c = "inline-block w-3 h-3 rounded-full ";
+    if (results[i] === "correct") c += "bg-good";
+    else if (results[i] === "wrong") c += "bg-bad";
+    else if (i === curIdx && phase !== "done") c += "bg-accent ring-2 ring-accent/30";
+    else c += "bg-line";
+    return `<span class="${c}" title="${i + 1}"></span>`;
+  }).join("");
+  const ok = results.filter((r) => r === "correct").length;
+  const bad = results.filter((r) => r === "wrong").length;
+  $("tally").innerHTML = `<span class="text-good">✓ ${ok}</span>&nbsp;&nbsp;<span class="text-bad">✗ ${bad}</span>`;
 }
 
 // ---------- scenario lifecycle ----------
@@ -81,23 +67,36 @@ async function startScenario(idx) {
   scene = buildScene(scn);
   view = makeViewBounds(cssW, cssH, scene.bbox);
   buildActors();
-  $("menu").classList.add("hidden");
   $("feedback").classList.add("hidden");
   $("qpanel").classList.add("hidden");
+  $("summary").classList.add("hidden");
   $("hud-title").textContent = loc(scn.title);
   setLocationAndStats();
   $("hud-hint").textContent = loc(scn.hint);
-  $("hud-score").textContent = correct;
-  $("hud-prog").textContent = `${idx + 1}/${total}`;
   answered = false; phase = "play"; t = 0; lastTs = 0;
+  renderProgress();
   cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+}
+
+// show the REAL place (junction name + district) + accident-statistics badge so it's clearly a real case
+function setLocationAndStats() {
+  const j = scn.junction || {};
+  $("hud-loc").textContent = j.name ? "📍 " + j.name + (j.district ? " · " + j.district : "") : "";
+  const st = scn.stats, el = $("hud-stats");
+  if (st && st.accidents) {
+    el.textContent = `⚠ ${SW.real}: ${st.accidents} ${SW.acc}`
+      + (st.injured ? ` · ${st.injured} ${SW.inj}` : "")
+      + (st.period ? ` (${st.period})` : "");
+    el.title = st.source || "";
+    el.classList.remove("hidden");
+  } else el.classList.add("hidden");
 }
 
 function buildActors() {
   actors = []; ego = null;
   for (const a of scn.actors || []) {
     const path = densify(a.path.map((p) => p.slice()), 0.4);
-    const color = a.color || (a.kind === "ego" ? "#5b9cff" : a.kind === "tram" ? "#cbd5e1" : "#f59e0b");
+    const color = a.color || (a.kind === "ego" ? "#5b9cff" : a.kind === "tram" ? "#cbd5e1" : a.kind === "ped" ? "#fbbf24" : "#f59e0b");
     const ag = new Agent(path, { kind: a.kind === "ego" ? "car" : a.kind, color, cruiseV: a.v || 8 });
     ag.kindTag = a.kind; ag.spawnT = a.spawn || 0;
     ag.v = a.v || 8;                          // already in motion when the clip starts
@@ -123,7 +122,6 @@ function enterDecide() {
   phase = "decide";
   cancelAnimationFrame(raf);
   draw();
-  // build the question panel
   $("q-prompt").textContent = loc(scn.question);
   const box = $("q-options"); box.innerHTML = "";
   (scn.options || []).forEach((opt, i) => {
@@ -131,26 +129,29 @@ function enterDecide() {
     btn.className = "btn w-full text-left rounded-xl border border-line bg-panel/95 px-4 py-3 text-sm font-semibold hover:border-accent";
     btn.textContent = loc(opt.text);
     btn.dataset.i = i;
-    btn.onclick = () => answer(i, btn);
+    btn.onclick = () => answer(i);
     box.appendChild(btn);
   });
   $("qpanel").classList.remove("hidden");
 }
 
-function answer(i, btn) {
+function answer(i) {
   if (answered) return;
   answered = true; phase = "result";
   const opt = scn.options[i];
   const good = !!opt.correct;
-  if (good) correct++;
-  $("hud-score").textContent = correct;
-  // colour the option buttons: chosen + the actually-correct one
+  results[curIdx] = good ? "correct" : "wrong";
+  renderProgress();
   document.querySelectorAll("#q-options button").forEach((b, j) => {
     b.disabled = true;
     const o = scn.options[j];
     if (o.correct) b.className = b.className.replace("border-line bg-panel/95", "border-good bg-good/15 text-good");
     else if (j === i) b.className = b.className.replace("border-line bg-panel/95", "border-bad bg-bad/15 text-bad");
   });
+  fetch(B + "/api/attempt", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scenario: scn.id, ok: good }),
+  }).catch(() => {});
   showFeedback(good, opt);
 }
 
@@ -159,26 +160,28 @@ function showFeedback(good, opt) {
   $("fb-verdict").className = "text-lg font-extrabold " + (good ? "text-good" : "text-bad");
   const ruleTxt = opt.rule && RULES[opt.rule] ? RULES[opt.rule][LANG] || "" : "";
   $("fb-rule").textContent = loc(scn.explain) || ruleTxt;
-  $("fb-cite").textContent = scn.citation || (opt.rule && RULES[opt.rule] ? "" : "");
-  const last = curIdx >= order.length - 1;
-  $("fb-next").classList.toggle("hidden", last);
-  $("fb-retry").textContent = T.retry; $("fb-next").textContent = T.next; $("fb-menu").textContent = T.menu;
-  // post the attempt (best-effort)
-  fetch(B + "/api/attempt", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ scenario: scn.id, ok: good, correct }),
-  }).catch(() => {});
+  $("fb-cite").textContent = scn.citation || "";
+  $("fb-next").textContent = curIdx >= total - 1 ? FIN : T.next;
   $("feedback").classList.remove("hidden");
 }
 
-$("fb-retry").onclick = () => startScenario(curIdx);
-$("fb-next").onclick = () => { if (curIdx < order.length - 1) startScenario(curIdx + 1); else showMenu(); };
-$("fb-menu").onclick = showMenu;
-function showMenu() {
-  cancelAnimationFrame(raf); phase = "idle";
-  $("feedback").classList.add("hidden"); $("qpanel").classList.add("hidden");
-  $("menu").classList.remove("hidden");
+$("fb-next").onclick = () => {
+  $("feedback").classList.add("hidden");
+  if (curIdx < total - 1) startScenario(curIdx + 1);
+  else showSummary();
+};
+
+function showSummary() {
+  cancelAnimationFrame(raf); phase = "done";
+  renderProgress();
+  const ok = results.filter((r) => r === "correct").length;
+  $("sum-title").textContent = T.finished;
+  $("sum-score").textContent = `${ok} / ${total}`;
+  $("sum-sub").textContent = T.score;
+  $("sum-restart").textContent = "↻ " + T.retry;
+  $("summary").classList.remove("hidden");
 }
+$("sum-restart").onclick = () => { results = new Array(total).fill(null); startScenario(0); };
 
 // ---------- render ----------
 function draw() {
@@ -202,17 +205,21 @@ function drawEgoMarker() {
   ctx.restore();
 }
 
-// localize the static menu/feedback chrome
-$("fb-retry").textContent = T.retry;
-$("fb-menu").textContent = T.menu;
-
 // ---------- debug hook ----------
 window.__sim = {
   start: (i) => startScenario(i),
   answer: (i) => { const b = document.querySelector(`#q-options button[data-i="${i}"]`); if (b) b.click(); },
-  get state() { return { phase, t, curIdx, correct, total, ego: ego && ego.pos, decideT: scn && scn.decision?.t }; },
+  next: () => $("fb-next").click(),
+  get state() { return { phase, t, curIdx, total, results: results.slice(), ego: ego && ego.pos }; },
 };
 
-// ---------- boot ----------
-resize();
-loadMenu();
+// ---------- boot: straight into the first situation (msg 3112), no menu ----------
+async function boot() {
+  const list = await (await fetch(B + "/scenarios")).json();
+  order = list.map((s) => s.id); total = list.length;
+  results = new Array(total).fill(null);
+  resize();
+  renderProgress();
+  if (total) startScenario(0);
+}
+boot();

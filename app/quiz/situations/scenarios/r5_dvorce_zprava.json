@@ -1,0 +1,383 @@
+{
+  "id": "r5_dvorce_zprava",
+  "order": 5,
+  "city": "praha",
+  "junction": {
+    "name": "Na Dvorcích × Nová cesta",
+    "district": "Praha 4 · Podolí",
+    "lat": 50.039109,
+    "lon": 14.437258,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Kdo jede první?",
+    "en": "Who goes first?",
+    "ru": "Кто едет первым?"
+  },
+  "hint": {
+    "cs": "Neoznačená křižovatka v Podolí. Sledujte a rozhodněte.",
+    "en": "An unmarked junction in Podolí. Watch and decide.",
+    "ru": "Нерегулируемый перекрёсток в Подоли. Смотрите и решайте."
+  },
+  "view": {
+    "minx": -50,
+    "miny": -50,
+    "maxx": 50,
+    "maxy": 50
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Na Dvorcích",
+        "centerline": [
+          [
+            18.9,
+            37.5
+          ],
+          [
+            18.7,
+            36.6
+          ],
+          [
+            17.6,
+            32.9
+          ],
+          [
+            15.8,
+            28.0
+          ],
+          [
+            13.7,
+            22.9
+          ],
+          [
+            11.8,
+            18.9
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Dvorcích",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -8.6,
+            -41.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Nová cesta",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            10.2,
+            -4.4
+          ],
+          [
+            22.4,
+            -10.2
+          ],
+          [
+            32.1,
+            -15.3
+          ],
+          [
+            37.6,
+            -18.6
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Nová cesta",
+        "centerline": [
+          [
+            -40.9,
+            9.6
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Dvorcích",
+        "centerline": [
+          [
+            18.9,
+            37.5
+          ],
+          [
+            18.7,
+            36.6
+          ],
+          [
+            17.6,
+            32.9
+          ],
+          [
+            15.8,
+            28.0
+          ],
+          [
+            13.7,
+            22.9
+          ],
+          [
+            11.8,
+            18.9
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Nová cesta",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            10.2,
+            -4.4
+          ],
+          [
+            22.4,
+            -10.2
+          ],
+          [
+            32.1,
+            -15.3
+          ],
+          [
+            37.6,
+            -18.6
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [],
+    "labels": [
+      {
+        "x": 13.1,
+        "y": 21.5,
+        "text": "Na Dvorcích",
+        "rot": 1.127
+      },
+      {
+        "x": -24.5,
+        "y": 5.8,
+        "text": "Nová cesta",
+        "rot": -0.231
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -10.3,
+          -40.7
+        ],
+        [
+          -7.7,
+          -30.9
+        ],
+        [
+          -5.2,
+          -21.7
+        ],
+        [
+          -2.6,
+          -13.2
+        ],
+        [
+          -0.0,
+          -5.3
+        ],
+        [
+          2.5,
+          1.9
+        ],
+        [
+          5.1,
+          8.5
+        ],
+        [
+          7.7,
+          14.4
+        ],
+        [
+          10.2,
+          19.7
+        ],
+        [
+          12.1,
+          23.6
+        ],
+        [
+          14.2,
+          28.6
+        ],
+        [
+          15.9,
+          33.4
+        ],
+        [
+          17.0,
+          37.0
+        ],
+        [
+          17.2,
+          37.9
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          -40.5,
+          11.3
+        ],
+        [
+          -30.8,
+          8.6
+        ],
+        [
+          -22.1,
+          6.2
+        ],
+        [
+          -14.3,
+          4.0
+        ],
+        [
+          -7.4,
+          2.1
+        ],
+        [
+          -1.4,
+          0.5
+        ],
+        [
+          3.6,
+          -0.9
+        ],
+        [
+          7.8,
+          -2.0
+        ],
+        [
+          11.0,
+          -2.8
+        ],
+        [
+          23.2,
+          -8.7
+        ],
+        [
+          33.0,
+          -13.8
+        ],
+        [
+          38.5,
+          -17.1
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Křižovatka bez značek. Zprava přijíždí vozidlo. Jak budete pokračovat?",
+    "en": "A junction with no signs. A vehicle comes from the right. How do you proceed?",
+    "ru": "Перекрёсток без знаков. Справа приближается автомобиль. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Projedu, jsem na hlavnější ulici",
+        "en": "I go, my street looks more major",
+        "ru": "Проеду — моя улица главнее на вид"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost vozidlu zprava",
+        "en": "Give way to the vehicle on the right",
+        "ru": "Уступлю автомобилю справа"
+      },
+      "correct": true,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Vjedu, kdo dřív přijede",
+        "en": "First come, first served",
+        "ru": "Кто первый подъехал, тот и едет"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    }
+  ],
+  "explain": {
+    "cs": "Bez dopravních značek nerozhoduje šířka ani „důležitost“ ulice — platí přednost zprava. Vozidlu přijíždějícímu zprava musíte dát přednost.",
+    "en": "With no signs, the width or apparent importance of a street doesn't matter — priority-to-the-right applies. You must give way to the vehicle coming from your right.",
+    "ru": "Без знаков ширина и кажущаяся «важность» улицы не имеют значения — действует «помеха справа». Автомобилю справа нужно уступить."
+  },
+  "citation": "§ 22 odst. 1 z. 361/2000 Sb."
+}

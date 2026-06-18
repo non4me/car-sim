@@ -122,6 +122,9 @@ EXTRACTS = {
     "nalanech":      dict(city="praha", streets="Na Líše|Na Lánech",     near=(-98, -1199),   r=40, name="Na Líše × Na Lánech", district="Praha 4 · Michle"),
     "bulovka":       dict(city="praha", streets="Povltavská|Bulovka",    near=(-117, 6000),   r=55, name="Povltavská × Bulovka", district="Praha 8 · Libeň"),
     "strboholy":     dict(city="praha", streets="Průmyslová|Černokostelecká", near=(4300, -200), r=60, name="Průmyslová × Černokostelecká", district="Praha 10 · Štěrboholy"),
+    "tulipan":       dict(city="praha", streets="Tulipánová|Želivecká",   near=(2240, 149),    r=42, name="Tulipánová × Želivecká", district="Praha 10 · Záběhlice"),
+    "dvorce":        dict(city="praha", streets="Na Dvorcích|Nová cesta", near=(-2018, -2199), r=42, name="Na Dvorcích × Nová cesta", district="Praha 4 · Podolí"),
+    "ohradni":       dict(city="praha", streets="Michelská|Ohradní",      near=(-838, -763),   r=46, name="Michelská × Ohradní", district="Praha 4 · Michle"),
 }
 
 CITE = {
@@ -130,6 +133,7 @@ CITE = {
     "priority_road": "§ 22 z. 361/2000 Sb.",
     "tram_straight_yields": "§ 21 a § 22 z. 361/2000 Sb.",
     "tram_turning": "§ 21 odst. 7 z. 361/2000 Sb.",
+    "pedestrian": "§ 5 odst. 2 h) a § 54 z. 361/2000 Sb.",
 }
 
 # Each spec: an EXTRACTS key + the teaching layer + high-level actors (resolved to real lane paths).
@@ -207,6 +211,54 @@ SPECS = [
                  "ru": "Вы едете по второстепенной дороге (знак «Уступи дорогу»), поэтому обязаны уступить всему движению по главной — включая трамвай. Выезжать можно только когда главная свободна."},
         rule="give_way",
     ),
+    dict(
+        id="r4_tulipan_chodec", order=4, extract="tulipan",
+        title={"cs": "Chodec na přechodu", "en": "Pedestrian on the crossing", "ru": "Пешеход на переходе"},
+        hint={"cs": "Blížíte se k přechodu pro chodce. Sledujte a rozhodněte.",
+              "en": "You approach a pedestrian crossing. Watch and decide.",
+              "ru": "Вы приближаетесь к пешеходному переходу. Смотрите и решайте."},
+        actors=[
+            dict(kind="ego", frm="Tulipánová@SE", to="straight", v=6, spawn=0.0),
+            dict(kind="ped", crossing=1, side=1, v=1.3, spawn=0.5),
+        ],
+        decision=dict(t=2.8),
+        question={"cs": "Před vámi je přechod pro chodce a chodec vstupuje do vozovky. Jak budete pokračovat?",
+                  "en": "There's a pedestrian crossing ahead and a pedestrian is stepping onto it. How do you proceed?",
+                  "ru": "Впереди пешеходный переход, и пешеход выходит на проезжую часть. Как вы поступите?"},
+        options=[
+            dict(text={"cs": "Projedu, než chodec dojde", "en": "Drive through before they reach me", "ru": "Проеду, пока пешеход не дошёл"}, correct=False, rule="pedestrian"),
+            dict(text={"cs": "Dám chodci přednost a počkám", "en": "Give way to the pedestrian and wait", "ru": "Уступлю пешеходу и подожду"}, correct=True, rule="pedestrian"),
+            dict(text={"cs": "Zatroubím, ať si pospíší", "en": "Honk so they hurry up", "ru": "Посигналю, чтобы поторопился"}, correct=False, rule="pedestrian"),
+        ],
+        explain={"cs": "Řidič musí dát přednost chodci, který je na přechodu nebo na něj vstupuje. Nesmíte ho ohrozit ani omezit — zastavte a nechte ho přejít.",
+                 "en": "A driver must give way to a pedestrian who is on the crossing or stepping onto it. You must not endanger or obstruct them — stop and let them cross.",
+                 "ru": "Водитель обязан уступить пешеходу, который находится на переходе или вступает на него. Нельзя создавать ему помеху или опасность — остановитесь и пропустите."},
+        rule="pedestrian",
+    ),
+    dict(
+        id="r5_dvorce_zprava", order=5, extract="dvorce",
+        title={"cs": "Kdo jede první?", "en": "Who goes first?", "ru": "Кто едет первым?"},
+        hint={"cs": "Neoznačená křižovatka v Podolí. Sledujte a rozhodněte.",
+              "en": "An unmarked junction in Podolí. Watch and decide.",
+              "ru": "Нерегулируемый перекрёсток в Подоли. Смотрите и решайте."},
+        actors=[
+            dict(kind="ego", frm="Na Dvorcích@N", to="straight", v=7, spawn=0.0),
+            dict(kind="car", frm="Nová cesta@W", to="straight", v=7, spawn=0.0),
+        ],
+        decision=dict(t=3.0),
+        question={"cs": "Křižovatka bez značek. Zprava přijíždí vozidlo. Jak budete pokračovat?",
+                  "en": "A junction with no signs. A vehicle comes from the right. How do you proceed?",
+                  "ru": "Перекрёсток без знаков. Справа приближается автомобиль. Как вы поступите?"},
+        options=[
+            dict(text={"cs": "Projedu, jsem na hlavnější ulici", "en": "I go, my street looks more major", "ru": "Проеду — моя улица главнее на вид"}, correct=False, rule="prednost_zprava"),
+            dict(text={"cs": "Dám přednost vozidlu zprava", "en": "Give way to the vehicle on the right", "ru": "Уступлю автомобилю справа"}, correct=True, rule="prednost_zprava"),
+            dict(text={"cs": "Vjedu, kdo dřív přijede", "en": "First come, first served", "ru": "Кто первый подъехал, тот и едет"}, correct=False, rule="prednost_zprava"),
+        ],
+        explain={"cs": "Bez dopravních značek nerozhoduje šířka ani „důležitost“ ulice — platí přednost zprava. Vozidlu přijíždějícímu zprava musíte dát přednost.",
+                 "en": "With no signs, the width or apparent importance of a street doesn't matter — priority-to-the-right applies. You must give way to the vehicle coming from your right.",
+                 "ru": "Без знаков ширина и кажущаяся «важность» улицы не имеют значения — действует «помеха справа». Автомобилю справа нужно уступить."},
+        rule="prednost_zprava",
+    ),
 ]
 
 
@@ -219,7 +271,16 @@ def build_one(spec):
     core_r = spec.get("core_r", geom["core"]["r"])
     actors = []
     for a in spec["actors"]:
-        path = a["path"] if "path" in a else actor_path(arms, a["frm"], a["to"], a.get("lane", 0.5), core_r)
+        if "path" in a:
+            path = a["path"]
+        elif a["kind"] == "ped" and "crossing" in a:          # pedestrian across a real zebra
+            c = geom["crossings"][a["crossing"]]
+            ctr, d, hw, s = c["center"], c["dir"], c["halfW"] + 1.0, a.get("side", 1)
+            perp = [-d[1], d[0]]
+            path = [[round(ctr[0] + perp[0] * hw * s, 1), round(ctr[1] + perp[1] * hw * s, 1)],
+                    [round(ctr[0] - perp[0] * hw * s, 1), round(ctr[1] - perp[1] * hw * s, 1)]]
+        else:
+            path = actor_path(arms, a["frm"], a["to"], a.get("lane", 0.5), core_r)
         act = {"kind": a["kind"], "path": path, "v": a.get("v", 8), "spawn": a.get("spawn", 0)}
         if "color" in a:
             act["color"] = a["color"]

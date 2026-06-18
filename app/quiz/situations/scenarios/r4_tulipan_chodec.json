@@ -1,0 +1,341 @@
+{
+  "id": "r4_tulipan_chodec",
+  "order": 4,
+  "city": "praha",
+  "junction": {
+    "name": "Tulipánová × Želivecká",
+    "district": "Praha 10 · Záběhlice",
+    "lat": 50.060347,
+    "lon": 14.496843,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Chodec na přechodu",
+    "en": "Pedestrian on the crossing",
+    "ru": "Пешеход на переходе"
+  },
+  "hint": {
+    "cs": "Blížíte se k přechodu pro chodce. Sledujte a rozhodněte.",
+    "en": "You approach a pedestrian crossing. Watch and decide.",
+    "ru": "Вы приближаетесь к пешеходному переходу. Смотрите и решайте."
+  },
+  "view": {
+    "minx": -50,
+    "miny": -50,
+    "maxx": 50,
+    "maxy": 50
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Želivecká",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -5.0,
+            -3.6
+          ],
+          [
+            -9.2,
+            -9.3
+          ],
+          [
+            -11.0,
+            -24.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Želivecká",
+        "centerline": [
+          [
+            -11.0,
+            -24.1
+          ],
+          [
+            -12.5,
+            -35.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Tulipánová",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            5.4,
+            3.4
+          ],
+          [
+            8.8,
+            7.4
+          ],
+          [
+            15.5,
+            18.5
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Želivecká",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            16.9,
+            -6.5
+          ],
+          [
+            27.6,
+            -12.0
+          ],
+          [
+            33.5,
+            -16.5
+          ],
+          [
+            37.1,
+            -19.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Tulipánová",
+        "centerline": [
+          [
+            15.5,
+            18.5
+          ],
+          [
+            23.6,
+            34.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Želivecká",
+        "centerline": [
+          [
+            -41.4,
+            7.3
+          ],
+          [
+            -23.1,
+            4.5
+          ],
+          [
+            -9.0,
+            2.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [
+      {
+        "center": [
+          -5.0,
+          -3.6
+        ],
+        "dir": [
+          -0.705,
+          -0.709
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          15.5,
+          18.5
+        ],
+        "dir": [
+          0.517,
+          0.856
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -23.1,
+          4.5
+        ],
+        "dir": [
+          0.988,
+          -0.153
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": 23.2,
+        "y": -9.7,
+        "text": "Želivecká",
+        "rot": -0.475
+      },
+      {
+        "x": 11.7,
+        "y": 12.2,
+        "text": "Tulipánová",
+        "rot": 1.028
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          17.0,
+          17.6
+        ],
+        [
+          10.1,
+          6.3
+        ],
+        [
+          6.3,
+          1.9
+        ],
+        [
+          4.7,
+          1.3
+        ],
+        [
+          3.1,
+          0.5
+        ],
+        [
+          1.4,
+          -0.6
+        ],
+        [
+          -0.3,
+          -1.9
+        ],
+        [
+          -2.0,
+          -3.4
+        ],
+        [
+          -3.8,
+          -5.2
+        ],
+        [
+          -5.6,
+          -7.3
+        ],
+        [
+          -7.5,
+          -9.5
+        ],
+        [
+          -9.3,
+          -24.3
+        ]
+      ],
+      "v": 6,
+      "spawn": 0.0
+    },
+    {
+      "kind": "ped",
+      "path": [
+        [
+          11.6,
+          20.8
+        ],
+        [
+          19.4,
+          16.2
+        ]
+      ],
+      "v": 1.3,
+      "spawn": 0.5
+    }
+  ],
+  "decision": {
+    "t": 2.8
+  },
+  "question": {
+    "cs": "Před vámi je přechod pro chodce a chodec vstupuje do vozovky. Jak budete pokračovat?",
+    "en": "There's a pedestrian crossing ahead and a pedestrian is stepping onto it. How do you proceed?",
+    "ru": "Впереди пешеходный переход, и пешеход выходит на проезжую часть. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Projedu, než chodec dojde",
+        "en": "Drive through before they reach me",
+        "ru": "Проеду, пока пешеход не дошёл"
+      },
+      "correct": false,
+      "rule": "pedestrian"
+    },
+    {
+      "text": {
+        "cs": "Dám chodci přednost a počkám",
+        "en": "Give way to the pedestrian and wait",
+        "ru": "Уступлю пешеходу и подожду"
+      },
+      "correct": true,
+      "rule": "pedestrian"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím, ať si pospíší",
+        "en": "Honk so they hurry up",
+        "ru": "Посигналю, чтобы поторопился"
+      },
+      "correct": false,
+      "rule": "pedestrian"
+    }
+  ],
+  "explain": {
+    "cs": "Řidič musí dát přednost chodci, který je na přechodu nebo na něj vstupuje. Nesmíte ho ohrozit ani omezit — zastavte a nechte ho přejít.",
+    "en": "A driver must give way to a pedestrian who is on the crossing or stepping onto it. You must not endanger or obstruct them — stop and let them cross.",
+    "ru": "Водитель обязан уступить пешеходу, который находится на переходе или вступает на него. Нельзя создавать ему помеху или опасность — остановитесь и пропустите."
+  },
+  "citation": "§ 5 odst. 2 h) a § 54 z. 361/2000 Sb."
+}
