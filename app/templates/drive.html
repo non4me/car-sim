@@ -254,5 +254,37 @@
     }
   </script>
   <script type="module" src="{{ asset_base }}/drive/main.js"></script>
+  <script>
+  // Profile stats (msg 3128): sample an approximate drive session — distance, time in motion, violations —
+  // and beacon it on leave. Self-contained (reads window.__drive); the server stores it only for a
+  // logged-in session, so guests record nothing. goTo/teleport jumps are ignored by the 250 m gate.
+  (function () {
+    var lastX = null, lastY = null, dist = 0, moveT = 0, viol = 0, wasViol = false;
+    setInterval(function () {
+      var d = window.__drive; if (!d || !d.car) return;
+      var c = d.car, r = (d.rules && d.rules()) || {};
+      if (lastX !== null) {
+        var m = Math.hypot(c.x - lastX, c.y - lastY);
+        if (m < 250) { dist += m; if (m > 0.3) moveT += 1; }   // skip teleports; count seconds moving
+      }
+      lastX = c.x; lastY = c.y;
+      var v = !!(r.oncoming || r.offRoad || r.over || r.boundary);   // rules engine keys (limits.js)
+      if (v && !wasViol) viol++;                               // count each new violation (rising edge)
+      wasViol = v;
+    }, 1000);
+    function flush() {
+      if (dist < 30) return;
+      try {
+        var C = window.CARSIM || {};
+        var payload = JSON.stringify({ city: C.city || "", district: C.cityName || C.district || "",
+          distance_m: Math.round(dist), duration_s: moveT, n_violations: viol });
+        navigator.sendBeacon("/api/drive/session", new Blob([payload], { type: "application/json" }));
+        dist = 0; moveT = 0; viol = 0;                         // reset so a lingering page can't double-count
+      } catch (e) { /* sendBeacon unsupported → drop the sample */ }
+    }
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") flush(); });
+  })();
+  </script>
 </body>
 </html>

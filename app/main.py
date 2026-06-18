@@ -350,9 +350,31 @@ def me_delete(request: Request):
     u, redirect = _require_login(request)
     if redirect:
         return redirect
-    db.delete_user(u["id"])              # cascades trips/events
+    db.delete_user(u["id"])              # cascades trips/events/attempts
     auth.logout_user(request)
     return RedirectResponse("/", status_code=303)
+
+
+@app.post("/api/drive/session")
+async def drive_session(request: Request):
+    """Record an approximate /drive session for the profile stats (msg 3128). Sent via sendBeacon on
+    pagehide; guests are silently ignored (no account = nothing stored). Sanity-clamped against garbage."""
+    u = auth.current_user(request)
+    if u is None:
+        return JSONResponse({"ok": False})
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    dist = float(body.get("distance_m") or 0)
+    if not (20 <= dist < 5_000_000):                 # ignore idle visits + clamp out impossible values
+        return JSONResponse({"ok": False})
+    now = db.now_iso()
+    db.create_trip(u["id"], city=(body.get("city") or "")[:32], district=(body.get("district") or "")[:64],
+                   started_at=now, ended_at=now, distance_m=dist,
+                   duration_s=max(0.0, min(float(body.get("duration_s") or 0), 86400.0)),
+                   n_violations=max(0, min(int(body.get("n_violations") or 0), 100000)))
+    return JSONResponse({"ok": True})
 
 
 def _require_admin(request: Request):
