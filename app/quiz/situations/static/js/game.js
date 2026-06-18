@@ -16,6 +16,28 @@ const ctx = canvas.getContext("2d");
 const $ = (id) => document.getElementById(id);
 const loc = (o) => (o ? (o[LANG] || o.cs || o.en || Object.values(o)[0] || "") : "");
 
+// accident-stats vocabulary (cs/en/ru authored; other langs fall back to cs — folded into app.json later)
+const STATW = {
+  cs: { real: "Reálná nehodová křižovatka", acc: "nehod", inj: "zraněných" },
+  en: { real: "Real accident hot-spot", acc: "crashes", inj: "injured" },
+  ru: { real: "Реальный аварийный перекрёсток", acc: "ДТП", inj: "ранены" },
+};
+const SW = STATW[LANG] || STATW.cs;
+
+// show the REAL place (junction name + district) + accident-statistics badge so it's clearly a real case
+function setLocationAndStats() {
+  const j = scn.junction || {};
+  $("hud-loc").textContent = j.name ? "📍 " + j.name + (j.district ? " · " + j.district : "") : "";
+  const st = scn.stats, el = $("hud-stats");
+  if (st && st.accidents) {
+    el.textContent = `⚠ ${SW.real}: ${st.accidents} ${SW.acc}`
+      + (st.injured ? ` · ${st.injured} ${SW.inj}` : "")
+      + (st.period ? ` (${st.period})` : "");
+    el.title = st.source || "";
+    el.classList.remove("hidden");
+  } else el.classList.add("hidden");
+}
+
 let cssW = 0, cssH = 0, view = null;
 let scn = null, scene = null, actors = [], ego = null;
 let order = [], curIdx = 0, total = 0, correct = 0;
@@ -63,6 +85,7 @@ async function startScenario(idx) {
   $("feedback").classList.add("hidden");
   $("qpanel").classList.add("hidden");
   $("hud-title").textContent = loc(scn.title);
+  setLocationAndStats();
   $("hud-hint").textContent = loc(scn.hint);
   $("hud-score").textContent = correct;
   $("hud-prog").textContent = `${idx + 1}/${total}`;

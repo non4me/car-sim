@@ -1,0 +1,670 @@
+{
+  "id": "r3_bulovka_vedlejsi",
+  "order": 3,
+  "city": "praha",
+  "junction": {
+    "name": "Povltavská × Bulovka",
+    "district": "Praha 8 · Libeň",
+    "lat": 50.113208,
+    "lon": 14.459675,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Vedlejší silnice a tramvaj",
+    "en": "Minor road and a tram",
+    "ru": "Второстепенная и трамвай"
+  },
+  "hint": {
+    "cs": "Přijíždíte po vedlejší silnici (Bulovka). Sledujte a rozhodněte.",
+    "en": "You arrive on the minor road (Bulovka). Watch and decide.",
+    "ru": "Вы подъезжаете по второстепенной (Bulovka). Смотрите и решайте."
+  },
+  "view": {
+    "minx": -63,
+    "miny": -63,
+    "maxx": 63,
+    "maxy": 63
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Povltavská",
+        "centerline": [
+          [
+            43.3,
+            34.0
+          ],
+          [
+            34.3,
+            26.2
+          ],
+          [
+            8.1,
+            6.2
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": true
+      },
+      {
+        "name": "Povltavská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -9.5,
+            -6.7
+          ],
+          [
+            -22.2,
+            -13.9
+          ],
+          [
+            -36.1,
+            -21.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": true
+      },
+      {
+        "name": "Bulovka",
+        "centerline": [
+          [
+            6.3,
+            -7.8
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Bulovka",
+        "centerline": [
+          [
+            25.3,
+            -31.8
+          ],
+          [
+            22.4,
+            -27.5
+          ],
+          [
+            10.6,
+            -12.7
+          ],
+          [
+            6.3,
+            -7.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Povltavská",
+        "centerline": [
+          [
+            -36.1,
+            -21.0
+          ],
+          [
+            -48.5,
+            -25.9
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": true
+      },
+      {
+        "name": "Povltavská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -9.5,
+            -6.7
+          ],
+          [
+            -22.2,
+            -13.9
+          ],
+          [
+            -36.1,
+            -21.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": true
+      },
+      {
+        "name": "Bulovka",
+        "centerline": [
+          [
+            25.3,
+            -31.8
+          ],
+          [
+            22.4,
+            -27.5
+          ],
+          [
+            10.6,
+            -12.7
+          ],
+          [
+            6.3,
+            -7.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Povltavská",
+        "centerline": [
+          [
+            43.3,
+            34.0
+          ],
+          [
+            34.3,
+            26.2
+          ],
+          [
+            8.1,
+            6.2
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": true
+      },
+      {
+        "name": "Bulovka",
+        "centerline": [
+          [
+            25.3,
+            -31.8
+          ],
+          [
+            22.4,
+            -27.5
+          ],
+          [
+            10.6,
+            -12.7
+          ],
+          [
+            6.3,
+            -7.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Bulovka",
+        "centerline": [
+          [
+            33.8,
+            -43.4
+          ],
+          [
+            33.4,
+            -42.9
+          ],
+          [
+            25.3,
+            -31.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Povltavská",
+        "centerline": [
+          [
+            43.3,
+            34.0
+          ],
+          [
+            34.3,
+            26.2
+          ],
+          [
+            8.1,
+            6.2
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": true
+      }
+    ],
+    "rails": [
+      [
+        [
+          30.7,
+          -4.5
+        ],
+        [
+          17.2,
+          -17.7
+        ],
+        [
+          3.2,
+          -30.5
+        ]
+      ],
+      [
+        [
+          -2.1,
+          -35.0
+        ],
+        [
+          -20.8,
+          -50.9
+        ]
+      ],
+      [
+        [
+          27.7,
+          -1.5
+        ],
+        [
+          14.3,
+          -14.5
+        ],
+        [
+          0.4,
+          -27.6
+        ]
+      ],
+      [
+        [
+          -3.9,
+          -31.3
+        ],
+        [
+          -25.2,
+          -48.9
+        ]
+      ],
+      [
+        [
+          0.4,
+          -27.6
+        ],
+        [
+          -2.5,
+          -30.1
+        ]
+      ],
+      [
+        [
+          3.2,
+          -30.5
+        ],
+        [
+          -0.7,
+          -33.8
+        ]
+      ],
+      [
+        [
+          52.2,
+          17.4
+        ],
+        [
+          30.7,
+          -4.5
+        ]
+      ],
+      [
+        [
+          30.7,
+          -4.5
+        ],
+        [
+          17.2,
+          -17.7
+        ],
+        [
+          3.2,
+          -30.5
+        ]
+      ],
+      [
+        [
+          50.5,
+          21.8
+        ],
+        [
+          27.7,
+          -1.5
+        ]
+      ],
+      [
+        [
+          27.7,
+          -1.5
+        ],
+        [
+          14.3,
+          -14.5
+        ],
+        [
+          0.4,
+          -27.6
+        ]
+      ],
+      [
+        [
+          30.7,
+          -4.5
+        ],
+        [
+          17.2,
+          -17.7
+        ],
+        [
+          3.2,
+          -30.5
+        ]
+      ],
+      [
+        [
+          52.2,
+          17.4
+        ],
+        [
+          30.7,
+          -4.5
+        ]
+      ],
+      [
+        [
+          50.5,
+          21.8
+        ],
+        [
+          27.7,
+          -1.5
+        ]
+      ]
+    ],
+    "signs": [
+      {
+        "code": "P4",
+        "x": 5.5,
+        "y": 1.2
+      },
+      {
+        "code": "P2",
+        "x": 9.0,
+        "y": 0.6
+      },
+      {
+        "code": "P2",
+        "x": -9.0,
+        "y": -0.2
+      },
+      {
+        "code": "P4",
+        "x": 7.5,
+        "y": -16.7
+      },
+      {
+        "code": "P4",
+        "x": 0.8,
+        "y": -9.0
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          8.1,
+          6.2
+        ],
+        "dir": [
+          -0.795,
+          -0.607
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": 26.2,
+        "y": 20.0,
+        "text": "Povltavská",
+        "rot": 0.652
+      },
+      {
+        "x": 19.9,
+        "y": -24.4,
+        "text": "Bulovka",
+        "rot": -0.898
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          23.8,
+          -32.8
+        ],
+        [
+          21.0,
+          -28.6
+        ],
+        [
+          9.3,
+          -13.9
+        ],
+        [
+          5.0,
+          -9.0
+        ],
+        [
+          3.9,
+          -6.7
+        ],
+        [
+          3.2,
+          -4.6
+        ],
+        [
+          2.9,
+          -2.4
+        ],
+        [
+          3.0,
+          -0.3
+        ],
+        [
+          3.5,
+          1.7
+        ],
+        [
+          4.3,
+          3.7
+        ],
+        [
+          5.5,
+          5.7
+        ],
+        [
+          7.0,
+          7.6
+        ],
+        [
+          33.2,
+          27.5
+        ],
+        [
+          42.2,
+          35.3
+        ]
+      ],
+      "v": 6,
+      "spawn": 0.0
+    },
+    {
+      "kind": "tram",
+      "path": [
+        [
+          -36.1,
+          -21.0
+        ],
+        [
+          -22.2,
+          -13.9
+        ],
+        [
+          -9.5,
+          -6.7
+        ],
+        [
+          -7.1,
+          -5.0
+        ],
+        [
+          -4.8,
+          -3.4
+        ],
+        [
+          -2.6,
+          -1.7
+        ],
+        [
+          -0.4,
+          -0.1
+        ],
+        [
+          1.8,
+          1.5
+        ],
+        [
+          4.0,
+          3.1
+        ],
+        [
+          6.1,
+          4.6
+        ],
+        [
+          8.1,
+          6.2
+        ],
+        [
+          34.3,
+          26.2
+        ],
+        [
+          43.3,
+          34.0
+        ]
+      ],
+      "v": 8,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Z vedlejší (Bulovka) odbočujete na hlavní (Povltavská). Po hlavní přijíždí tramvaj. Jak budete pokračovat?",
+    "en": "From the minor road (Bulovka) you turn onto the main road (Povltavská). A tram is coming on the main road. How do you proceed?",
+    "ru": "Со второстепенной (Bulovka) вы поворачиваете на главную (Povltavská). По главной приближается трамвай. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Stihnu to a vjedu před tramvaj",
+        "en": "I'll make it and pull out before the tram",
+        "ru": "Успею и выеду перед трамваем"
+      },
+      "correct": false,
+      "rule": "give_way"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost tramvaji i provozu na hlavní",
+        "en": "Give way to the tram and the main-road traffic",
+        "ru": "Уступлю трамваю и движению по главной"
+      },
+      "correct": true,
+      "rule": "give_way"
+    },
+    {
+      "text": {
+        "cs": "Tramvaj mi dá přednost, jsem blíž",
+        "en": "The tram will yield, I'm closer",
+        "ru": "Трамвай уступит, я ближе"
+      },
+      "correct": false,
+      "rule": "give_way"
+    }
+  ],
+  "explain": {
+    "cs": "Přijíždíte po vedlejší silnici (značka „Dej přednost v jízdě“), proto musíte dát přednost veškerému provozu na hlavní — včetně tramvaje. Vjet smíte, až bude hlavní volná.",
+    "en": "You are on the minor road (a “give way” sign), so you must yield to all traffic on the main road — including the tram. Pull out only when the main road is clear.",
+    "ru": "Вы едете по второстепенной дороге (знак «Уступи дорогу»), поэтому обязаны уступить всему движению по главной — включая трамвай. Выезжать можно только когда главная свободна."
+  },
+  "citation": "značka P4, § 22 z. 361/2000 Sb.",
+  "stats": {
+    "accidents": 84,
+    "injured": 10,
+    "source": "Regionální dopravní konference Praha (denik.cz, TOP-10 rizikových míst)"
+  }
+}

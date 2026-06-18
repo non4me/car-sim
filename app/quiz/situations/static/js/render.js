@@ -216,6 +216,18 @@ export function drawSign(ctx, view, code, pos) {
       ctx.beginPath(); ctx.arc(0, 0, r * 0.45, 0.6, 5.4); ctx.stroke();
       break;
     }
+    case "signal": { // traffic signal — dark vertical housing with R/A/G lights
+      const w = r * 0.72, h = r * 1.7;
+      roundRect(ctx, -w / 2, -h / 2, w, h, w * 0.3);
+      ctx.fillStyle = "#1b1f29"; ctx.fill();
+      ctx.strokeStyle = "#05070a"; ctx.lineWidth = Math.max(1.5, r * 0.12); ctx.stroke();
+      const cols = ["#e0322c", "#e6a417", "#2fbf4e"], rr = w * 0.3;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath(); ctx.fillStyle = cols[i];
+        ctx.arc(0, -h / 2 + h * (0.2 + i * 0.3), rr, 0, 7); ctx.fill();
+      }
+      break;
+    }
     default: { // speed limit B20a "30/50/90" style or generic
       ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fillStyle = "#fff"; ctx.fill();
       ctx.strokeStyle = "#d11"; ctx.lineWidth = Math.max(2, r * 0.18); ctx.stroke();

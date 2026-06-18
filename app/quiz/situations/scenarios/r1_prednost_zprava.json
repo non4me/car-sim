@@ -1,0 +1,311 @@
+{
+  "id": "r1_prednost_zprava",
+  "order": 1,
+  "city": "praha",
+  "junction": {
+    "name": "Na Líše × Na Lánech",
+    "district": "Praha 4 · Michle",
+    "lat": 50.048157,
+    "lon": 14.464123,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Přednost zprava",
+    "en": "Priority from the right",
+    "ru": "Помеха справа"
+  },
+  "hint": {
+    "cs": "Neoznačená křižovatka. Sledujte situaci a rozhodněte.",
+    "en": "Unmarked junction. Watch and decide.",
+    "ru": "Нерегулируемый перекрёсток. Смотрите и решайте."
+  },
+  "view": {
+    "minx": -48,
+    "miny": -48,
+    "maxx": 48,
+    "maxy": 48
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Na Líše",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            1.6,
+            3.0
+          ],
+          [
+            19.2,
+            35.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Lánech",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -3.2,
+            1.7
+          ],
+          [
+            -35.2,
+            19.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Líše",
+        "centerline": [
+          [
+            -19.3,
+            -35.0
+          ],
+          [
+            -2.4,
+            -4.4
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Líše",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            1.6,
+            3.0
+          ],
+          [
+            19.2,
+            35.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Lánech",
+        "centerline": [
+          [
+            35.1,
+            -19.1
+          ],
+          [
+            4.4,
+            -2.4
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Lánech",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -3.2,
+            1.7
+          ],
+          [
+            -35.2,
+            19.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [],
+    "labels": [
+      {
+        "x": 11.5,
+        "y": 21.1,
+        "text": "Na Líše",
+        "rot": 1.069
+      },
+      {
+        "x": -21.1,
+        "y": 11.4,
+        "text": "Na Lánech",
+        "rot": -0.498
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -34.4,
+          20.6
+        ],
+        [
+          -25.7,
+          15.5
+        ],
+        [
+          -17.1,
+          10.5
+        ],
+        [
+          -8.4,
+          5.6
+        ],
+        [
+          0.4,
+          0.8
+        ],
+        [
+          9.2,
+          -4.0
+        ],
+        [
+          18.1,
+          -8.6
+        ],
+        [
+          27.0,
+          -13.1
+        ],
+        [
+          35.9,
+          -17.6
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          20.7,
+          34.3
+        ],
+        [
+          15.6,
+          25.7
+        ],
+        [
+          10.6,
+          17.0
+        ],
+        [
+          5.6,
+          8.3
+        ],
+        [
+          0.7,
+          -0.4
+        ],
+        [
+          -4.0,
+          -9.2
+        ],
+        [
+          -8.7,
+          -18.0
+        ],
+        [
+          -13.3,
+          -26.9
+        ],
+        [
+          -17.8,
+          -35.8
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.2
+  },
+  "question": {
+    "cs": "Křižovatka bez dopravních značek. Zprava přijíždí vozidlo. Jak budete pokračovat?",
+    "en": "A junction with no signs. A vehicle is coming from the right. How do you proceed?",
+    "ru": "Перекрёсток без знаков. Справа приближается автомобиль. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Mám přednost, projedu první",
+        "en": "I have priority, I go first",
+        "ru": "У меня приоритет, проезжаю первым"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost vozidlu zprava",
+        "en": "I give way to the vehicle on the right",
+        "ru": "Уступлю автомобилю справа"
+      },
+      "correct": true,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím a projedu",
+        "en": "I honk and go",
+        "ru": "Сигналю и проезжаю"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    }
+  ],
+  "explain": {
+    "cs": "Na křižovatce bez dopravních značek platí přednost zprava (pravidlo pravé ruky). Vozidlo přijíždějící zprava má přednost — musíte mu dát přednost v jízdě.",
+    "en": "At a junction with no signs, priority-to-the-right applies. The vehicle coming from your right has priority — you must give way.",
+    "ru": "На перекрёстке без знаков действует «помеха справа». Автомобиль, приближающийся справа, имеет приоритет — вы должны уступить."
+  },
+  "citation": "§ 22 odst. 1 z. 361/2000 Sb."
+}
