@@ -19,13 +19,17 @@ export function makeView(canvasW, canvasH, worldW, worldH, margin = 0.06) {
 // Fit an arbitrary metric bounding box [minx,miny,maxx,maxy] into the canvas. Real
 // junctions are authored in a centre-origin frame (negative coords), so unlike makeView
 // (which assumes a 0..W box) we offset by the bbox min. Single source of scale.
-export function makeViewBounds(canvasW, canvasH, bbox, margin = 0.08) {
+// reserveBottom (0..1) keeps a band at the bottom clear of the fitted scene — the decision
+// panel overlays the lower part of the canvas at the freeze, so we centre the junction in the
+// region above it instead of dead-centre (otherwise actors arriving from the south hide behind it).
+export function makeViewBounds(canvasW, canvasH, bbox, margin = 0.08, reserveBottom = 0) {
   const [minx, miny, maxx, maxy] = bbox;
   const wW = Math.max(1, maxx - minx), wH = Math.max(1, maxy - miny);
-  const availW = canvasW * (1 - 2 * margin), availH = canvasH * (1 - 2 * margin);
+  const usableH = canvasH * (1 - reserveBottom);
+  const availW = canvasW * (1 - 2 * margin), availH = usableH * (1 - 2 * margin);
   const scale = Math.min(availW / wW, availH / wH);          // px per metre
   const ox = (canvasW - wW * scale) / 2 - minx * scale;
-  const oy = (canvasH - wH * scale) / 2 - miny * scale;
+  const oy = (usableH - wH * scale) / 2 - miny * scale;
   return {
     scale, ox, oy,
     sx: (x) => ox + x * scale,

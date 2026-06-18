@@ -1,0 +1,755 @@
+{
+  "id": "r12_michelska_odboceni",
+  "order": 12,
+  "city": "praha",
+  "junction": {
+    "name": "Michelská × Ohradní",
+    "district": "Praha 4 · Michle",
+    "lat": 50.052095,
+    "lon": 14.453781,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Na semaforu vlevo",
+    "en": "Turning left at lights",
+    "ru": "Налево на светофоре"
+  },
+  "hint": {
+    "cs": "Křižovatka se semafory. Máte zelenou a chcete odbočit vlevo.",
+    "en": "A signalized junction. You have green and want to turn left.",
+    "ru": "Перекрёсток со светофором. У вас зелёный, вы хотите повернуть налево."
+  },
+  "view": {
+    "minx": -50,
+    "miny": -50,
+    "maxx": 50,
+    "maxy": 50
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -13.0,
+            1.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -5.5,
+            -9.1
+          ],
+          [
+            -7.5,
+            -12.3
+          ],
+          [
+            -8.8,
+            -14.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            -8.8,
+            -14.4
+          ],
+          [
+            -16.0,
+            -26.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            15.2,
+            -1.3
+          ],
+          [
+            18.0,
+            -1.6
+          ],
+          [
+            21.2,
+            -2.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            21.2,
+            -2.0
+          ],
+          [
+            29.2,
+            -3.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            28.0,
+            31.3
+          ],
+          [
+            27.4,
+            31.0
+          ],
+          [
+            20.6,
+            24.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            20.6,
+            24.8
+          ],
+          [
+            19.7,
+            17.2
+          ],
+          [
+            19.6,
+            13.2
+          ],
+          [
+            19.9,
+            9.9
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            19.9,
+            9.9
+          ],
+          [
+            21.0,
+            6.6
+          ],
+          [
+            29.2,
+            -3.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            -16.0,
+            -26.1
+          ],
+          [
+            -16.0,
+            -12.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            -16.0,
+            -12.0
+          ],
+          [
+            -17.2,
+            -7.7
+          ],
+          [
+            -21.4,
+            -3.0
+          ],
+          [
+            -26.6,
+            2.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "priority": false
+      },
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            -37.2,
+            3.0
+          ],
+          [
+            -26.6,
+            2.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            -26.6,
+            2.1
+          ],
+          [
+            -19.2,
+            1.5
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            -19.2,
+            1.5
+          ],
+          [
+            -16.4,
+            1.2
+          ],
+          [
+            -13.0,
+            1.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Ohradní",
+        "centerline": [
+          [
+            29.2,
+            -3.7
+          ],
+          [
+            35.8,
+            -5.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            20.6,
+            24.8
+          ],
+          [
+            14.0,
+            17.8
+          ],
+          [
+            8.6,
+            11.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            8.6,
+            11.3
+          ],
+          [
+            6.8,
+            8.8
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            -16.0,
+            -26.1
+          ],
+          [
+            -21.5,
+            -36.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Michelská",
+        "centerline": [
+          [
+            28.0,
+            31.3
+          ],
+          [
+            27.4,
+            31.0
+          ],
+          [
+            20.6,
+            24.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [
+      {
+        "code": "signal",
+        "x": 19.9,
+        "y": 9.9
+      },
+      {
+        "code": "signal",
+        "x": 8.6,
+        "y": 11.3
+      },
+      {
+        "code": "signal",
+        "x": -19.2,
+        "y": 1.5
+      },
+      {
+        "code": "signal",
+        "x": 21.2,
+        "y": -2.0
+      },
+      {
+        "code": "signal",
+        "x": -16.0,
+        "y": -12.0
+      },
+      {
+        "code": "signal",
+        "x": -8.8,
+        "y": -14.4
+      },
+      {
+        "code": "P4",
+        "x": -11.0,
+        "y": -18.6
+      },
+      {
+        "code": "P2",
+        "x": -7.8,
+        "y": -22.3
+      },
+      {
+        "code": "P2",
+        "x": -24.0,
+        "y": -30.2
+      },
+      {
+        "code": "P4",
+        "x": 14.8,
+        "y": 18.0
+      },
+      {
+        "code": "P2",
+        "x": 29.5,
+        "y": 26.2
+      },
+      {
+        "code": "P2",
+        "x": 11.8,
+        "y": 22.8
+      },
+      {
+        "code": "P4",
+        "x": -7.1,
+        "y": 5.6
+      },
+      {
+        "code": "P4",
+        "x": 7.1,
+        "y": -5.6
+      },
+      {
+        "code": "P2",
+        "x": -8.1,
+        "y": -3.8
+      },
+      {
+        "code": "P2",
+        "x": 8.6,
+        "y": 2.9
+      },
+      {
+        "code": "P4",
+        "x": -40.2,
+        "y": 6.1
+      },
+      {
+        "code": "P4",
+        "x": -32.7,
+        "y": 17.0
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          -13.0,
+          1.0
+        ],
+        "dir": [
+          -0.997,
+          0.073
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -5.5,
+          -9.1
+        ],
+        "dir": [
+          -0.523,
+          -0.852
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          15.2,
+          -1.3
+        ],
+        "dir": [
+          0.996,
+          -0.09
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -36.8,
+          7.8
+        ],
+        "dir": [
+          0.079,
+          0.997
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          21.0,
+          6.6
+        ],
+        "dir": [
+          0.566,
+          -0.825
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -17.2,
+          -7.7
+        ],
+        "dir": [
+          -0.515,
+          0.857
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          37.4,
+          -0.9
+        ],
+        "dir": [
+          0.357,
+          0.934
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          28.4,
+          -8.0
+        ],
+        "dir": [
+          -0.122,
+          -0.992
+        ],
+        "halfW": 1.75
+      }
+    ],
+    "labels": [
+      {
+        "x": 14.9,
+        "y": -1.3,
+        "text": "Ohradní",
+        "rot": -0.085
+      },
+      {
+        "x": 16.9,
+        "y": 20.9,
+        "text": "Michelská",
+        "rot": 0.815
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          21.9,
+          23.6
+        ],
+        [
+          15.3,
+          16.7
+        ],
+        [
+          9.9,
+          10.2
+        ],
+        [
+          7.4,
+          7.8
+        ],
+        [
+          4.8,
+          5.7
+        ],
+        [
+          2.0,
+          3.9
+        ],
+        [
+          -0.8,
+          2.4
+        ],
+        [
+          -3.7,
+          1.1
+        ],
+        [
+          -6.7,
+          0.2
+        ],
+        [
+          -9.9,
+          -0.4
+        ],
+        [
+          -13.1,
+          -0.7
+        ],
+        [
+          -16.6,
+          -0.5
+        ],
+        [
+          -19.4,
+          -0.2
+        ]
+      ],
+      "v": 6,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          -10.3,
+          -13.5
+        ],
+        [
+          -9.0,
+          -11.4
+        ],
+        [
+          -7.0,
+          -8.2
+        ],
+        [
+          -5.3,
+          -6.1
+        ],
+        [
+          -3.6,
+          -4.0
+        ],
+        [
+          -2.0,
+          -1.8
+        ],
+        [
+          -0.4,
+          0.4
+        ],
+        [
+          1.1,
+          2.7
+        ],
+        [
+          2.6,
+          5.0
+        ],
+        [
+          4.0,
+          7.4
+        ],
+        [
+          5.4,
+          9.8
+        ],
+        [
+          7.2,
+          12.3
+        ]
+      ],
+      "v": 8,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Máte zelenou a odbočujete vlevo. Proti vám jede vozidlo rovně, také na zelenou. Jak budete pokračovat?",
+    "en": "You have green and are turning left. An oncoming vehicle goes straight, also on green. How do you proceed?",
+    "ru": "У вас зелёный, вы поворачиваете налево. Навстречу на зелёный едет автомобиль прямо. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Zelená je zelená, odbočím",
+        "en": "Green is green, I turn",
+        "ru": "Зелёный есть зелёный, поворачиваю"
+      },
+      "correct": false,
+      "rule": "signal_left"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost protijedoucímu vozidlu",
+        "en": "Give way to the oncoming vehicle",
+        "ru": "Уступлю встречному автомобилю"
+      },
+      "correct": true,
+      "rule": "signal_left"
+    },
+    {
+      "text": {
+        "cs": "Zatroubím a odbočím",
+        "en": "Honk and turn",
+        "ru": "Сигналю и поворачиваю"
+      },
+      "correct": false,
+      "rule": "signal_left"
+    }
+  ],
+  "explain": {
+    "cs": "Zelený signál vás opravňuje vjet do křižovatky, ale při odbočování vlevo musíte dát přednost protijedoucím vozidlům, která mají také zelenou a jedou rovně nebo odbočují vpravo.",
+    "en": "A green light lets you enter the junction, but when turning left you must give way to oncoming vehicles that also have green and go straight or turn right.",
+    "ru": "Зелёный сигнал разрешает въезд на перекрёсток, но при повороте налево вы обязаны уступить встречным, у которых тоже зелёный и которые едут прямо или поворачивают направо."
+  },
+  "citation": "§ 21 odst. 5 a § 70 z. 361/2000 Sb."
+}

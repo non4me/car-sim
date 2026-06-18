@@ -13,6 +13,7 @@ const B = window.SIM_BASE || "";            // mount prefix (/quiz/situations)
 const LANG = pickLang();
 const T = STR[LANG];
 const FIN = ({ cs: "Dokončit", en: "Finish", ru: "Завершить" })[LANG] || "Dokončit";
+const VIEW_RESERVE = 0.2;                    // keep the lower fifth clear for the decision panel
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const $ = (id) => document.getElementById(id);
@@ -41,7 +42,7 @@ function resize() {
   canvas.height = Math.round(cssH * dpr);
   canvas.style.width = cssW + "px"; canvas.style.height = cssH + "px";
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  if (scene) { view = makeViewBounds(cssW, cssH, scene.bbox); draw(); }
+  if (scene) { view = makeViewBounds(cssW, cssH, scene.bbox, 0.08, VIEW_RESERVE); draw(); }
 }
 window.addEventListener("resize", resize);
 
@@ -65,7 +66,7 @@ async function startScenario(idx) {
   curIdx = idx;
   scn = await (await fetch(`${B}/scenario/${order[idx]}`)).json();
   scene = buildScene(scn);
-  view = makeViewBounds(cssW, cssH, scene.bbox);
+  view = makeViewBounds(cssW, cssH, scene.bbox, 0.08, VIEW_RESERVE);
   buildActors();
   $("feedback").classList.add("hidden");
   $("qpanel").classList.add("hidden");

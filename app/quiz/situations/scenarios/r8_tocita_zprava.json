@@ -1,0 +1,338 @@
+{
+  "id": "r8_tocita_zprava",
+  "order": 8,
+  "city": "praha",
+  "junction": {
+    "name": "Nová cesta × Točitá",
+    "district": "Praha 4 · Krč",
+    "lat": 50.038994,
+    "lon": 14.435531,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Zprava přijíždí",
+    "en": "Coming from the right",
+    "ru": "Подъезжает справа"
+  },
+  "hint": {
+    "cs": "Neoznačená křižovatka v Krči. Sledujte a rozhodněte.",
+    "en": "Unmarked junction in Krč. Watch and decide.",
+    "ru": "Нерегулируемый перекрёсток в Крчи. Смотрите и решайте."
+  },
+  "view": {
+    "minx": -48,
+    "miny": -48,
+    "maxx": 48,
+    "maxy": 48
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Točitá",
+        "centerline": [
+          [
+            -1.8,
+            -40.0
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Točitá",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            0.1,
+            3.6
+          ],
+          [
+            -0.2,
+            6.4
+          ],
+          [
+            -1.0,
+            9.4
+          ],
+          [
+            -2.1,
+            12.8
+          ],
+          [
+            -3.6,
+            16.8
+          ],
+          [
+            -5.4,
+            21.0
+          ],
+          [
+            -7.5,
+            25.1
+          ],
+          [
+            -10.0,
+            29.1
+          ],
+          [
+            -13.3,
+            33.7
+          ],
+          [
+            -16.0,
+            36.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Nová cesta",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            40.0,
+            1.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Nová cesta",
+        "centerline": [
+          [
+            -40.0,
+            -1.0
+          ],
+          [
+            -32.8,
+            -0.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Nová cesta",
+        "centerline": [
+          [
+            -32.8,
+            -0.8
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [],
+    "labels": [
+      {
+        "x": -6.3,
+        "y": 22.8,
+        "text": "Točitá",
+        "rot": -1.097
+      },
+      {
+        "x": 24.0,
+        "y": 0.8,
+        "text": "Nová cesta",
+        "rot": 0.032
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -32.8,
+          0.9
+        ],
+        [
+          -24.5,
+          0.8
+        ],
+        [
+          -16.0,
+          0.7
+        ],
+        [
+          -7.2,
+          0.8
+        ],
+        [
+          1.8,
+          1.0
+        ],
+        [
+          11.0,
+          1.3
+        ],
+        [
+          20.4,
+          1.8
+        ],
+        [
+          30.1,
+          2.3
+        ],
+        [
+          39.9,
+          3.0
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          -14.7,
+          37.9
+        ],
+        [
+          -11.9,
+          34.7
+        ],
+        [
+          -8.5,
+          30.0
+        ],
+        [
+          -5.9,
+          25.9
+        ],
+        [
+          -3.8,
+          21.7
+        ],
+        [
+          -2.0,
+          17.4
+        ],
+        [
+          -0.4,
+          13.3
+        ],
+        [
+          0.7,
+          9.9
+        ],
+        [
+          1.5,
+          6.6
+        ],
+        [
+          1.2,
+          4.4
+        ],
+        [
+          0.9,
+          1.2
+        ],
+        [
+          0.6,
+          -3.1
+        ],
+        [
+          0.4,
+          -8.4
+        ],
+        [
+          0.2,
+          -14.7
+        ],
+        [
+          0.1,
+          -22.1
+        ],
+        [
+          -0.0,
+          -30.6
+        ],
+        [
+          -0.1,
+          -40.1
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.1
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Křižovatka bez značek, zprava přijíždí vozidlo přibližně stejnou rychlostí. Jak budete pokračovat?",
+    "en": "An unmarked junction; a vehicle approaches from the right at about the same speed. How do you proceed?",
+    "ru": "Перекрёсток без знаков, справа примерно с той же скоростью подъезжает автомобиль. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Projedu rovně, mám to po hlavní",
+        "en": "I go straight, I'm on the through road",
+        "ru": "Проеду прямо, я по сквозной"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost vozidlu zprava",
+        "en": "Give way to the vehicle on the right",
+        "ru": "Уступлю автомобилю справа"
+      },
+      "correct": true,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Pojedu, kdo se bojí, ten couvne",
+        "en": "I go — whoever's scared backs off",
+        "ru": "Поеду — кто боится, тот уступит"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    }
+  ],
+  "explain": {
+    "cs": "Na neoznačené křižovatce platí přednost zprava. Vozidlo přijíždí zprava, takže přednost dáte jemu.",
+    "en": "At an unmarked junction, priority-to-the-right applies. The vehicle is on your right, so you give way to it.",
+    "ru": "На нерегулируемом перекрёстке действует «помеха справа». Автомобиль справа — значит уступаете ему."
+  },
+  "citation": "§ 22 odst. 1 z. 361/2000 Sb."
+}

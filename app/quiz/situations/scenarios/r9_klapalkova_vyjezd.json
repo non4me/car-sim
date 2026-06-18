@@ -1,0 +1,353 @@
+{
+  "id": "r9_klapalkova_vyjezd",
+  "order": 9,
+  "city": "praha",
+  "junction": {
+    "name": "Klapálkova × Měchnovská",
+    "district": "Praha 11 · Chodov",
+    "lat": 50.044739,
+    "lon": 14.501274,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Vyjíždíte z vedlejší ulice",
+    "en": "Pulling out of a side street",
+    "ru": "Выезд с второстепенной"
+  },
+  "hint": {
+    "cs": "Vyjíždíte z menší ulice (Měchnovská) na průběžnou. Sledujte a rozhodněte.",
+    "en": "You pull out of a smaller street (Měchnovská) onto a through road. Watch and decide.",
+    "ru": "Вы выезжаете с небольшой улицы (Měchnovská) на сквозную. Смотрите и решайте."
+  },
+  "view": {
+    "minx": -50,
+    "miny": -50,
+    "maxx": 50,
+    "maxy": 50
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Měchnovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -5.6,
+            7.0
+          ],
+          [
+            -11.1,
+            15.7
+          ],
+          [
+            -19.2,
+            37.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Klapálkova",
+        "centerline": [
+          [
+            -31.2,
+            -28.1
+          ],
+          [
+            -27.6,
+            -25.1
+          ],
+          [
+            -20.9,
+            -19.6
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Klapálkova",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            12.2,
+            7.3
+          ],
+          [
+            25.2,
+            13.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Klapálkova",
+        "centerline": [
+          [
+            25.2,
+            13.3
+          ],
+          [
+            32.4,
+            16.1
+          ],
+          [
+            38.1,
+            17.3
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Měchnovská",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -5.6,
+            7.0
+          ],
+          [
+            -11.1,
+            15.7
+          ],
+          [
+            -19.2,
+            37.4
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [
+      {
+        "center": [
+          -27.6,
+          -25.1
+        ],
+        "dir": [
+          0.771,
+          0.636
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -5.6,
+          7.0
+        ],
+        "dir": [
+          -0.575,
+          0.818
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": -13.2,
+        "y": 21.3,
+        "text": "Měchnovská",
+        "rot": -1.214
+      },
+      {
+        "x": -18.4,
+        "y": -17.2,
+        "text": "Klapálkova",
+        "rot": 0.753
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -17.6,
+          38.0
+        ],
+        [
+          -9.6,
+          16.6
+        ],
+        [
+          -4.2,
+          8.1
+        ],
+        [
+          -3.6,
+          5.9
+        ],
+        [
+          -3.6,
+          3.2
+        ],
+        [
+          -4.4,
+          0.2
+        ],
+        [
+          -6.0,
+          -3.2
+        ],
+        [
+          -8.3,
+          -7.0
+        ],
+        [
+          -11.4,
+          -11.3
+        ],
+        [
+          -15.2,
+          -15.9
+        ],
+        [
+          -19.8,
+          -21.0
+        ],
+        [
+          -26.5,
+          -26.4
+        ],
+        [
+          -30.1,
+          -29.4
+        ]
+      ],
+      "v": 5,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          25.9,
+          11.7
+        ],
+        [
+          13.1,
+          5.8
+        ],
+        [
+          9.7,
+          4.1
+        ],
+        [
+          6.1,
+          2.0
+        ],
+        [
+          2.3,
+          -0.7
+        ],
+        [
+          -1.7,
+          -3.8
+        ],
+        [
+          -5.9,
+          -7.4
+        ],
+        [
+          -10.3,
+          -11.4
+        ],
+        [
+          -14.9,
+          -16.0
+        ],
+        [
+          -19.8,
+          -21.0
+        ],
+        [
+          -26.5,
+          -26.4
+        ],
+        [
+          -30.1,
+          -29.4
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Vyjíždíte z menší ulice na průběžnou, zprava po ní přijíždí vozidlo. Jak budete pokračovat?",
+    "en": "You pull out of a smaller street onto a through road; a vehicle comes along it from the right. How do you proceed?",
+    "ru": "Вы выезжаете с небольшой улицы на сквозную, по ней справа едет автомобиль. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Rychle se zařadím před něj",
+        "en": "Quickly pull in front of it",
+        "ru": "Быстро встрою перед ним"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost vozidlu zprava na průběžné",
+        "en": "Give way to the vehicle on the right on the through road",
+        "ru": "Уступлю автомобилю справа на сквозной"
+      },
+      "correct": true,
+      "rule": "prednost_zprava"
+    },
+    {
+      "text": {
+        "cs": "Mávnu na něj, ať počká",
+        "en": "Wave at them to wait",
+        "ru": "Махну ему, чтобы подождал"
+      },
+      "correct": false,
+      "rule": "prednost_zprava"
+    }
+  ],
+  "explain": {
+    "cs": "I bez značek platí přednost zprava. Vozidlo na průběžné ulici přijíždí zprava — musíte mu dát přednost a zařadit se, až bude volno.",
+    "en": "Even without signs, priority-to-the-right applies. The vehicle on the through road comes from your right — give way and pull out only when it's clear.",
+    "ru": "Даже без знаков действует «помеха справа». Автомобиль на сквозной едет справа — уступите и выезжайте, когда будет свободно."
+  },
+  "citation": "§ 22 odst. 1 z. 361/2000 Sb."
+}

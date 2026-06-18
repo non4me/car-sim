@@ -1,0 +1,398 @@
+{
+  "id": "r11_cervenydvur_hlavni",
+  "order": 11,
+  "city": "praha",
+  "junction": {
+    "name": "K Červenému dvoru × Na Třebešíně",
+    "district": "Praha 10 · Strašnice",
+    "lat": 50.082247,
+    "lon": 14.482586,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Jste na hlavní",
+    "en": "You're on the main road",
+    "ru": "Вы на главной"
+  },
+  "hint": {
+    "cs": "Jedete po hlavní (K Červenému dvoru). Z vedlejší čeká vozidlo. Sledujte a rozhodněte.",
+    "en": "You drive on the main road (K Červenému dvoru). A car waits on the side road. Watch and decide.",
+    "ru": "Вы едете по главной (K Červenému dvoru). На второстепенной ждёт автомобиль. Смотрите и решайте."
+  },
+  "view": {
+    "minx": -50,
+    "miny": -50,
+    "maxx": 50,
+    "maxy": 50
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Na Třebešíně",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -5.6,
+            1.7
+          ],
+          [
+            -40.3,
+            12.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "K Červenému dvoru",
+        "centerline": [
+          [
+            -12.0,
+            -40.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Třebešíně",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            -5.6,
+            1.7
+          ],
+          [
+            -40.3,
+            12.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Na Třebešíně",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            6.6,
+            -1.9
+          ],
+          [
+            40.3,
+            -11.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "priority": false
+      },
+      {
+        "name": "K Červenému dvoru",
+        "centerline": [
+          [
+            -12.0,
+            -40.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "K Červenému dvoru",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            2.2,
+            6.6
+          ],
+          [
+            4.9,
+            13.6
+          ],
+          [
+            9.0,
+            21.7
+          ],
+          [
+            11.6,
+            25.9
+          ],
+          [
+            14.4,
+            29.7
+          ],
+          [
+            20.5,
+            36.7
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [
+      {
+        "code": "P4",
+        "x": -5.7,
+        "y": 7.0
+      },
+      {
+        "code": "P4",
+        "x": 5.8,
+        "y": -6.8
+      },
+      {
+        "code": "P2",
+        "x": -6.9,
+        "y": -5.7
+      },
+      {
+        "code": "P2",
+        "x": 7.1,
+        "y": 5.6
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          -5.6,
+          1.7
+        ],
+        "dir": [
+          -0.959,
+          0.284
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          6.6,
+          -1.9
+        ],
+        "dir": [
+          0.959,
+          -0.283
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          2.2,
+          6.6
+        ],
+        "dir": [
+          0.342,
+          0.94
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": -24.1,
+        "y": 7.2,
+        "text": "Na Třebešíně",
+        "rot": -0.289
+      },
+      {
+        "x": 9.9,
+        "y": 23.1,
+        "text": "K Červenému dvoru",
+        "rot": 1.016
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          21.8,
+          35.6
+        ],
+        [
+          15.8,
+          28.7
+        ],
+        [
+          13.1,
+          25.0
+        ],
+        [
+          10.6,
+          20.9
+        ],
+        [
+          6.5,
+          13.0
+        ],
+        [
+          3.9,
+          6.0
+        ],
+        [
+          2.8,
+          4.0
+        ],
+        [
+          1.5,
+          0.9
+        ],
+        [
+          0.1,
+          -3.4
+        ],
+        [
+          -1.6,
+          -8.7
+        ],
+        [
+          -3.5,
+          -15.1
+        ],
+        [
+          -5.6,
+          -22.6
+        ],
+        [
+          -7.8,
+          -31.1
+        ],
+        [
+          -10.3,
+          -40.8
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          -39.8,
+          13.7
+        ],
+        [
+          -5.1,
+          3.4
+        ],
+        [
+          -4.1,
+          1.9
+        ],
+        [
+          -3.5,
+          -0.7
+        ],
+        [
+          -3.4,
+          -4.4
+        ],
+        [
+          -3.9,
+          -9.4
+        ],
+        [
+          -4.7,
+          -15.5
+        ],
+        [
+          -6.1,
+          -22.7
+        ],
+        [
+          -8.0,
+          -31.2
+        ],
+        [
+          -10.3,
+          -40.8
+        ]
+      ],
+      "v": 2.4,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Jedete po hlavní silnici. Z vedlejší vlevo čeká vozidlo, které chce vyjet. Jak budete pokračovat?",
+    "en": "You're on the main road. A car on the side road to your left waits to pull out. How do you proceed?",
+    "ru": "Вы едете по главной. Слева на второстепенной ждёт автомобиль, который хочет выехать. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Pro jistotu zastavím a pustím ho",
+        "en": "Stop just in case and let it out",
+        "ru": "На всякий случай остановлюсь и пропущу"
+      },
+      "correct": false,
+      "rule": "priority_road"
+    },
+    {
+      "text": {
+        "cs": "Mám přednost, plynule pokračuji",
+        "en": "I have priority, I continue smoothly",
+        "ru": "У меня приоритет, спокойно продолжаю"
+      },
+      "correct": true,
+      "rule": "priority_road"
+    },
+    {
+      "text": {
+        "cs": "Zastavím a zamávám, ať jede",
+        "en": "Stop and wave it through",
+        "ru": "Остановлюсь и махну, чтобы ехал"
+      },
+      "correct": false,
+      "rule": "priority_road"
+    }
+  ],
+  "explain": {
+    "cs": "Jedete po hlavní silnici (značka „Hlavní pozemní komunikace“), takže přednost máte vy. Vozidlo z vedlejší musí dát přednost vám — pokračujte plynule a sledujte ho. Bezdůvodné zastavování na hlavní mate ostatní a může způsobit nehodu.",
+    "en": "You're on the main road (the “priority road” sign), so you have priority. The car on the side road must yield to you — keep moving and watch it. Stopping on the main road for no reason confuses others and can cause a crash.",
+    "ru": "Вы едете по главной дороге (знак «Главная дорога»), приоритет у вас. Автомобиль со второстепенной обязан уступить вам — продолжайте плавно и следите за ним. Беспричинная остановка на главной путает других и может привести к ДТП."
+  },
+  "citation": "§ 22 z. 361/2000 Sb."
+}

@@ -1,0 +1,421 @@
+{
+  "id": "r10_prespolni_vedlejsi",
+  "order": 10,
+  "city": "praha",
+  "junction": {
+    "name": "Přespolní × Záběhlická",
+    "district": "Praha 10 · Záběhlice",
+    "lat": 50.05464,
+    "lon": 14.487972,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Vedlejší silnice",
+    "en": "Minor road",
+    "ru": "Второстепенная дорога"
+  },
+  "hint": {
+    "cs": "Přijíždíte po vedlejší (Přespolní) — značka „Dej přednost“. Sledujte a rozhodněte.",
+    "en": "You arrive on the minor road (Přespolní) — a “give way” sign. Watch and decide.",
+    "ru": "Вы подъезжаете по второстепенной (Přespolní) — знак «Уступи дорогу». Смотрите и решайте."
+  },
+  "view": {
+    "minx": -50,
+    "miny": -50,
+    "maxx": 50,
+    "maxy": 50
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Přespolní",
+        "centerline": [
+          [
+            -11.6,
+            40.0
+          ],
+          [
+            -9.1,
+            32.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Přespolní",
+        "centerline": [
+          [
+            -9.1,
+            32.8
+          ],
+          [
+            -6.9,
+            25.8
+          ],
+          [
+            -1.7,
+            7.7
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Záběhlická",
+        "centerline": [
+          [
+            -38.9,
+            -16.0
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Přespolní",
+        "centerline": [
+          [
+            -9.1,
+            32.8
+          ],
+          [
+            -6.9,
+            25.8
+          ],
+          [
+            -1.7,
+            7.7
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Záběhlická",
+        "centerline": [
+          [
+            -38.9,
+            -16.0
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Přespolní",
+        "centerline": [
+          [
+            15.3,
+            -39.1
+          ],
+          [
+            2.3,
+            -6.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": true,
+        "priority": false
+      },
+      {
+        "name": "Záběhlická",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            10.6,
+            4.3
+          ],
+          [
+            38.9,
+            16.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [
+      {
+        "code": "P2",
+        "x": -8.8,
+        "y": 1.8
+      },
+      {
+        "code": "P4",
+        "x": 3.3,
+        "y": 8.4
+      },
+      {
+        "code": "P4",
+        "x": -2.1,
+        "y": -8.8
+      },
+      {
+        "code": "P2",
+        "x": 8.8,
+        "y": -1.8
+      }
+    ],
+    "crossings": [
+      {
+        "center": [
+          -6.9,
+          25.8
+        ],
+        "dir": [
+          0.28,
+          -0.96
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          -13.7,
+          31.0
+        ],
+        "dir": [
+          -0.927,
+          -0.376
+        ],
+        "halfW": 1.75
+      },
+      {
+        "center": [
+          -1.7,
+          7.7
+        ],
+        "dir": [
+          0.257,
+          -0.966
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          2.3,
+          -6.3
+        ],
+        "dir": [
+          -0.365,
+          0.931
+        ],
+        "halfW": 3.5
+      },
+      {
+        "center": [
+          10.6,
+          4.3
+        ],
+        "dir": [
+          0.925,
+          0.38
+        ],
+        "halfW": 3.5
+      }
+    ],
+    "labels": [
+      {
+        "x": 9.1,
+        "y": -23.5,
+        "text": "Přespolní",
+        "rot": -1.193
+      },
+      {
+        "x": 23.3,
+        "y": 9.6,
+        "text": "Záběhlická",
+        "rot": 0.392
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -7.4,
+          33.3
+        ],
+        [
+          -5.2,
+          26.3
+        ],
+        [
+          0.0,
+          8.1
+        ],
+        [
+          0.1,
+          6.1
+        ],
+        [
+          0.3,
+          4.2
+        ],
+        [
+          0.6,
+          2.4
+        ],
+        [
+          1.0,
+          0.6
+        ],
+        [
+          1.5,
+          -1.1
+        ],
+        [
+          2.2,
+          -2.7
+        ],
+        [
+          3.0,
+          -4.2
+        ],
+        [
+          3.9,
+          -5.7
+        ],
+        [
+          16.9,
+          -38.5
+        ]
+      ],
+      "v": 6,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          -39.6,
+          -14.4
+        ],
+        [
+          -30.1,
+          -10.9
+        ],
+        [
+          -21.6,
+          -7.7
+        ],
+        [
+          -14.1,
+          -4.8
+        ],
+        [
+          -7.4,
+          -2.1
+        ],
+        [
+          -1.7,
+          0.3
+        ],
+        [
+          3.1,
+          2.4
+        ],
+        [
+          7.0,
+          4.3
+        ],
+        [
+          9.9,
+          5.9
+        ],
+        [
+          38.2,
+          17.6
+        ]
+      ],
+      "v": 8,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Z vedlejší (Přespolní) chcete přejet přes hlavní (Záběhlická). Po hlavní jede vozidlo. Jak budete pokračovat?",
+    "en": "From the minor road (Přespolní) you want to cross the main road (Záběhlická). A vehicle is coming on the main road. How do you proceed?",
+    "ru": "Со второстепенной (Přespolní) вы хотите пересечь главную (Záběhlická). По главной едет автомобиль. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Přejedu rychle, než dojede",
+        "en": "Cross quickly before it arrives",
+        "ru": "Быстро пересеку, пока не доехал"
+      },
+      "correct": false,
+      "rule": "give_way"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost vozidlu na hlavní",
+        "en": "Give way to the vehicle on the main road",
+        "ru": "Уступлю автомобилю на главной"
+      },
+      "correct": true,
+      "rule": "give_way"
+    },
+    {
+      "text": {
+        "cs": "Na hlavní mi dají přednost",
+        "en": "Traffic on the main road will yield to me",
+        "ru": "На главной мне уступят"
+      },
+      "correct": false,
+      "rule": "give_way"
+    }
+  ],
+  "explain": {
+    "cs": "Značka „Dej přednost v jízdě“ (P4) znamená, že vozidlům na hlavní silnici musíte dát přednost. Vjet smíte, až bude hlavní volná — bez ohledu na to, kdo přijíždí zleva či zprava.",
+    "en": "The “give way” sign (P4) means you must yield to traffic on the main road. Proceed only when the main road is clear — regardless of which side the traffic comes from.",
+    "ru": "Знак «Уступи дорогу» (P4) означает, что вы обязаны пропустить транспорт на главной. Двигаться можно, только когда главная свободна — независимо от того, слева или справа едет автомобиль."
+  },
+  "citation": "značka P4, § 22 z. 361/2000 Sb."
+}

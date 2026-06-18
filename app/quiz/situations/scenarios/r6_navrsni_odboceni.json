@@ -1,0 +1,270 @@
+{
+  "id": "r6_navrsni_odboceni",
+  "order": 6,
+  "city": "praha",
+  "junction": {
+    "name": "Návršní × Točitá",
+    "district": "Praha 4 · Krč",
+    "lat": 50.039675,
+    "lon": 14.435483,
+    "source": "OSM bake (car-sim) © OpenStreetMap"
+  },
+  "title": {
+    "cs": "Odbočujete vlevo",
+    "en": "Turning left",
+    "ru": "Поворот налево"
+  },
+  "hint": {
+    "cs": "Neoznačená křižovatka. Chcete odbočit vlevo, proti vám jede vozidlo.",
+    "en": "Unmarked junction. You want to turn left; a vehicle comes towards you.",
+    "ru": "Нерегулируемый перекрёсток. Вы поворачиваете налево, навстречу едет автомобиль."
+  },
+  "view": {
+    "minx": -48,
+    "miny": -48,
+    "maxx": 48,
+    "maxy": 48
+  },
+  "geom": {
+    "core": {
+      "x": 0,
+      "y": 0,
+      "r": 6
+    },
+    "roads": [
+      {
+        "name": "Točitá",
+        "centerline": [
+          [
+            -0.4,
+            -40.0
+          ],
+          [
+            -0.1,
+            -15.8
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Točitá",
+        "centerline": [
+          [
+            -0.1,
+            -15.8
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Točitá",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            1.8,
+            40.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Návršní",
+        "centerline": [
+          [
+            -40.0,
+            -0.3
+          ],
+          [
+            0.0,
+            -0.0
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      },
+      {
+        "name": "Návršní",
+        "centerline": [
+          [
+            0.0,
+            -0.0
+          ],
+          [
+            40.0,
+            -0.1
+          ]
+        ],
+        "halfW": 3.5,
+        "lanes": 2,
+        "oneway": false,
+        "priority": false
+      }
+    ],
+    "rails": [],
+    "signs": [],
+    "crossings": [],
+    "labels": [
+      {
+        "x": 1.1,
+        "y": 24.0,
+        "text": "Točitá",
+        "rot": 1.526
+      },
+      {
+        "x": -24.0,
+        "y": -0.2,
+        "text": "Návršní",
+        "rot": 0.007
+      }
+    ]
+  },
+  "actors": [
+    {
+      "kind": "ego",
+      "path": [
+        [
+          -40.0,
+          1.4
+        ],
+        [
+          -30.6,
+          0.9
+        ],
+        [
+          -22.4,
+          -0.2
+        ],
+        [
+          -15.4,
+          -1.7
+        ],
+        [
+          -9.6,
+          -3.6
+        ],
+        [
+          -5.0,
+          -6.0
+        ],
+        [
+          -1.6,
+          -8.8
+        ],
+        [
+          0.6,
+          -12.1
+        ],
+        [
+          1.6,
+          -15.8
+        ]
+      ],
+      "v": 6,
+      "spawn": 0.0
+    },
+    {
+      "kind": "car",
+      "path": [
+        [
+          40.0,
+          -1.8
+        ],
+        [
+          30.0,
+          -1.4
+        ],
+        [
+          20.0,
+          -1.2
+        ],
+        [
+          10.0,
+          -1.0
+        ],
+        [
+          0.0,
+          -1.0
+        ],
+        [
+          -10.0,
+          -1.1
+        ],
+        [
+          -20.0,
+          -1.3
+        ],
+        [
+          -30.0,
+          -1.6
+        ],
+        [
+          -40.0,
+          -2.0
+        ]
+      ],
+      "v": 7,
+      "spawn": 0.0
+    }
+  ],
+  "decision": {
+    "t": 3.0
+  },
+  "question": {
+    "cs": "Odbočujete vlevo. Proti vám jede protijedoucí vozidlo rovně. Jak budete pokračovat?",
+    "en": "You are turning left. An oncoming vehicle is going straight. How do you proceed?",
+    "ru": "Вы поворачиваете налево. Встречный автомобиль едет прямо. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": {
+        "cs": "Odbočím první, jsem blíž",
+        "en": "I turn first, I'm closer",
+        "ru": "Поверну первым, я ближе"
+      },
+      "correct": false,
+      "rule": "left_turn"
+    },
+    {
+      "text": {
+        "cs": "Dám přednost protijedoucímu vozidlu",
+        "en": "Give way to the oncoming vehicle",
+        "ru": "Уступлю встречному автомобилю"
+      },
+      "correct": true,
+      "rule": "left_turn"
+    },
+    {
+      "text": {
+        "cs": "Mám přednost zprava, projedu",
+        "en": "I have priority from the right, I go",
+        "ru": "У меня помеха справа, проезжаю"
+      },
+      "correct": false,
+      "rule": "left_turn"
+    }
+  ],
+  "explain": {
+    "cs": "Při odbočování vlevo musíte dát přednost protijedoucím vozidlům jedoucím rovně nebo odbočujícím vpravo. Pravidlo platí i na neoznačené křižovatce.",
+    "en": "When turning left you must give way to oncoming vehicles going straight or turning right. This holds even at an unmarked junction.",
+    "ru": "При повороте налево вы обязаны уступить встречным, едущим прямо или поворачивающим направо. Правило действует и на нерегулируемом перекрёстке."
+  },
+  "citation": "§ 21 odst. 5 z. 361/2000 Sb."
+}
