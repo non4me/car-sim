@@ -58,6 +58,91 @@ export function drawStatic(ctx, view, jun) {
   for (const sg of jun.signs) drawSign(ctx, view, sg.code, sg.pos);
 }
 
+// Renderer for an authored REAL junction (scene.js output). Reuses the same primitives as
+// drawStatic but takes arbitrary-geometry roads (centreline + width) instead of symmetric arms.
+export function drawScene(ctx, view, sc) {
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+  // asphalt: a thick round-capped stroke per centreline; overlaps merge into a clean junction
+  for (const r of sc.roads) polyline(ctx, view, r.centerline, r.halfW * 2, ASPHALT);
+  // kerb lines (V1a) + dashed lane dividers (V2a)
+  for (const e of sc.edges) polyline(ctx, view, e, 0.15, MARK_DIM);
+  for (const c of sc.centerlines) polyline(ctx, view, c, 0.18, MARK_DIM, [2.4, 2.4]);
+  // mask markings inside the open junction (kerb/centre lines stop at the intersection)
+  if (sc.core) {
+    ctx.fillStyle = ASPHALT;
+    ctx.beginPath(); ctx.arc(view.sx(sc.core.pos[0]), view.sy(sc.core.pos[1]), view.s(sc.core.r), 0, 7); ctx.fill();
+  }
+  // tram tracks (drawn after the mask so rails continue through the junction)
+  for (const rail of sc.rails) drawRail(ctx, view, rail);
+  // pedestrian crossings
+  for (const z of sc.zebras) drawZebra(ctx, view, z);
+  // stop / give-way lines
+  for (const s of sc.stopLines) {
+    if (s.kind === "give") line(ctx, view, s.a, s.b, 0.4, MARK, [0.7, 0.7]);
+    else line(ctx, view, s.a, s.b, 0.55, MARK);
+  }
+  // lane arrows + street labels
+  for (const a of sc.arrows) drawArrow(ctx, view, a);
+  for (const l of sc.labels) drawLabel(ctx, view, l);
+  // upright signs (drawn last, on top)
+  for (const sg of sc.signs) drawSign(ctx, view, sg.code, sg.pos);
+}
+
+function drawRail(ctx, view, c) {
+  const OFF = 0.7;
+  polyline(ctx, view, c.map((p, i) => railOffset(c, i, OFF)), 0.18, RAIL);
+  polyline(ctx, view, c.map((p, i) => railOffset(c, i, -OFF)), 0.18, RAIL);
+  for (let i = 1; i < c.length; i++) {                 // sleepers
+    const seg = Math.max(2, Math.round(V.dist(c[i - 1], c[i]) / 2));
+    for (let k = 0; k <= seg; k++) {
+      const p = V.lerp(c[i - 1], c[i], k / seg);
+      const perp = V.right(V.norm(V.sub(c[i], c[i - 1])));
+      line(ctx, view, V.add(p, V.mul(perp, 0.95)), V.add(p, V.mul(perp, -0.95)), 0.1, RAIL);
+    }
+  }
+}
+function railOffset(c, i, d) {
+  const dir = i < c.length - 1 ? V.norm(V.sub(c[i + 1], c[i])) : V.norm(V.sub(c[i], c[i - 1]));
+  return V.add(c[i], V.mul(V.right(dir), d));
+}
+
+function drawArrow(ctx, view, a) {
+  const ang = Math.atan2(a.dir[1], a.dir[0]);
+  ctx.save();
+  ctx.translate(view.sx(a.pos[0]), view.sy(a.pos[1]));
+  ctx.rotate(ang);
+  ctx.strokeStyle = MARK; ctx.fillStyle = MARK;
+  ctx.lineWidth = Math.max(2, view.s(0.32)); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  const L = view.s(2.6), head = view.s(0.85), bend = view.s(1.2);
+  ctx.beginPath();
+  if (a.kind === "left" || a.kind === "right") {
+    const s = a.kind === "left" ? -1 : 1;             // y-down: right turn bends +y
+    ctx.moveTo(-L / 2, 0); ctx.lineTo(L * 0.18, 0); ctx.lineTo(L * 0.18, s * bend);
+    ctx.stroke();
+    arrowHead(ctx, [L * 0.18, s * bend], s > 0 ? Math.PI / 2 : -Math.PI / 2, head);
+  } else {
+    ctx.moveTo(-L / 2, 0); ctx.lineTo(L / 2, 0); ctx.stroke();
+    arrowHead(ctx, [L / 2, 0], 0, head);
+  }
+  ctx.restore();
+}
+function arrowHead(ctx, tip, ang, h) {
+  ctx.save(); ctx.translate(tip[0], tip[1]); ctx.rotate(ang);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-h, -h * 0.7); ctx.lineTo(-h, h * 0.7); ctx.closePath();
+  ctx.fill(); ctx.restore();
+}
+
+function drawLabel(ctx, view, l) {
+  ctx.save();
+  ctx.translate(view.sx(l.pos[0]), view.sy(l.pos[1]));
+  if (l.rot) ctx.rotate(l.rot);
+  ctx.fillStyle = "rgba(154,163,178,.85)";
+  ctx.font = `600 ${Math.max(9, Math.round(view.s(2.0)))}px ui-sans-serif, system-ui`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(l.text, 0, 0);
+  ctx.restore();
+}
+
 function polyline(ctx, view, pts, w, color, dash) {
   ctx.beginPath();
   ctx.lineWidth = Math.max(1, view.s(w));

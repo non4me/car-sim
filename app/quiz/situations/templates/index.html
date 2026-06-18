@@ -29,19 +29,17 @@
       </div>
       <div class="bg-panel/80 backdrop-blur rounded-lg px-3 py-2 text-right">
         <div class="text-[10px] uppercase tracking-wide text-slate-500">{{ t.sim_score }}</div>
-        <div id="hud-score" class="font-bold tabular-nums text-lg leading-none">100</div>
-        <div id="hud-speed" class="text-[10px] text-slate-500 tabular-nums mt-1">0 km/h</div>
+        <div id="hud-score" class="font-bold tabular-nums text-lg leading-none">0</div>
+        <div id="hud-prog" class="text-[10px] text-slate-500 tabular-nums mt-1">0/0</div>
       </div>
     </div>
 
-    <!-- on-screen controls -->
-    <div id="controls" class="absolute bottom-0 inset-x-0 p-4 flex items-end justify-between gap-3 select-none">
-      <div class="flex gap-2" id="turnbtns">
-        <button data-turn="left"  class="btn ctrl w-14 h-14 rounded-xl bg-panel/90 border border-line text-2xl">↰</button>
-        <button data-turn="straight" class="btn ctrl w-14 h-14 rounded-xl bg-panel/90 border border-line text-2xl">↑</button>
-        <button data-turn="right" class="btn ctrl w-14 h-14 rounded-xl bg-panel/90 border border-line text-2xl">↱</button>
+    <!-- decision panel — appears when the animation freezes at the decision point -->
+    <div id="qpanel" class="hidden absolute bottom-0 inset-x-0 p-3">
+      <div class="mx-auto max-w-xl bg-ink/85 backdrop-blur rounded-2xl border border-line p-3 fade-in">
+        <div id="q-prompt" class="text-sm font-bold mb-2 leading-snug"></div>
+        <div id="q-options" class="grid gap-2"></div>
       </div>
-      <button id="gas" class="btn w-28 h-16 rounded-2xl bg-accent text-ink font-extrabold text-lg shadow-lg shadow-accent/20">{{ t.sim_go }}</button>
     </div>
 
     <!-- start / scenario menu -->

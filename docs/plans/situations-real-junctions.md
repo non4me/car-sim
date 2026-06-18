@@ -124,6 +124,27 @@ using their own risk lists.
 - DTMP licensing: public ZPS/DTI part is open for any purpose; confirm attribution terms before shipping traced geometry.
 - Animation timing + freeze point need playtesting so the "decision moment" is unambiguous.
 
+## Progress
+- **P1 DONE (msg 3099 — vertical slice).** New engine replaces the old driving sim entirely:
+  - `scene.js` — flexible real-junction geometry (arbitrary arms via centreline+width, tram rails, signs at
+    explicit positions, crossings, stop/give lines, lane arrows, street labels, junction-core marking mask).
+  - `world.js` `makeViewBounds` — fit a centre-origin metric bbox to canvas.
+  - `render.js` `drawScene` — reuses the existing vector signs/zebra/agents; adds rails/arrows/labels.
+  - `game.js` — fully rewritten flow: short **animation → freeze at decision point → multiple-choice → reveal
+    with rule + § citation**. No driving. Blue "you" ring/chevron marks the ego. Reuses the `Agent`
+    path-follower and the shared 10-language i18n.
+  - `index.html` — gas/turn controls replaced by the question/options panel.
+  - First scenario `r1_tram_hlavni` (the tram-on-minor-road *chyták*: you on hlavní, tram on vedlejší → YOU
+    have priority). Old abstract scenarios `s1–s8` + old core (`sim.js`/`junction.js`/`rules.js`) retired.
+  - Verified on prod (cs + ru): animation → freeze (ego ~10 m before junction) → correct answer → green
+    verdict + explanation + `§ 21 a § 22` citation. No console errors. 10-lang plumbing confirmed (ru).
+  - **Slice caveat:** `r1` geometry is a clean schematic, not yet an ortofoto/DTMP-precise trace of a named
+    junction — the slice was to agree the visual + interaction. Next: trace real named junctions precisely.
+  - **Deploy gotcha:** our `rsync` has no `--delete`, so locally-removed files (old scenarios/modules) linger
+    on the server and get baked into the image — must `rm` them server-side (or add `--delete`).
+- **P2 NEXT** — author the curated ~8 named junctions (precise traces) covering each rule-trap bucket; run
+  their question/option/explain strings through the Gemini pipeline for all 10 languages.
+
 ## Sources
 - Prague Top-10 risk junctions — [Deník](https://www.denik.cz/zivot-ridice/dopravni-konference-praha-rizikove-krizovatky-462023.html), [Aktuálně](https://zpravy.aktualne.cz/ekonomika/auto/nejhorsi-krizovatky-v-praze/r~9c5a5fe092b411ee8d680cc47ab5f122/), [I.P. Pavlova #1 in CR](https://ekonomickydenik.cz/nejrizikoveji-krizovatka-je-v-centru-prahy-u-i-p-pavlova-vice-nez-sto-bouracek-za-dva-roky-ale-i-dalsi-mesta-maji-nebezpecna-mista/)
 - Rule traps — [tram junctions](https://www.bezpecnecesty.cz/cz/autoskola/vyuka/krizovatky/krizovatky-s-tramvajemi), [roundabout exception](https://www.autozive.cz/kruhovy-objezd-prednost-vyjimka-znacka/), [autoškola junction test](https://www.autozive.cz/autoskola-krizovatka-test/), [bezpecnecesty výuka](https://www.bezpecnecesty.cz/cz/autoskola/vyuka/krizovatky)

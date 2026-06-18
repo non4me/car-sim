@@ -1,0 +1,75 @@
+{
+  "id": "r1_tram_hlavni",
+  "order": 1,
+  "city": "praha",
+  "junction": { "name": "Hlavní × vedlejší s tramvají", "source": "schematic (prototype slice; precise ortofoto/DTMP trace to follow)" },
+  "title": {
+    "cs": "Tramvaj na vedlejší silnici",
+    "en": "Tram on the minor road",
+    "ru": "Трамвай на второстепенной"
+  },
+  "hint": {
+    "cs": "Sledujte situaci a rozhodněte, jak budete pokračovat.",
+    "en": "Watch the situation and decide how to proceed.",
+    "ru": "Посмотрите ситуацию и решите, как действовать."
+  },
+  "view": { "minx": -30, "miny": -30, "maxx": 30, "maxy": 30 },
+  "geom": {
+    "roads": [
+      { "name": "Hlavní", "centerline": [[-50, 0], [50, 0]], "lanes": 2, "priority": true },
+      { "name": "Vedlejší", "centerline": [[0, -50], [0, 50]], "lanes": 2 }
+    ],
+    "core": { "x": 0, "y": 0, "r": 5 },
+    "rails": [ [[0, -50], [0, 50]] ],
+    "signs": [
+      { "code": "P2", "x": -9, "y": 8 },
+      { "code": "P2", "x": 9, "y": -8 },
+      { "code": "P4", "x": -8, "y": -9 },
+      { "code": "P4", "x": 8, "y": 9 }
+    ],
+    "stoplines": [
+      { "a": [-3.5, -7], "b": [3.5, -7], "kind": "give" },
+      { "a": [-3.5, 7], "b": [3.5, 7], "kind": "give" }
+    ],
+    "arrows": [
+      { "x": -18, "y": 1.75, "dir": [1, 0], "kind": "straight" }
+    ],
+    "labels": [
+      { "x": -34, "y": -3.4, "text": "Hlavní" },
+      { "x": 3.4, "y": -34, "text": "Vedlejší", "rot": 1.5708 }
+    ]
+  },
+  "actors": [
+    { "kind": "ego", "path": [[-34, 1.75], [52, 1.75]], "v": 8, "spawn": 0 },
+    { "kind": "tram", "path": [[0, -32], [0, 54]], "v": 7, "spawn": 0 }
+  ],
+  "decision": { "t": 3.0 },
+  "question": {
+    "cs": "Jedete po hlavní silnici rovně. Zleva přijíždí tramvaj, která pokračuje rovně přes křižovatku. Jak budete pokračovat?",
+    "en": "You are going straight on the priority road. A tram approaches from the left and will continue straight across the junction. How do you proceed?",
+    "ru": "Вы едете прямо по главной дороге. Слева приближается трамвай, который продолжит движение прямо через перекрёсток. Как вы поступите?"
+  },
+  "options": [
+    {
+      "text": { "cs": "Dám tramvaji přednost — tramvaj má přednost vždy", "en": "Give way to the tram — a tram always has priority", "ru": "Уступлю трамваю — у трамвая всегда приоритет" },
+      "correct": false,
+      "rule": "tram_straight"
+    },
+    {
+      "text": { "cs": "Mám přednost, plynule projedu", "en": "I have priority, I proceed", "ru": "У меня приоритет, проезжаю" },
+      "correct": true,
+      "rule": "tram_straight_yields"
+    },
+    {
+      "text": { "cs": "Zastavím a počkám, až tramvaj přejede", "en": "I stop and wait for the tram to pass", "ru": "Остановлюсь и подожду, пока трамвай проедет" },
+      "correct": false,
+      "rule": "tram_straight"
+    }
+  ],
+  "explain": {
+    "cs": "Tramvaj přijíždí po vedlejší silnici (značka „Dej přednost v jízdě“), vy jedete po hlavní. Tramvaj nemá absolutní přednost — je-li přednost upravena dopravními značkami, řídí se podle nich. Na hlavní silnici proto máte přednost i před tramvají jedoucí rovně.",
+    "en": "The tram is on the minor road (a “give way” sign), while you are on the priority road. A tram does not have absolute priority — where priority is set by signs, the signs govern. So on the priority road you have right of way even over a tram going straight.",
+    "ru": "Трамвай едет по второстепенной дороге (знак «Уступи дорогу»), а вы — по главной. У трамвая нет абсолютного приоритета: если приоритет задан знаками, действуют знаки. Поэтому на главной дороге у вас приоритет даже перед трамваем, едущим прямо."
+  },
+  "citation": "§ 21 a § 22 z. 361/2000 Sb."
+}
