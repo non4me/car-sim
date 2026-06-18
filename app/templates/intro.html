@@ -28,8 +28,6 @@
     .card .d{color:#8a93a6;font-size:13px;margin-top:4px}
     .card.soon{opacity:.55}
     .card-main{display:block;text-decoration:none;color:inherit}
-    .tag{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#6b7385;border:1px solid var(--line);
-      border-radius:999px;padding:2px 8px;margin-left:8px}
     .dist{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
     .dist-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7385}
     .dist a{color:var(--accent);text-decoration:none;font-size:13px;font-weight:600}
@@ -51,7 +49,7 @@
     <div class="cards">
       <div class="card">
         <a class="card-main" href="/drive">
-          <div class="t">🚗 {{ t.drive_t }} <span class="tag">{{ t.tag_primary }}</span></div>
+          <div class="t">🚗 {{ t.drive_t }}</div>
           <div class="d">{{ t.drive_d }}</div>
         </a>
         <div class="drivecities">
@@ -60,11 +58,11 @@
         </div>
       </div>
       <a class="card" href="/quiz">
-        <div class="t">🧠 {{ t.quiz_t }} <span class="tag">{{ t.tag_live }}</span></div>
+        <div class="t">🧠 {{ t.quiz_t }}</div>
         <div class="d">{{ t.quiz_d }}</div>
       </a>
       <a class="card" href="/docs">
-        <div class="t">📖 {{ t.docs_t }} <span class="tag">{{ t.tag_live }}</span></div>
+        <div class="t">📖 {{ t.docs_t }}</div>
         <div class="d">{{ t.docs_d }}</div>
       </a>
     </div>
