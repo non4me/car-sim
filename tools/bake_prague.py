@@ -57,13 +57,14 @@ def _want_way(tags) -> bool:
 
 
 def read_pbf(path: str, bbox=PRAGUE_BBOX):
-    """pbf → (nodes, all_ways, places, labels, pois, addrs) in the Overpass element shapes build_artifact expects."""
+    """pbf → (nodes, all_ways, places, labels, pois, addrs, sign_nodes) in the Overpass element shapes build_artifact expects."""
     nodes: dict = {}      # id -> {"lat","lon","tags"}
     all_ways: list = []   # {"id","nodes":[ids],"tags":{}}
     places: list = []     # {"name","lat","lon","kind"} — districts/quarters for search
     labels: list = []     # {"lat","lon","kind","name"} — stations + major landmarks (msg 2771)
     pois: list = []       # {"lat","lon","kind","name"?} — pharmacies/ATMs/food/shops… (phase 2)
     addrs: list = []      # {"lat","lon","n"} — house numbers (phase 2)
+    sign_nodes: list = [] # {"lat","lon","v"} — posted traffic_sign nodes (limits/prohib/info) (msg 3149)
     s, w, n, e = bbox
     inbb = lambda la, lo: s <= la <= n and w <= lo <= e
     # with_locations() caches every node's coord in C++; EmptyTagFilter means Python only sees
@@ -96,6 +97,9 @@ def read_pbf(path: str, bbox=PRAGUE_BBOX):
             hn = ntags.get("addr:housenumber")            # house number node (phase 2)
             if hn and inbb(la, lo):
                 addrs.append({"lat": la, "lon": lo, "n": hn})
+            ts = ntags.get("traffic_sign")                # posted road sign node (msg 3149)
+            if ts and ts not in ("none", "no") and inbb(la, lo):
+                sign_nodes.append({"lat": la, "lon": lo, "v": ts, "ms": ntags.get("maxspeed")})
         elif o.is_way():
             tags = {t.k: t.v for t in o.tags}
             lab = label_for(tags)                         # station/landmark/POI as a building/way → centroid
@@ -131,7 +135,7 @@ def read_pbf(path: str, bbox=PRAGUE_BBOX):
                 n_ways += 1
                 if n_ways % 50000 == 0:
                     print(f"  …{n_ways} ways, {len(nodes)} nodes")
-    return nodes, all_ways, places, labels, pois, addrs
+    return nodes, all_ways, places, labels, pois, addrs, sign_nodes
 
 
 def read_water_areas(path: str, bbox=PRAGUE_BBOX) -> list:
@@ -190,18 +194,18 @@ def main():
 
     snapshot = args.snapshot or _snapshot_from_header(args.pbf)
     print(f"[{args.name}] reading {args.pbf} (snapshot {snapshot})…")
-    nodes, all_ways, places, labels, pois, addrs = read_pbf(args.pbf)
+    nodes, all_ways, places, labels, pois, addrs, sign_nodes = read_pbf(args.pbf)
     # dedup labels/POIs co-located under the same name (mapped as both a node and a building)
     labels = dedup_points(labels, lambda l: (l["kind"], l["name"], round(l["lat"], 3), round(l["lon"], 3)))
     pois = dedup_points(pois, lambda p: (p["kind"], p.get("name", ""), round(p["lat"], 4), round(p["lon"], 4)))
     print(f"[{args.name}] parsed {len(all_ways)} ways, {len(nodes)} nodes, {len(places)} places, "
-          f"{len(labels)} labels, {len(pois)} pois, {len(addrs)} house-numbers → processing…")
+          f"{len(labels)} labels, {len(pois)} pois, {len(addrs)} house-numbers, {len(sign_nodes)} signs → processing…")
     water = read_water_areas(args.pbf)
     print(f"[{args.name}] assembled {len(water)} water areas (incl. multipolygon rivers)")
     out = ROOT / "data" / "cities" / args.country / "praha" / args.name
     build_artifact(nodes, all_ways, PRAGUE_BBOX, args.country, args.name, out,
                    snapshot=snapshot, debug_png=False, place_nodes=places, water_areas=water,
-                   label_nodes=labels, poi_nodes=pois, addr_nodes=addrs)
+                   label_nodes=labels, poi_nodes=pois, addr_nodes=addrs, sign_nodes=sign_nodes)
 
 
 if __name__ == "__main__":

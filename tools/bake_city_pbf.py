@@ -51,11 +51,11 @@ def main():
     snapshot = args.snapshot or _snapshot_from_header(args.pbf)
     print(f"[{args.city}/{name}] reading {args.pbf} (bbox {bbox}, snapshot {snapshot})…")
 
-    nodes, all_ways, places, labels, pois, addrs = read_pbf(args.pbf, bbox)
+    nodes, all_ways, places, labels, pois, addrs, sign_nodes = read_pbf(args.pbf, bbox)
     labels = dedup_points(labels, lambda l: (l["kind"], l["name"], round(l["lat"], 3), round(l["lon"], 3)))
     pois = dedup_points(pois, lambda p: (p["kind"], p.get("name", ""), round(p["lat"], 4), round(p["lon"], 4)))
     print(f"[{args.city}/{name}] parsed {len(all_ways)} ways, {len(nodes)} nodes, {len(places)} places, "
-          f"{len(labels)} labels, {len(pois)} pois, {len(addrs)} house-numbers → processing…")
+          f"{len(labels)} labels, {len(pois)} pois, {len(addrs)} house-numbers, {len(sign_nodes)} signs → processing…")
 
     water = read_water_areas(args.pbf, bbox)
     print(f"[{args.city}/{name}] assembled {len(water)} water areas (incl. multipolygon rivers)")
@@ -64,7 +64,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     build_artifact(nodes, all_ways, bbox, args.country, name, out,
                    snapshot=snapshot, debug_png=False, place_nodes=places, water_areas=water,
-                   label_nodes=labels, poi_nodes=pois, addr_nodes=addrs, city=args.city)
+                   label_nodes=labels, poi_nodes=pois, addr_nodes=addrs, sign_nodes=sign_nodes, city=args.city)
     print(f"[{args.city}/{name}] done → {out}")
 
 

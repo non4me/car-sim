@@ -15,6 +15,7 @@ Districts are named bboxes below (S,W,N,E). Data © OpenStreetMap contributors (
 import argparse
 import json
 import math
+import re
 import urllib.request
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -261,9 +262,53 @@ def _project_water(water_areas, to_xy, tol=4.0) -> list[dict]:
     return areas
 
 
+def classify_traffic_sign(raw, maxspeed=None):
+    """Map an OSM `traffic_sign` value (Czech vyhláška 294/2015 codes / free text) to a render
+    (kind, value) for the map, or None to drop (empties + codes already covered by junction-control
+    derivation). Families: A=warning, B=prohibitory, C=mandatory, IP/IS/IZ=informational/zone (msg 3149).
+    `maxspeed` = the node's own maxspeed tag (some signs are `traffic_sign=maxspeed` with the value over there)."""
+    if not raw:
+        return None
+    first = str(raw).split(";")[0].strip()                 # a node may list several; the first governs
+    low = first.lower()
+    m = re.search(r"\[(\d{1,3})\]", first)                 # posted value embedded, e.g. B20a[30]
+    speed = m.group(1) if m else None
+    if not speed and maxspeed:                             # … else the separate maxspeed= tag (traffic_sign=maxspeed)
+        mm = re.search(r"\d{1,3}", str(maxspeed))
+        speed = mm.group(0) if mm else None
+    code = first.split("[")[0].strip()
+    cu = re.sub(r"^(cz|cs)[:\-_]?", "", code, flags=re.I)  # drop country prefix CZ:/CZ-/CS:/cz:
+    cu = re.sub(r"[^A-Za-z0-9]", "", cu).upper()           # → letters+digits only: "IZ1a"→"IZ1A", "B20a"→"B20A"
+    if low in ("yes", "yic", "none", "no", "unknown", ""):
+        return None
+    # speed limit (B20a / maxspeed)
+    if "maxspeed" in low or cu.startswith(("B20", "B21")):
+        return ("speed_limit", speed) if speed else None
+    # already shown by junction-control derivation → don't double up
+    if cu.startswith(("P1", "P2", "P3", "P4", "P6", "P7", "P8")) or low in ("give_way", "yield", "stop", "priority"):
+        return None
+    # town boundary / zone (city_limit = obec/konec obce IZ4) — informational; checked before B/C so
+    # "CITYLIMIT".startswith("C") doesn't misfire into mandatory
+    if "city_limit" in low or "town" in low or cu.startswith(("IZ", "IP", "IS", "IJ")):
+        return ("info", None)
+    # no-entry / prohibitory (B family)
+    if cu in ("B1", "B2") or "no_entry" in low or low in ("no entry", "no-entry"):
+        return ("no_entry", None)
+    if cu.startswith("B") or low.startswith(("no ", "no_")) or "=no" in low:
+        return ("prohibitory", speed)                      # other prohibitions (weight/overtaking/…) → generic red ring
+    # mandatory (C family / only_* direction)
+    if cu.startswith("C") or "only" in low:
+        return ("mandatory", None)
+    # warning (A family)
+    if cu.startswith("A"):
+        return ("warning", None)
+    # anything else available → keep as informational (Vlad: "all signs incl. informational")
+    return ("info", None)
+
+
 def build_artifact(nodes, all_ways, bbox, country, name, out,
                    debug_only=False, snapshot=None, debug_png=True, place_nodes=None, water_areas=None,
-                   label_nodes=None, poi_nodes=None, addr_nodes=None, city="praha"):
+                   label_nodes=None, poi_nodes=None, addr_nodes=None, sign_nodes=None, city="praha"):
     """Shared processing: raw OSM {nodes, all_ways} + bbox → tiled artifact (edges, areas,
     junctions, signs, tiles, meta). Front-ends: Overpass (district `bake`) and pbf (`bake_prague`).
     `water_areas` (optional) = pre-assembled multipolygon-aware water rings — used for all-Prague so
@@ -414,12 +459,60 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
             for ei in mains:
                 place(ei, "priority_road")
 
+    # Posted OSM traffic_sign nodes (msg 3149): real roadside signs — speed limits, no-entry, prohibitions,
+    # mandatory, informational/zone — that the derivation above never produces. Keep one only if it sits near a
+    # drivable road (a coarse vertex grid gives candidate edges; signs >SNAP m from any carriageway = footway/
+    # noise, dropped) and place it at its true location. Codes already shown as junction control are skipped.
+    if sign_nodes:
+        CELL, SNAP = 60.0, 30.0
+        egrid = defaultdict(list)
+        for ei, ed in enumerate(edges):
+            for (gx, gy) in ed["geom"]:
+                egrid[(int(gx // CELL), int(gy // CELL))].append(ei)
+
+        def near_road(px, py):
+            best = SNAP * SNAP + 1.0
+            cx, cy = int(px // CELL), int(py // CELL)
+            seen_e = set()
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for ei in egrid.get((cx + dx, cy + dy), ()):
+                        if ei in seen_e:
+                            continue
+                        seen_e.add(ei)
+                        g = edges[ei]["geom"]
+                        for k in range(len(g) - 1):
+                            ax, ay, bx, by = g[k][0], g[k][1], g[k + 1][0], g[k + 1][1]
+                            vx, vy = bx - ax, by - ay
+                            L2 = vx * vx + vy * vy or 1.0
+                            t = max(0.0, min(1.0, ((px - ax) * vx + (py - ay) * vy) / L2))
+                            ddx, ddy = px - (ax + t * vx), py - (ay + t * vy)
+                            best = min(best, ddx * ddx + ddy * ddy)
+            return best <= SNAP * SNAP
+
+        kept = 0
+        for sn in sign_nodes:
+            cl = classify_traffic_sign(sn.get("v"), sn.get("ms"))
+            if not cl:
+                continue
+            kind, val = cl
+            px, py = to_xy(sn["lat"], sn["lon"])
+            if not near_road(px, py):
+                continue
+            sg = {"x": round(px, 1), "y": round(py, 1), "kind": kind}
+            if val:
+                sg["v"] = val
+            signs.append(sg)
+            kept += 1
+        print(f"  posted OSM signs: {kept} kept of {len(sign_nodes)} (snapped to roads)")
+
     # collapse co-located signs of the same kind (interchange clusters / dense nodes) to one per ~12 m
-    # cell so complex junctions don't swarm with duplicates (msg 2980).
+    # cell so complex junctions don't swarm with duplicates (msg 2980). Value (speed) is part of the key so
+    # two different posted limits near each other don't collapse into one.
     if signs:
         seen_sg, deduped = set(), []
         for sg in signs:
-            key = (sg["kind"], round(sg["x"] / 12.0), round(sg["y"] / 12.0))
+            key = (sg["kind"], sg.get("v"), round(sg["x"] / 12.0), round(sg["y"] / 12.0))
             if key in seen_sg:
                 continue
             seen_sg.add(key)

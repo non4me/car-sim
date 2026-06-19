@@ -134,7 +134,8 @@ export function draw(ctx, view, map, car, rules, route, districts) {
     // de-overlap + interior cull (msg 3022): drop signs that fall INSIDE a junction box (they belong on
     // the approach, not the middle), then place the rest through a guard so no two signs ever collide —
     // critical control (signal/stop) and the nearest signs win, so it stays clear which road each governs.
-    const RANK = { signals: 0, signal: 0, stop: 0, give_way: 1, priority_road: 2 };
+    const RANK = { signals: 0, signal: 0, stop: 0, give_way: 1, priority_road: 2,
+                   speed_limit: 1, no_entry: 1, warning: 1, prohibitory: 2, mandatory: 2, info: 4 };
     const sg = makeLabelGuard();
     const cands = [];
     for (const s of map.signs) {
@@ -147,7 +148,7 @@ export function draw(ctx, view, map, car, rules, route, districts) {
     for (const { s } of cands) {
       const [X, Y] = view.project(s.x, s.y);
       if (!sg.tryPlace(X - bs, Y - bs, X + bs, Y + bs)) continue;
-      drawSign(ctx, X, Y, s.kind, ss);
+      drawSign(ctx, X, Y, s.kind, ss, s.v);
     }
   } else {
     for (const j of map.junctions) {
@@ -793,14 +794,95 @@ function drawCrossings(ctx, view, map, zoom) {
 
 // Junction control signs, drawn BILLBOARDED (axis-aligned in screen space, so they stay upright
 // and readable no matter how the heading-up camera is rotated). `s` is the glyph half-size in px.
-function drawSign(ctx, X, Y, kind, s) {
+function drawSign(ctx, X, Y, kind, s, v) {
   ctx.save();
   ctx.lineJoin = "round";
   if (kind === "stop") drawStopSign(ctx, X, Y, s);
   else if (kind === "give_way") drawYieldSign(ctx, X, Y, s);
   else if (kind === "signal" || kind === "signals") drawSignal(ctx, X, Y, s);
   else if (kind === "priority_road") drawPriorityRoad(ctx, X, Y, s);
+  else if (kind === "speed_limit") drawSpeedLimit(ctx, X, Y, s, v);   // posted OSM signs (msg 3149)
+  else if (kind === "no_entry") drawNoEntry(ctx, X, Y, s);
+  else if (kind === "prohibitory") drawProhibitory(ctx, X, Y, s);
+  else if (kind === "mandatory") drawMandatory(ctx, X, Y, s);
+  else if (kind === "warning") drawWarning(ctx, X, Y, s);
+  else if (kind === "info") drawInfoSign(ctx, X, Y, s);
   ctx.restore();
+}
+
+// --- posted OSM road signs (msg 3149): billboarded glyphs, same half-size `s` convention ---
+// Speed limit (B20a / maxspeed) — white roundel, red ring, black number.
+function drawSpeedLimit(ctx, X, Y, s, v) {
+  ctx.beginPath(); ctx.arc(X, Y, s, 0, 7);
+  ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.lineWidth = Math.max(1.5, s * 0.30); ctx.strokeStyle = "#d2231f"; ctx.stroke();
+  if (v) {
+    ctx.fillStyle = "#15181f";
+    const txt = String(v);
+    ctx.font = `800 ${Math.round(s * (txt.length > 2 ? 0.78 : 0.95))}px ui-sans-serif,system-ui,sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(txt, X, Y + s * 0.06);
+  }
+}
+
+// No entry (B1/B2 zákaz vjezdu) — red disc with a white bar.
+function drawNoEntry(ctx, X, Y, s) {
+  ctx.beginPath(); ctx.arc(X, Y, s, 0, 7);
+  ctx.fillStyle = "#d2231f"; ctx.fill();
+  ctx.lineWidth = Math.max(1, s * 0.1); ctx.strokeStyle = "#fff"; ctx.stroke();
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(X - s * 0.58, Y - s * 0.17, s * 1.16, s * 0.34);   // white horizontal bar
+}
+
+// Generic prohibition (other B-family: weight/overtaking/…) — white disc, thick red ring.
+function drawProhibitory(ctx, X, Y, s) {
+  ctx.beginPath(); ctx.arc(X, Y, s, 0, 7);
+  ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.lineWidth = Math.max(1.5, s * 0.34); ctx.strokeStyle = "#d2231f"; ctx.stroke();
+}
+
+// Mandatory direction (C-family / only_*) — blue disc, white up-arrow.
+function drawMandatory(ctx, X, Y, s) {
+  ctx.beginPath(); ctx.arc(X, Y, s, 0, 7);
+  ctx.fillStyle = "#1f6fd6"; ctx.fill();
+  ctx.lineWidth = Math.max(1, s * 0.1); ctx.strokeStyle = "#fff"; ctx.stroke();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.moveTo(X, Y - s * 0.55);
+  ctx.lineTo(X + s * 0.42, Y + s * 0.05);
+  ctx.lineTo(X + s * 0.16, Y + s * 0.05);
+  ctx.lineTo(X + s * 0.16, Y + s * 0.55);
+  ctx.lineTo(X - s * 0.16, Y + s * 0.55);
+  ctx.lineTo(X - s * 0.16, Y + s * 0.05);
+  ctx.lineTo(X - s * 0.42, Y + s * 0.05);
+  ctx.closePath(); ctx.fill();
+}
+
+// Warning (A-family) — white triangle pointing UP (vs give-way's down) with a red rim + "!".
+function drawWarning(ctx, X, Y, s) {
+  const r = s * 1.15;
+  ctx.beginPath();
+  ctx.moveTo(X, Y - r);
+  ctx.lineTo(X + r * 0.866, Y + r * 0.5);
+  ctx.lineTo(X - r * 0.866, Y + r * 0.5);
+  ctx.closePath();
+  ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.lineWidth = Math.max(1.2, s * 0.2); ctx.strokeStyle = "#d2231f"; ctx.stroke();
+  ctx.fillStyle = "#15181f";
+  ctx.font = `800 ${Math.round(s * 0.8)}px ui-sans-serif,system-ui,sans-serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("!", X, Y + s * 0.16);
+}
+
+// Informational / zone (IP/IS/IZ + town boundary + unmapped) — blue rounded square with a white "i".
+function drawInfoSign(ctx, X, Y, s) {
+  roundRect(ctx, X - s * 0.9, Y - s * 0.9, s * 1.8, s * 1.8, s * 0.22);
+  ctx.fillStyle = "#1f6fd6"; ctx.fill();
+  ctx.lineWidth = Math.max(1, s * 0.12); ctx.strokeStyle = "#fff"; ctx.stroke();
+  ctx.fillStyle = "#fff";
+  ctx.font = `800 ${Math.round(s * 1.0)}px Georgia,ui-serif,serif`;
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("i", X, Y + s * 0.04);
 }
 
 // "Hlavní pozemní komunikace" (priority road) — yellow diamond with a white border.
