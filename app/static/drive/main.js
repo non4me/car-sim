@@ -19,6 +19,11 @@ const OVERVIEW_Z = 5;           // below this px/m → bird's-eye overview (car 
 const OFFROAD_WALL = 4.3;       // metres the car may sink off-road before a wall blocks going deeper
 const FOLLOW_TURN = 1.85;       // rad/s — max auto-steer rate in route-follow (matches the car's turnRate)
 const FOLLOW_LOOKAHEAD = 14;    // metres ahead on the route the auto-pilot aims for (pure-pursuit)
+// ideal-driver autopilot (msg 3161): it holds the legal limit but slows COMFORTABLY for bends, signals,
+// stop/give-way signs + the destination, and keeps the right (RHT) lane.
+const A_LAT = 3.2;              // m/s² — comfortable lateral accel → corner speed = sqrt(A_LAT·radius)
+const A_BRK = 3.0;             // m/s² — comfortable deceleration used to brake EARLY (sqrt speed profile)
+const LANE_OFF = 1.75;         // m — keep this far right of the route centreline (right lane, RHT)
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -287,7 +292,10 @@ async function boot() {
           routeLine = res.polyline; routeI = 0; routeBox = bboxOf(routeLine);
           followEl.disabled = false;                    // auto-pilot now available
           routeFollowOn = followEl.checked;             // honour a pre-ticked toggle (minimap "Trasa" auto-enables)
-          info.textContent = `${T("d_route", "trasa")} ${(res.length_m / 1000).toFixed(2)} km`; info.className = "ok";
+          // length + ETA at the legal limit (an ideal rule-obeying drive, msg 3161)
+          const mins = Math.max(1, Math.round((res.time_s || 0) / 60));
+          info.textContent = `${T("d_route", "trasa")} ${(res.length_m / 1000).toFixed(2)} km · ≈ ${mins} min`;
+          info.className = "ok";
           goTo(routeLine[0][0], routeLine[0][1]);       // drop the car at the route's start, on the road
         } else {
           routeLine = null; routeFollowOn = false; info.textContent = T("d_notfound", "trasa nenalezena"); info.className = "err";
@@ -320,9 +328,15 @@ async function boot() {
     routeI = bi;
     let look = FOLLOW_LOOKAHEAD, i = bi;
     let px = R[i][0] + (R[i + 1][0] - R[i][0]) * bt, py = R[i][1] + (R[i + 1][1] - R[i][1]) * bt;
+    // keep the RIGHT lane (RHT): aim a touch right of the route centreline, in the local travel
+    // direction, so the car tracks the right lane and enters turns from it (msg 3161).
+    const laneOff = Math.min(2.2, (rules && rules.width ? rules.width : 7) / 4);
     while (i < R.length - 1) {
       const bx = R[i + 1][0], by = R[i + 1][1], seg = Math.hypot(bx - px, by - py);
-      if (seg >= look) { const t = look / seg; return { x: px + (bx - px) * t, y: py + (by - py) * t, done: false }; }
+      if (seg >= look) {
+        const t = look / seg, dx = (bx - px) / seg, dy = (by - py) / seg;   // unit travel dir at the aim point
+        return { x: px + (bx - px) * t + dy * laneOff, y: py + (by - py) * t - dx * laneOff, done: false };  // right = (dy,−dx)
+      }
       look -= seg; i++; px = R[i][0]; py = R[i][1];
     }
     const end = R[R.length - 1];
@@ -348,6 +362,49 @@ async function boot() {
     car.x += (cx - car.x) * kp; car.y += (cy - car.y) * kp;
   }
 
+  // ideal-driver longitudinal plan (msg 3161): the highest speed that still obeys the limit and brakes EARLY
+  // (sqrt profile, comfortable A_BRK) for upcoming bends, red/amber signals, stop & give-way signs, and the
+  // destination. Returns the target speed in m/s. Stop signs latch once halted so the car proceeds after.
+  const stoppedAt = new Set();
+  const brakeCap = (vc, d) => Math.sqrt(Math.max(0, vc * vc + 2 * A_BRK * Math.max(0, d)));
+  function idealSpeed() {
+    let vt = ((rules && rules.limit) || 50) / 3.6;            // posted limit (or urban default), m/s
+    const R = routeLine;
+    if (R && R.length > 2) {                                  // brake for bends on the route ahead
+      let prevx = car.x, prevy = car.y, acc = 0;
+      for (let j = routeI + 1; j < R.length - 1 && acc < 80; j++) {
+        acc += Math.hypot(R[j][0] - prevx, R[j][1] - prevy); prevx = R[j][0]; prevy = R[j][1];
+        const a0 = R[j - 1], a1 = R[j], a2 = R[j + 1];
+        const c = Math.hypot(a1[0] - a0[0], a1[1] - a0[1]);
+        const a = Math.hypot(a2[0] - a1[0], a2[1] - a1[1]);
+        const bl = Math.hypot(a2[0] - a0[0], a2[1] - a0[1]);
+        const area = Math.abs((a1[0] - a0[0]) * (a2[1] - a0[1]) - (a1[1] - a0[1]) * (a2[0] - a0[0])) / 2;
+        if (area > 1e-3) {                                   // circumradius → safe corner speed
+          const rad = (a * bl * c) / (4 * area);
+          vt = Math.min(vt, brakeCap(Math.sqrt(A_LAT * rad), acc));
+        }
+      }
+    }
+    if (rules && (rules.signal === "red" || rules.signal === "amber"))   // stop at a red/amber light
+      vt = Math.min(vt, brakeCap(0, rules.signalDist - 3.5));
+    const ch = Math.cos(car.h), sh = Math.sin(car.h);        // stop/give-way signs ahead
+    let nearStop = null;
+    for (const s of map.signs) {
+      if (s.kind !== "stop" && s.kind !== "give_way") continue;
+      const dx = s.x - car.x, dy = s.y - car.y, d = Math.hypot(dx, dy);
+      if (d > 35 || (dx * ch + dy * sh) / (d || 1) < 0.3) continue;       // within range AND ahead
+      if (s.kind === "give_way") { vt = Math.min(vt, brakeCap(5.5, d - 3)); continue; }  // slow to yield (~20 km/h)
+      const key = `${Math.round(s.x)},${Math.round(s.y)}`;
+      if (!stoppedAt.has(key)) { vt = Math.min(vt, brakeCap(0, d - 3)); if (!nearStop || d < nearStop.d) nearStop = { key, d }; }
+    }
+    if (nearStop && nearStop.d < 5 && Math.abs(car.v) < 0.4) stoppedAt.add(nearStop.key);  // latch a satisfied stop
+    if (R && R.length) {                                     // stop at the destination
+      const e = R[R.length - 1];
+      vt = Math.min(vt, brakeCap(0, Math.hypot(car.x - e[0], car.y - e[1]) - 2));
+    }
+    return Math.max(0, vt);
+  }
+
   function update(dt) {
     if (paused) return;                               // Esc / lost focus freezes the sim
     const controls = dbg || input.controls();
@@ -371,13 +428,13 @@ async function boot() {
         let dh = Math.atan2(Math.sin(desired - car.h), Math.cos(desired - car.h));
         const mt = FOLLOW_TURN * dt;
         car.h += Math.max(-mt, Math.min(mt, dh));                   // auto-steer (rate-limited)
-        // STOP for a red/amber signal ahead on the route (msg 3151): brake within ~stopping distance,
-        // hard-brake right at the line; release on green so the user's throttle (manual) drives on.
-        const stopZone = 7 + Math.abs(car.v) * 1.3;                 // earlier the faster you go
-        const redAhead = rules && (rules.signal === "red" || rules.signal === "amber") && rules.signalDist < stopZone;
-        const ctl = redAhead
-          ? { throttle: 0, brake: 1, hard: rules.signalDist < 4.5, turn: 0 }
-          : { throttle: controls.throttle, brake: controls.brake, hard: controls.hard, turn: 0 };
+        // FULLY autonomous longitudinal control (msg 3161): hold the planned ideal speed — throttle below it,
+        // brake above it, hard-brake when well over (or about to stop). No user input needed; drives itself.
+        const vt = idealSpeed(), v = car.v;
+        const ctl = { throttle: 0, brake: 0, hard: false, turn: 0 };
+        if (v > vt + 0.4 || (vt < 0.5 && v > 0.15)) {           // brake above target; fully STOP when target≈0
+          ctl.brake = 1; ctl.hard = v > vt + 5 || (vt < 0.5 && v > 2);
+        } else if (v < vt - 0.2) { ctl.throttle = 1; }         // accelerate to sit just under the limit
         car.update(dt, ctl);
         handled = true;
       }
@@ -439,6 +496,9 @@ async function boot() {
     car, map, view, rules: () => rules,
     routeLine: () => routeLine, following: () => routeFollowOn, followDbg: () => dbgFollow,   // headless route-test hooks
     set: (o) => { dbg = o; }, clear: () => { dbg = null; },
+    // load a route polyline + engage the autopilot (headless route-test hook; same path as the route panel)
+    driveRoute: (poly) => { routeLine = poly; routeI = 0; routeBox = bboxOf(poly); routeFollowOn = true;
+      if (poly && poly.length) goTo(poly[0][0], poly[0][1]); },
     // manual deterministic advance (for headless verification when RAF is throttled)
     tick: (n = 1) => { for (let i = 0; i < n; i++) update(1 / 60); render(); return { x: car.x, y: car.y, h: car.h, kmh: car.speedKmh, street: rules.street, zoom: +view.zoom.toFixed(1) }; },
   };

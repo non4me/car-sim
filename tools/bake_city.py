@@ -732,9 +732,10 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         encoding="utf-8")
     print(f"  [{name}] overview: {len(ov_water)} water, {len(ov_roads)} roads, {len(ov_green)} green")
 
-    # routing graph (for server-side shortest-path): one row per edge [a, b, oneway, geom].
-    # Directedness (one-ways) is applied at route time; geom lets the route follow real roads.
-    graph = [[ed["a"], ed["b"], 1 if ed["oneway"] else 0, ed["geom"]] for ed in edges]
+    # routing graph (for server-side shortest-path): one row per edge [a, b, oneway, geom, maxspeed].
+    # Directedness (one-ways) is applied at route time; geom lets the route follow real roads; maxspeed
+    # (km/h) is for the route's travel-time estimate at the legal limit (msg 3161).
+    graph = [[ed["a"], ed["b"], 1 if ed["oneway"] else 0, ed["geom"], ed["maxspeed"]] for ed in edges]
     (out / "graph.json").write_text(json.dumps(graph, separators=(",", ":")), encoding="utf-8")
     sk = Counter(s["kind"] for s in signs)
     print(f"[{name}] baked → {out}  ({len(tiles)} tiles, {len(edges)} edges, "

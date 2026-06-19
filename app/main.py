@@ -224,7 +224,7 @@ def route(city: str = DEFAULT_CITY_SLUG, district: str = "prague",
     if r is None:
         return JSONResponse({"polyline": [], "length_m": 0, "error": "no graph"}, status_code=404)
     res = r.route(fx, fy, tx, ty)
-    return JSONResponse(res or {"polyline": [], "length_m": 0})
+    return JSONResponse(res or {"polyline": [], "length_m": 0, "time_s": 0})
 
 
 HTML_HEADERS = {"Cache-Control": "no-cache"}  # never cache the HTML that names the asset build token

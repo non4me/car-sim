@@ -19,22 +19,27 @@ class Router:
     def __init__(self, graph_path: Path):
         rows = json.loads(Path(graph_path).read_text(encoding="utf-8"))
         self.geoms = [None] * len(rows)
+        self.secs = [0.0] * len(rows)    # travel time (s) of each edge at its legal limit (msg 3161)
         self.node_pt: dict = {}      # node id -> (x, y)
         self.adj: dict = {}          # node id -> list of (nbr, cost, geom_index, forward)
         self.grid: dict = {}         # (cx, cy) -> [node ids]
+        DEFAULT_KMH = 50             # urban fallback when an edge has no baked maxspeed
 
         def add_node(nid, x, y):
             if nid not in self.node_pt:
                 self.node_pt[nid] = (x, y)
                 self.grid.setdefault((int(x // _CELL), int(y // _CELL)), []).append(nid)
 
-        for gi, (a, b, ow, g) in enumerate(rows):
+        for gi, row in enumerate(rows):
+            a, b, ow, g = row[0], row[1], row[2], row[3]
+            ms = row[4] if len(row) > 4 and row[4] else DEFAULT_KMH   # km/h (old 4-col graphs → default)
             self.geoms[gi] = g
             add_node(a, g[0][0], g[0][1])
             add_node(b, g[-1][0], g[-1][1])
             length = 0.0
             for i in range(1, len(g)):
                 length += math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1])
+            self.secs[gi] = length / (ms / 3.6)                      # seconds at the legal limit
             self.adj.setdefault(a, []).append((b, length, gi, True))
             if not ow:
                 self.adj.setdefault(b, []).append((a, length, gi, False))
@@ -79,12 +84,14 @@ class Router:
                     heapq.heappush(pq, (nd + math.hypot(px - gx, py - gy), nd, v))
         if t != s and t not in prev:
             return None
-        # reconstruct the polyline (concatenate edge geoms, reversed where travelled backwards)
-        segs, cur = [], t
+        # reconstruct the polyline (concatenate edge geoms, reversed where travelled backwards) and sum
+        # the per-edge travel time at the legal limit → an ETA for an ideal, rule-obeying drive (msg 3161)
+        segs, secs, cur = [], 0.0, t
         while cur != s and cur in prev:
             pu, gi, fwd = prev[cur]
             g = self.geoms[gi]
             segs.append(g if fwd else g[::-1])
+            secs += self.secs[gi]
             cur = pu
         segs.reverse()
         poly = []
@@ -92,7 +99,7 @@ class Router:
             for p in seg:
                 if not poly or poly[-1] != p:
                     poly.append(p)
-        return {"polyline": poly, "length_m": round(dist.get(t, 0.0))}
+        return {"polyline": poly, "length_m": round(dist.get(t, 0.0)), "time_s": round(secs)}
 
 
 def get_router(graph_path: Path) -> Router | None:
