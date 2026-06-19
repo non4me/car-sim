@@ -3,13 +3,26 @@
 // teleports the map (streaming the destination tiles, then snapping onto the nearest road).
 import { T } from "../i18n.js";
 
+// dropdown kind label per result kind (Czech fallback; HUD strings localise later)
+const KIND_LABEL = {
+  district: ["k_district", "čtvrť"], street: ["k_street", "ulice"],
+  airport: ["k_airport", "letiště"], station: ["k_station", "stanice"], castle: ["k_castle", "hrad"],
+  museum: ["k_museum", "muzeum"], theatre: ["k_theatre", "divadlo"], stadium: ["k_stadium", "stadion"],
+  university: ["k_university", "univerzita"], hospital: ["k_hospital", "nemocnice"],
+};
+
 export async function loadSearchIndex(base) {
   try {
     // ?b dodges a stale CF-cached 404 from before the file existed; no-cache keeps it fresh via ETag
     const idx = await (await fetch(base + "/search.json?b=1")).json();
-    const items = [];
-    for (const p of idx.places || []) items.push({ name: p.name, x: p.x, y: p.y, kind: "district" });
-    for (const s of idx.streets || []) items.push({ name: s.name, x: s.x, y: s.y, kind: "street" });
+    const items = [], seen = new Set();
+    for (const p of idx.places || []) { items.push({ name: p.name, x: p.x, y: p.y, kind: "district" }); seen.add(p.name.toLowerCase()); }
+    for (const s of idx.streets || []) { items.push({ name: s.name, x: s.x, y: s.y, kind: "street" }); seen.add(s.name.toLowerCase()); }
+    // landmarks (stations, airports, bridges-on-water, castles, museums, stadiums, …) are searchable
+    // destinations too — incl. for routing (msg 3184). Squares/bridges/embankments are already in `streets`.
+    for (const l of idx.landmarks || []) {
+      if (l.name && !seen.has(l.name.toLowerCase())) { items.push({ name: l.name, x: l.x, y: l.y, kind: l.kind }); seen.add(l.name.toLowerCase()); }
+    }
     for (const it of items) it.q = it.name.toLowerCase();
     // places keep their OSM place-kind (city/town/suburb/quarter/…) for City/Trasa minimap ranking;
     // landmarks = the major city-wide objects (station/castle/…) baked into search.json (msg 2784).
@@ -51,7 +64,8 @@ export function makeSearchBox(input, results, items, onPick) {
       el.className = "sr-item" + (i === hi ? " hi" : "");
       const nm = document.createElement("span"); nm.className = "sr-name"; nm.textContent = it.name;
       const kd = document.createElement("span"); kd.className = "sr-kind";
-      kd.textContent = it.kind === "district" ? T("k_district", "čtvrť") : T("k_street", "ulice");
+      const kl = KIND_LABEL[it.kind] || ["k_place", "místo"];
+      kd.textContent = T(kl[0], kl[1]);
       el.append(nm, kd);
       el.addEventListener("mousedown", (e) => { e.preventDefault(); pick(it); });
       results.appendChild(el);
