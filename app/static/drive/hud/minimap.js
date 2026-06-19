@@ -46,10 +46,11 @@ function polySpan(poly) {
   return (poly._span = Math.max(maxx - minx, maxy - miny));
 }
 
-export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBtn) {
+export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBtn, onPick) {
   const ctx = canvas.getContext("2d");
   let level = 0;                  // 0..4  → +1.. +5  (+ = zoom in, − = zoom out)
   let mode = "local";             // local | city | route
+  let lastT = null;               // last-drawn view transform {s,cx,cy} → invert a minimap click to world coords (msg 3181)
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const size = canvas.clientWidth || 138;
   canvas.width = canvas.height = Math.round(size * dpr);
@@ -76,6 +77,17 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
   if (cityBtn) cityBtn.addEventListener("click", (e) => { e.preventDefault(); setMode(mode === "city" ? "local" : "city"); });
   if (routeBtn) routeBtn.addEventListener("click", (e) => {
     e.preventDefault(); if (routeBtn.disabled) return; setMode(mode === "route" ? "local" : "route");
+  });
+
+  // click the minimap → move the car to that world point (snaps to the nearest road) (msg 3181). Works in
+  // every mode: all use pixel = size/2 + (world − center)·s, north-up, so the inverse is uniform.
+  canvas.style.cursor = "crosshair";
+  canvas.addEventListener("click", (e) => {
+    if (!lastT || !onPick) return;
+    const r = canvas.getBoundingClientRect();
+    const px = (e.clientX - r.left) * (size / (r.width || size));   // CSS px → minimap draw units
+    const py = (e.clientY - r.top) * (size / (r.height || size));
+    onPick(lastT.cx + (px - size / 2) / lastT.s, lastT.cy - (py - size / 2) / lastT.s);
   });
 
   // de-overlapping label placer: keeps placed bounding boxes for the frame and skips any new label
@@ -144,6 +156,7 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
   // ---- local (car-centred) ----------------------------------------------------------------------
   function drawLocal(map, car, currentStreet) {
     const R = RADII[level], s = (size / 2) / R, cx = car.x, cy = car.y;
+    lastT = { s, cx, cy };                                  // for click-to-move (msg 3181)
     const toM = (wx, wy) => [size / 2 + (wx - cx) * s, size / 2 - (wy - cy) * s];
     for (const e of map.edges) {
       const bb = e.bb;
@@ -163,14 +176,14 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
   function fitToBox(box, pad) {
     const span = Math.max(box.w, box.h, 1), s = (size - pad * 2) / span;
     const cx = box.cx, cy = box.cy;
-    return { s, toM: (wx, wy) => [size / 2 + (wx - cx) * s, size / 2 - (wy - cy) * s] };
+    return { s, cx, cy, toM: (wx, wy) => [size / 2 + (wx - cx) * s, size / 2 - (wy - cy) * s] };
   }
 
   function drawCity(map, car, ov) {
     const b = map.meta && map.meta.bounds;
     if (!b) return drawLocal(map, car, "");
     const box = { cx: (b.minx + b.maxx) / 2, cy: (b.miny + b.maxy) / 2, w: b.maxx - b.minx, h: b.maxy - b.miny };
-    const { toM } = fitToBox(box, 10);
+    const ft = fitToBox(box, 10); const toM = ft.toM; lastT = { s: ft.s, cx: ft.cx, cy: ft.cy };  // click-to-move (msg 3181)
     const cxw = box.cx, cyw = box.cy;
     const ovd = ov.overview;
 
@@ -289,7 +302,7 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
   // ---- route (Trasa) ----------------------------------------------------------------------------
   function drawRoute(map, car, route, ov) {
     const { line, box } = route;
-    const { toM } = fitToBox(box, 12);
+    const ft = fitToBox(box, 12); const toM = ft.toM; lastT = { s: ft.s, cx: ft.cx, cy: ft.cy };  // click-to-move (msg 3181)
 
     // faint resident streets where they happen to be loaded
     ctx.strokeStyle = "rgba(120,135,160,.16)"; ctx.lineWidth = 1;

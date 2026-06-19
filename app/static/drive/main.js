@@ -94,6 +94,7 @@ async function boot() {
     document.getElementById("miniLevel"),
     document.getElementById("miniCity"),
     document.getElementById("miniRoute"),
+    (wx, wy) => goTo(wx, wy),          // click the minimap → move the car there (msg 3181)
   );
   let rules = evalRules(map, car);
   let dbg = null;
