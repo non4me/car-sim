@@ -44,7 +44,10 @@ export function evalRules(map, car) {
     if (d < signalDist) {
       signalDist = d;
       signal = signalState(s.jx, s.jy, s.grp);
-      ranRed = signal === "red" && d < 7 && kmh > 5;          // crossed the line on red while moving
+      // a genuine red-run: actually entering the junction (d<4 m of the head) still moving (>10 km/h).
+      // The old d<7 & kmh>5 tripped on the legitimate braking approach (car slows to a stop at d≈3.5 m,
+      // but passed d=7 m at ~18 km/h) → false "ran red" on every stop (mass test-drive, msg 3170).
+      ranRed = signal === "red" && d < 4 && kmh > 10;
     }
   }
 

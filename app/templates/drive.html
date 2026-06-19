@@ -57,6 +57,11 @@
     #street .refbadge{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:5px;
       border:1.5px solid;font-weight:800;font-size:.82em;line-height:1.35;vertical-align:middle;
       letter-spacing:.3px}
+    /* remaining time/distance to destination, shown only while the autopilot is following (msg 3174) */
+    #routeeta{left:50%;top:140px;transform:translateX(-50%);text-align:center;font-weight:700;
+      font-size:13px;background:rgba(20,25,37,.55);border:1px solid rgba(52,211,153,.3);
+      border-radius:10px;padding:4px 14px;color:var(--good);white-space:nowrap;backdrop-filter:blur(2px)}
+    #routeeta.hidden{display:none}
 
     /* drive-tools strip (search / Trasa / help) — overlaid on the top-left of the map, BELOW the
        standalone header. The bar is click-through so map-pan still works in the gaps between tools. */
@@ -225,6 +230,7 @@
   <div class="hud" id="zoomind">zoom —</div>
   <div class="hud hidden" id="warn">—</div>
   <div class="hud" id="street">—</div>
+  <div class="hud hidden" id="routeeta">—</div>
   <div class="hud" id="speedo"><div class="v" id="speed">0</div><div class="u">km/h</div></div>
   <div class="hud none" id="limit"><span id="limitval">—</span></div>
 

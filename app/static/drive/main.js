@@ -103,6 +103,7 @@ async function boot() {
   let routeFollowOn = false;   // auto-drive along routeLine (steering auto, throttle/brake = user)
   let routeI = 0;              // progress index along routeLine (segment the car is on)
   let routeBox = null;         // routeLine bbox {cx,cy,w,h} → fits the whole route into the minimap (msg 2777/2784)
+  let routeTotalLen = 0, routeTotalTime = 0;   // route length (m) + ETA (s) at the legal limit → live remaining readout (msg 3174)
   let saveTick = 0;            // throttles persisting the car position to localStorage (msg 2775)
   const savePos = () => { try { localStorage.setItem(POS_KEY, JSON.stringify({ x: +car.x.toFixed(1), y: +car.y.toFixed(1), h: +car.h.toFixed(3) })); } catch { /* quota */ } };
   window.addEventListener("beforeunload", savePos);   // also save on close/reload
@@ -289,6 +290,7 @@ async function boot() {
         const res = await fetch(u).then((r) => r.json());
         if (res.polyline && res.polyline.length > 1) {
           routeLine = res.polyline; routeI = 0; routeBox = bboxOf(routeLine);
+          routeTotalLen = res.length_m || 0; routeTotalTime = res.time_s || 0;   // for the live remaining readout (msg 3174)
           followEl.disabled = false;                    // auto-pilot now available
           routeFollowOn = followEl.checked;             // honour a pre-ticked toggle (minimap "Trasa" auto-enables)
           // length + ETA at the legal limit (an ideal rule-obeying drive, msg 3161)
@@ -308,6 +310,7 @@ async function boot() {
       routeFollowOn = false; followEl.checked = false; followEl.disabled = true;
       fromEl.value = ""; toEl.value = "";
       info.textContent = T("d_pick2", "vyber dvě ulice"); info.className = ""; syncGo();
+      updateRouteEta(false);                            // hide the remaining-time readout (msg 3174)
     });
   }
 
@@ -325,6 +328,25 @@ async function boot() {
       acc += nl; pdx = ndx; pdy = ndy;
     }
     return total;
+  }
+
+  // Remaining route distance (m) from the car's live progress to the end — for the autopilot ETA (msg 3174).
+  function routeRemaining() {
+    const R = routeLine; if (!R || R.length < 2) return 0;
+    const i = Math.min(routeI, R.length - 2);
+    let rem = Math.hypot(R[i + 1][0] - car.x, R[i + 1][1] - car.y);
+    for (let j = i + 1; j < R.length - 1; j++) rem += Math.hypot(R[j + 1][0] - R[j][0], R[j + 1][1] - R[j][1]);
+    return rem;
+  }
+  const etaEl = document.getElementById("routeeta");
+  function updateRouteEta(show) {
+    if (!etaEl) return;
+    if (!show) { etaEl.classList.add("hidden"); return; }
+    const rem = routeRemaining();
+    const secs = Math.round(routeTotalTime * (routeTotalLen > 0 ? rem / routeTotalLen : 0));  // scale legal-limit ETA by fraction left
+    const mins = Math.max(1, Math.round(secs / 60)), km = rem / 1000;
+    etaEl.textContent = `${T("d_eta_left", "zbývá")} ≈ ${mins} min · ${km.toFixed(km < 10 ? 1 : 0)} km`;
+    etaEl.classList.remove("hidden");
   }
 
   // ROUTE AUTO-PILOT (msg 2759 #3): pure-pursuit a point a (speed-scaled) distance ahead on the route.
@@ -405,6 +427,28 @@ async function boot() {
         vt = Math.min(vt, brakeCap(vCorner, acc));           // slow to vCorner by the time we reach the bend
       }
     }
+    // anticipate speed-limit DROPS on the route ahead (mass test-drive, msg 3170): an ideal driver slows
+    // BEFORE entering a lower-limit zone, not reactively after. MARCH along the route at a fixed step and
+    // brake early (sqrt profile) for the lowest upcoming limit. Fixed-step (not per-vertex) because motorway
+    // route segments can be 100s of m apart — vertex-stepping skipped right over the change. 230 m horizon
+    // brakes 119→50 km/h at a comfortable A_BRK.
+    if (R && R.length > 1) {
+      const STEP = 12, MAXD = 230;
+      let acc = 0, seg = Math.min(routeI, R.length - 2), cx = car.x, cy = car.y;
+      while (acc < MAXD && seg < R.length - 1) {
+        const bx = R[seg + 1][0], by = R[seg + 1][1];
+        const dx = bx - cx, dy = by - cy, d = Math.hypot(dx, dy);
+        if (d < 0.5) { seg++; cx = R[seg][0]; cy = R[seg][1]; continue; }
+        const step = Math.min(STEP, d);
+        cx += dx / d * step; cy += dy / d * step; acc += step;
+        if (acc < 8) continue;                               // the immediate edge is already rules.limit
+        const ne = map.nearestEdge(cx, cy, car.layer ?? null);
+        if (ne && ne.edge && ne.edge.maxspeed) {
+          const lim = ne.edge.maxspeed / 3.6;
+          if (lim < vt) vt = Math.min(vt, brakeCap(lim, acc));   // be at `lim` by the time we get there
+        }
+      }
+    }
     if (rules && !rules.onSurface) vt = Math.min(vt, 2.5);   // drifted off the carriageway → crawl back on
     if (rules && (rules.signal === "red" || rules.signal === "amber"))   // stop at a red/amber light
       vt = Math.min(vt, brakeCap(0, rules.signalDist - 3.5));
@@ -482,6 +526,7 @@ async function boot() {
     const f = document.getElementById("routeFollow"); if (f) f.checked = false;
     const info = document.getElementById("routeInfo");
     if (info) { info.textContent = T("d_arrived", "cíl ✓"); info.className = "ok"; }
+    updateRouteEta(false);                              // hide the remaining-time readout (msg 3174)
   }
 
   const zoomEl = document.getElementById("zoomind");
@@ -511,6 +556,8 @@ async function boot() {
     if (zoomEl) zoomEl.textContent = `zoom ${view.zoom < 1 ? view.zoom.toFixed(1) : Math.round(view.zoom)} px/m · ${ZMIN}–${ZMAX}`;
     // persist the car position ~every 1.5 s so a reload resumes where you were (msg 2775)
     if (++saveTick % 90 === 0) savePos();
+    // live remaining time/distance to the destination while the autopilot drives (msg 3174)
+    if (saveTick % 12 === 0) updateRouteEta(routeFollowOn && !!routeLine && routeLine.length > 1);
   }
 
   window.__drive = {
@@ -519,6 +566,8 @@ async function boot() {
     set: (o) => { dbg = o; }, clear: () => { dbg = null; },
     // load a route polyline + engage the autopilot (headless route-test hook; same path as the route panel)
     driveRoute: (poly) => { routeLine = poly; routeI = 0; routeBox = bboxOf(poly); routeFollowOn = true;
+      routeTotalLen = 0; for (let j = 1; j < (poly ? poly.length : 0); j++) routeTotalLen += Math.hypot(poly[j][0] - poly[j-1][0], poly[j][1] - poly[j-1][1]);
+      routeTotalTime = routeTotalLen / (50 / 3.6);     // headless estimate at 50 km/h (real routes carry server time_s)
       if (poly && poly.length) goTo(poly[0][0], poly[0][1]); },
     // manual deterministic advance (for headless verification when RAF is throttled)
     tick: (n = 1) => { for (let i = 0; i < n; i++) update(1 / 60); render(); return { x: car.x, y: car.y, h: car.h, kmh: car.speedKmh, street: rules.street, zoom: +view.zoom.toFixed(1) }; },
