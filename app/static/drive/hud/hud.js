@@ -5,6 +5,8 @@ const STR = {
   boundary: T("w_boundary", "Dál cesta nevede — otočte se"),
   offroad: T("w_offroad", "Mimo vozovku"),
   oncoming: T("w_oncoming", "V protisměru!"),
+  ranred: T("w_ranred", "Projetí na červenou!"),
+  redstop: T("w_redstop", "Červená — stůj"),
 };
 
 // CZ road-number badge colour (mirrors render/draw.js refStyle): red dálnice (D), blue I. třída
@@ -72,9 +74,11 @@ export function makeHud() {
       // actually see the car as a vehicle (msg 2768).
       let wtext = null, wcls = "bad";
       if (hideWarn) wtext = null;
+      else if (r.ranRed) wtext = STR.ranred;                              // crossed on red (msg 3151)
       else if (r.boundary) wtext = STR.boundary;
       else if (r.offRoad) { wtext = STR.offroad; wcls = "warnY"; }
       else if (r.oncoming) wtext = STR.oncoming;
+      else if (r.signal === "red" && r.signalDist < 9 && r.kmh <= 5) { wtext = STR.redstop; wcls = "warnY"; }  // stopped at red
       else if (r.over) wtext = `${STR.over} — ${r.limit} km/h`;
       warn.classList.toggle("hidden", !wtext);
       if (wtext) {

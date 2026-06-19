@@ -449,7 +449,18 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
         mains = [ei for ei, r in ranks if r == min_rank]
         minors = [ei for ei, r in ranks if r > min_rank]
         if ctrl == "signals":
-            signs.append({"x": round(nx, 1), "y": round(ny, 1), "kind": "signal"})
+            # PER-APPROACH signal heads (msg 3151 working lights): one head per incoming road, placed at its
+            # stop line, carrying its phase group (E-W axis=0 / N-S=1, matches signals.js grpOf) + the junction
+            # centre so the client computes the live aspect. Opposite approaches share a group → go green
+            # together; the cross axis is half a cycle out of phase. (Low-zoom dot still comes from junctions.)
+            for ei in inc:
+                ed = edges[ei]
+                tx, ty = tangent_into(ed, nid)
+                sb, off = ed["width"] / 2 + 4.0, ed["width"] / 2 + 1.5
+                px, py = nx + tx * sb + (-ty) * off, ny + ty * sb + tx * off
+                grp = 0 if abs(tx) >= abs(ty) else 1
+                signs.append({"x": round(px, 1), "y": round(py, 1), "kind": "signal",
+                              "grp": grp, "jx": round(nx, 1), "jy": round(ny, 1)})
         elif ctrl in ("stop", "give_way"):
             for ei in (minors or inc):
                 place(ei, ctrl)
@@ -512,7 +523,7 @@ def build_artifact(nodes, all_ways, bbox, country, name, out,
     if signs:
         seen_sg, deduped = set(), []
         for sg in signs:
-            key = (sg["kind"], sg.get("v"), round(sg["x"] / 12.0), round(sg["y"] / 12.0))
+            key = (sg["kind"], sg.get("v"), sg.get("grp"), round(sg["x"] / 12.0), round(sg["y"] / 12.0))
             if key in seen_sg:
                 continue
             seen_sg.add(key)

@@ -268,7 +268,7 @@
         if (m < 250) { dist += m; if (m > 0.3) moveT += 1; }   // skip teleports; count seconds moving
       }
       lastX = c.x; lastY = c.y;
-      var v = !!(r.oncoming || r.offRoad || r.over || r.boundary);   // rules engine keys (limits.js)
+      var v = !!(r.oncoming || r.offRoad || r.over || r.boundary || r.ranRed);   // rules engine keys (limits.js)
       if (v && !wasViol) viol++;                               // count each new violation (rising edge)
       wasViol = v;
     }, 1000);

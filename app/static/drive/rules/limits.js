@@ -1,3 +1,5 @@
+import { signalState } from "./signals.js";
+
 // Evaluate what the car is doing against the map: current segment + speed limit,
 // over-limit, off-surface, and out-of-bounds (map edge). Pure, testable.
 export function evalRules(map, car) {
@@ -27,8 +29,28 @@ export function evalRules(map, car) {
     }
   }
 
+  // traffic signals (msg 3151): the nearest signal head AHEAD of the car (per-approach heads carry their
+  // phase group `grp` + junction centre `jx,jy`). signal = its current aspect; ranRed pulses when the car
+  // rolls past a red head while moving (rising-edge → a "ran red" violation, fed into the trip stats).
+  let signal = null, signalDist = Infinity, ranRed = false;
+  const ch = Math.cos(car.h), shy = Math.sin(car.h);
+  for (const s of map.signs) {
+    if (s.kind !== "signal" || s.grp === undefined) continue;
+    const dx = s.x - car.x, dy = s.y - car.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 > 30 * 30) continue;
+    const d = Math.sqrt(d2) || 1;
+    if ((dx * ch + dy * shy) / d < -0.3) continue;            // only heads in front (or just crossed)
+    if (d < signalDist) {
+      signalDist = d;
+      signal = signalState(s.jx, s.jy, s.grp);
+      ranRed = signal === "red" && d < 7 && kmh > 5;          // crossed the line on red while moving
+    }
+  }
+
   return {
     limit, over, onSurface, oncoming,
+    signal, signalDist, ranRed,
     boundary: !inBounds,
     offRoad: inBounds && !onSurface,
     street: edge ? (edge.name || "") : "",

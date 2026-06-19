@@ -371,7 +371,14 @@ async function boot() {
         let dh = Math.atan2(Math.sin(desired - car.h), Math.cos(desired - car.h));
         const mt = FOLLOW_TURN * dt;
         car.h += Math.max(-mt, Math.min(mt, dh));                   // auto-steer (rate-limited)
-        car.update(dt, { throttle: controls.throttle, brake: controls.brake, hard: controls.hard, turn: 0 });
+        // STOP for a red/amber signal ahead on the route (msg 3151): brake within ~stopping distance,
+        // hard-brake right at the line; release on green so the user's throttle (manual) drives on.
+        const stopZone = 7 + Math.abs(car.v) * 1.3;                 // earlier the faster you go
+        const redAhead = rules && (rules.signal === "red" || rules.signal === "amber") && rules.signalDist < stopZone;
+        const ctl = redAhead
+          ? { throttle: 0, brake: 1, hard: rules.signalDist < 4.5, turn: 0 }
+          : { throttle: controls.throttle, brake: controls.brake, hard: controls.hard, turn: 0 };
+        car.update(dt, ctl);
         handled = true;
       }
     }

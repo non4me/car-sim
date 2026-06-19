@@ -1,6 +1,7 @@
 // Top-down renderer with a heading-up (rotating) camera. Roads, lane markings,
 // junction control, subtle street-name labels on the roads, and the nose-up car.
 import { PARAMS as P } from "../vehicle/params.js";
+import { signalState, signalClock } from "../rules/signals.js";
 
 const BG = "#0e1118";
 const ASPHALT = "#2c333f";   // single road-surface colour (uniform → no seams where roads cross)
@@ -148,7 +149,9 @@ export function draw(ctx, view, map, car, rules, route, districts) {
     for (const { s } of cands) {
       const [X, Y] = view.project(s.x, s.y);
       if (!sg.tryPlace(X - bs, Y - bs, X + bs, Y + bs)) continue;
-      drawSign(ctx, X, Y, s.kind, ss, s.v);
+      // live signal aspect for per-approach heads (msg 3151): light only the active lamp
+      const aspect = (s.kind === "signal" && s.grp !== undefined) ? signalState(s.jx, s.jy, s.grp) : null;
+      drawSign(ctx, X, Y, s.kind, ss, s.v, aspect);
     }
   } else {
     for (const j of map.junctions) {
@@ -733,6 +736,7 @@ function drawLaneMarkings(ctx, view, vis, zoom) {
 // teeth" were removed per msg 3008 — they cluttered complex junctions; the ▽ give-way sign still marks it.)
 function drawApproachMarkings(ctx, view, vis, junctions, zoom) {
   const R = view.visR();
+  const tNow = signalClock();
   ctx.save();
   ctx.lineCap = "butt";
   for (const j of junctions) {
@@ -746,15 +750,25 @@ function drawApproachMarkings(ctx, view, vis, junctions, zoom) {
       let L = 0;
       for (let i = 1; i < g.length; i++) L += Math.hypot(g[i][0] - g[i - 1][0], g[i][1] - g[i - 1][1]);
       const wp = walkAlong(g, atStart, Math.min(4, L * 0.4));   // a few m in from the junction
-      drawStopBar(ctx, view, wp, Math.max(1.5, e.width / 2), zoom);
+      // signals stop-bar glows with the live phase (msg 3151): the approach's tangent away from the
+      // junction → its phase group → red/amber/green; stop junctions stay plain white.
+      let col = null;
+      if (j.ctrl === "signals") {
+        const [ax, ay] = atStart ? [g[0], g[1]] : [g[last], g[last - 1]];
+        const tx0 = ax[0] - ay[0], ty0 = ax[1] - ay[1];                 // unit not needed: only |tx|≥|ty| matters
+        const grp = Math.abs(tx0) >= Math.abs(ty0) ? 0 : 1;
+        col = { red: "rgba(229,72,77,.92)", amber: "rgba(246,196,83,.92)", green: "rgba(52,211,153,.85)" }[
+          signalState(j.x, j.y, grp, tNow)];
+      }
+      drawStopBar(ctx, view, wp, Math.max(1.5, e.width / 2), zoom, col);
     }
   }
   ctx.restore();
 }
 
-function drawStopBar(ctx, view, wp, half, zoom) {
+function drawStopBar(ctx, view, wp, half, zoom, col) {
   const px = -wp.diry, py = wp.dirx;                 // world-space across-road perpendicular (unit)
-  ctx.strokeStyle = "rgba(236,239,246,.72)";
+  ctx.strokeStyle = col || "rgba(236,239,246,.72)";
   ctx.lineWidth = Math.max(2, zoom * 0.55);          // ~0.55 m thick
   const [ax, ay] = view.project(wp.x + px * half, wp.y + py * half);
   const [bx, by] = view.project(wp.x - px * half, wp.y - py * half);
@@ -794,12 +808,12 @@ function drawCrossings(ctx, view, map, zoom) {
 
 // Junction control signs, drawn BILLBOARDED (axis-aligned in screen space, so they stay upright
 // and readable no matter how the heading-up camera is rotated). `s` is the glyph half-size in px.
-function drawSign(ctx, X, Y, kind, s, v) {
+function drawSign(ctx, X, Y, kind, s, v, aspect) {
   ctx.save();
   ctx.lineJoin = "round";
   if (kind === "stop") drawStopSign(ctx, X, Y, s);
   else if (kind === "give_way") drawYieldSign(ctx, X, Y, s);
-  else if (kind === "signal" || kind === "signals") drawSignal(ctx, X, Y, s);
+  else if (kind === "signal" || kind === "signals") drawSignal(ctx, X, Y, s, aspect);
   else if (kind === "priority_road") drawPriorityRoad(ctx, X, Y, s);
   else if (kind === "speed_limit") drawSpeedLimit(ctx, X, Y, s, v);   // posted OSM signs (msg 3149)
   else if (kind === "no_entry") drawNoEntry(ctx, X, Y, s);
@@ -924,16 +938,22 @@ function drawYieldSign(ctx, X, Y, s) {
   ctx.lineWidth = Math.max(1.2, s * 0.22); ctx.strokeStyle = "#d2231f"; ctx.stroke();
 }
 
-function drawSignal(ctx, X, Y, s) {
+function drawSignal(ctx, X, Y, s, aspect) {
   const w = s * 0.95, h = s * 2.1;                   // dark housing + three lights (red/amber/green)
   roundRect(ctx, X - w / 2, Y - h / 2, w, h, w * 0.32);
   ctx.fillStyle = "#15181f"; ctx.fill();
   ctx.lineWidth = Math.max(1, s * 0.1); ctx.strokeStyle = "#39404e"; ctx.stroke();
-  const rr = w * 0.3, cols = ["#e5484d", "#f6c453", "#34d399"];
+  const rr = w * 0.3, cols = ["#e5484d", "#f6c453", "#34d399"], names = ["red", "amber", "green"];
   for (let i = 0; i < 3; i++) {
+    // working light (msg 3151): the active lamp glows, the others are dimmed. With no aspect (old
+    // tiles / static), fall back to all-lit so it still reads as a signal.
+    const lit = !aspect || aspect === names[i];
     ctx.beginPath();
     ctx.arc(X, Y - h * 0.30 + i * h * 0.30, rr, 0, 7);
-    ctx.fillStyle = cols[i]; ctx.fill();
+    if (lit && aspect) { ctx.shadowColor = cols[i]; ctx.shadowBlur = s * 0.6; }
+    ctx.fillStyle = lit ? cols[i] : "#2a2f3a";
+    ctx.fill();
+    ctx.shadowBlur = 0;
   }
 }
 
