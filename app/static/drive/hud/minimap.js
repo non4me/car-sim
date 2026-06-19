@@ -1,10 +1,12 @@
 // North-up minimap with three modes (msg 2691 + 2777 + 2784):
-//   • local  — nearby streets around the car, 3 zoom levels (+/- buttons).
+//   • local  — nearby streets around the car, 5 zoom levels (+ = in, − = out).
 //   • city   — the WHOLE city: main districts (ranked by size) + major objects, de-overlapped.
 //   • route  — the selected route, scaled to fit; localities graded by distance to the route
 //              (adjacent = full, next ring = semi-transparent, third ring = 20%, farther = hidden).
 import { T } from "../i18n.js";
-const RADII = [110, 240, 430];   // world metres shown each way (local mode), for levels +1, +2, +3
+// world metres shown each way (local mode). Lower index = closer (zoomed IN), higher = wider (zoomed OUT).
+// +4/+5 added for more zoom-out (msg 3178); all within the resident tile ring so streets still render.
+const RADII = [110, 240, 430, 720, 1150];
 
 // district ranking (OSM place kind) — smaller rank = more important = bigger/brighter label.
 // The city's OWN districts (suburb/quarter — Vinohrady, Smíchov, Karlín…) outrank the surrounding
@@ -46,7 +48,7 @@ function polySpan(poly) {
 
 export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBtn) {
   const ctx = canvas.getContext("2d");
-  let level = 0;                  // 0..2  → +1.. +3
+  let level = 0;                  // 0..4  → +1.. +5  (+ = zoom in, − = zoom out)
   let mode = "local";             // local | city | route
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const size = canvas.clientWidth || 138;
@@ -68,8 +70,9 @@ export function makeMinimap(canvas, plusBtn, minusBtn, levelEl, cityBtn, routeBt
     [plusBtn, minusBtn, levelEl].forEach((b) => b && (b.style.opacity = zoomActive ? "" : ".35"));
   };
 
-  plusBtn.addEventListener("click", (e) => { e.preventDefault(); if (mode === "local") setLevel(level + 1); });
-  minusBtn.addEventListener("click", (e) => { e.preventDefault(); if (mode === "local") setLevel(level - 1); });
+  // + zooms IN (smaller radius), − zooms OUT (larger radius) — was reversed (msg 3178)
+  plusBtn.addEventListener("click", (e) => { e.preventDefault(); if (mode === "local") setLevel(level - 1); });
+  minusBtn.addEventListener("click", (e) => { e.preventDefault(); if (mode === "local") setLevel(level + 1); });
   if (cityBtn) cityBtn.addEventListener("click", (e) => { e.preventDefault(); setMode(mode === "city" ? "local" : "city"); });
   if (routeBtn) routeBtn.addEventListener("click", (e) => {
     e.preventDefault(); if (routeBtn.disabled) return; setMode(mode === "route" ? "local" : "route");
