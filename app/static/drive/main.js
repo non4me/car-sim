@@ -21,9 +21,8 @@ const FOLLOW_TURN = 1.85;       // rad/s — max auto-steer rate in route-follow
 const FOLLOW_LOOKAHEAD = 14;    // metres ahead on the route the auto-pilot aims for (pure-pursuit)
 // ideal-driver autopilot (msg 3161): it holds the legal limit but slows COMFORTABLY for bends, signals,
 // stop/give-way signs + the destination, and keeps the right (RHT) lane.
-const A_LAT = 3.2;              // m/s² — comfortable lateral accel → corner speed = sqrt(A_LAT·radius)
+const A_LAT = 2.6;              // m/s² — comfortable lateral accel → corner speed = sqrt(A_LAT·radius)
 const A_BRK = 3.0;             // m/s² — comfortable deceleration used to brake EARLY (sqrt speed profile)
-const LANE_OFF = 1.75;         // m — keep this far right of the route centreline (right lane, RHT)
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -312,7 +311,23 @@ async function boot() {
     });
   }
 
-  // ROUTE AUTO-PILOT (msg 2759 #3): pure-pursuit a point FOLLOW_LOOKAHEAD m ahead on the route.
+  // Total |heading change| (rad) over the next `maxd` m of the route from segment bi @ bt — used to fade
+  // the lane offset through bends (msg 3165).
+  function routeBendAhead(bi, bt, maxd) {
+    const R = routeLine;
+    if (!R || bi >= R.length - 2) return 0;
+    let px = R[bi][0] + (R[bi + 1][0] - R[bi][0]) * bt, py = R[bi][1] + (R[bi + 1][1] - R[bi][1]) * bt;
+    let pdx = R[bi + 1][0] - px, pdy = R[bi + 1][1] - py; const pl = Math.hypot(pdx, pdy) || 1; pdx /= pl; pdy /= pl;
+    let acc = 0, total = 0;
+    for (let j = bi + 1; j < R.length - 1 && acc < maxd; j++) {
+      let ndx = R[j + 1][0] - R[j][0], ndy = R[j + 1][1] - R[j][1]; const nl = Math.hypot(ndx, ndy) || 1; ndx /= nl; ndy /= nl;
+      total += Math.abs(Math.atan2(pdx * ndy - pdy * ndx, pdx * ndx + pdy * ndy));
+      acc += nl; pdx = ndx; pdy = ndy;
+    }
+    return total;
+  }
+
+  // ROUTE AUTO-PILOT (msg 2759 #3): pure-pursuit a point a (speed-scaled) distance ahead on the route.
   // Returns the world target, or {done:true} at the destination. Tracks routeI so it never walks
   // backward (and only scans a forward window, so 600-point routes stay cheap per frame).
   function routeTarget() {
@@ -326,11 +341,14 @@ async function boot() {
       if (d < bd) { bd = d; bi = i; bt = t; }
     }
     routeI = bi;
-    let look = FOLLOW_LOOKAHEAD, i = bi;
+    // pure-pursuit look-ahead SCALES with speed (shorter when slow) so the car tracks tight turns instead
+    // of cutting across them at a fixed long distance — was overshooting bends off the road (msg 3165).
+    let look = Math.max(4.0, Math.min(13, 2.5 + Math.abs(car.v) * 0.85)), i = bi;
     let px = R[i][0] + (R[i + 1][0] - R[i][0]) * bt, py = R[i][1] + (R[i + 1][1] - R[i][1]) * bt;
-    // keep the RIGHT lane (RHT): aim a touch right of the route centreline, in the local travel
-    // direction, so the car tracks the right lane and enters turns from it (msg 3161).
-    const laneOff = Math.min(2.2, (rules && rules.width ? rules.width : 7) / 4);
+    // keep the RIGHT lane (RHT) on straights, but FADE the offset to the centreline through a bend
+    // (a fixed right offset on a curve pushes the aim point off the carriageway).
+    const bend = routeBendAhead(bi, bt, 12);
+    const laneOff = Math.min(1.6, (rules && rules.width ? rules.width : 7) / 4) * Math.max(0, 1 - bend / 0.5);
     while (i < R.length - 1) {
       const bx = R[i + 1][0], by = R[i + 1][1], seg = Math.hypot(bx - px, by - py);
       if (seg >= look) {
@@ -370,21 +388,24 @@ async function boot() {
   function idealSpeed() {
     let vt = ((rules && rules.limit) || 50) / 3.6;            // posted limit (or urban default), m/s
     const R = routeLine;
-    if (R && R.length > 2) {                                  // brake for bends on the route ahead
+    if (R && R.length > 2) {                                  // brake EARLY + ENOUGH for bends ahead (msg 3165)
+      const OMEGA = FOLLOW_TURN * 0.8;                        // usable steer rate (margin under the car's max)
       let prevx = car.x, prevy = car.y, acc = 0;
-      for (let j = routeI + 1; j < R.length - 1 && acc < 80; j++) {
-        acc += Math.hypot(R[j][0] - prevx, R[j][1] - prevy); prevx = R[j][0]; prevy = R[j][1];
-        const a0 = R[j - 1], a1 = R[j], a2 = R[j + 1];
-        const c = Math.hypot(a1[0] - a0[0], a1[1] - a0[1]);
-        const a = Math.hypot(a2[0] - a1[0], a2[1] - a1[1]);
-        const bl = Math.hypot(a2[0] - a0[0], a2[1] - a0[1]);
-        const area = Math.abs((a1[0] - a0[0]) * (a2[1] - a0[1]) - (a1[1] - a0[1]) * (a2[0] - a0[0])) / 2;
-        if (area > 1e-3) {                                   // circumradius → safe corner speed
-          const rad = (a * bl * c) / (4 * area);
-          vt = Math.min(vt, brakeCap(Math.sqrt(A_LAT * rad), acc));
-        }
+      for (let j = routeI + 1; j < R.length - 1 && acc < 50; j++) {
+        const segIn = Math.hypot(R[j][0] - prevx, R[j][1] - prevy);
+        acc += segIn; prevx = R[j][0]; prevy = R[j][1];
+        // deflection (turn) angle at vertex j; local corner radius from L = R·θ → R = arm/θ
+        const ix = R[j][0] - R[j - 1][0], iy = R[j][1] - R[j - 1][1];
+        const ox = R[j + 1][0] - R[j][0], oy = R[j + 1][1] - R[j][1];
+        const dth = Math.abs(Math.atan2(ix * oy - iy * ox, ix * ox + iy * oy));
+        if (dth < 0.06) continue;                            // ~straight → no limit
+        const arm = Math.max(2, Math.min(segIn, Math.hypot(ox, oy)));
+        const radius = arm / dth;
+        const vCorner = Math.max(2.0, Math.min(Math.sqrt(A_LAT * radius), OMEGA * radius));  // grip AND steer-rate
+        vt = Math.min(vt, brakeCap(vCorner, acc));           // slow to vCorner by the time we reach the bend
       }
     }
+    if (rules && !rules.onSurface) vt = Math.min(vt, 2.5);   // drifted off the carriageway → crawl back on
     if (rules && (rules.signal === "red" || rules.signal === "amber"))   // stop at a red/amber light
       vt = Math.min(vt, brakeCap(0, rules.signalDist - 3.5));
     const ch = Math.cos(car.h), sh = Math.sin(car.h);        // stop/give-way signs ahead
