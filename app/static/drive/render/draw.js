@@ -78,7 +78,11 @@ export function draw(ctx, view, map, car, rules, route, districts) {
   // carriageway (like Google), no holes where there really aren't any.
   if (hulls) {
     ctx.setLineDash([]); ctx.fillStyle = ASPHALT;
-    for (const H of hulls) { if (H.lv) continue; path(ctx, view, H.hull); ctx.closePath(); ctx.fill(); }
+    for (const H of hulls) {
+      if (H.lv) continue;
+      path(ctx, view, H.disc); ctx.closePath(); ctx.fill();
+      for (const q of H.arms) { path(ctx, view, q); ctx.closePath(); ctx.fill(); }
+    }
   }
   // tram tracks run IN the street → draw them ON the asphalt (incl. straight across the junction) with
   // Google-style transverse ties, so they read as tracks and don't vanish or become a "fake road" (msg 3023/3024).
@@ -783,19 +787,22 @@ function drawCrossings(ctx, view, map, zoom) {
   const cr = map.crossings;
   if (!cr || !cr.length) return;
   const R = view.visR();
-  const DEPTH = 4.0, BAR = 0.5, GAP = 0.5;          // metres: band depth along road, bar + gap
+  // A real "zebra" (CZ V7): bold stripes laid PARALLEL to the traffic flow (cars drive over their
+  // length), tiled side-by-side ACROSS the carriageway. So the band spans the road width and the
+  // stripes run along the road tangent. Depth (along travel) ≈ a crossing's length; width = kerb-to-kerb.
+  const DEPTH = 4.0, STRIPE = 0.5, GAP = 0.5;       // metres: stripe length along road, stripe + gap across
   ctx.save();
   ctx.fillStyle = "rgba(236,239,246,.80)";
   for (const c of cr) {
     if (!view.near(c.x, c.y, R)) continue;
-    const tx = c.tx, ty = c.ty;                     // road tangent (unit) — bars run across this
-    const px = -ty, py = tx;                        // across-road perpendicular
-    const half = (c.w || 6) / 2 + 0.3;              // span kerb-to-kerb (+ small overhang)
-    for (let s0 = -DEPTH / 2; s0 < DEPTH / 2 - 1e-6; s0 += BAR + GAP) {
-      const sc = s0 + BAR / 2;                       // bar centre along the road
-      const mx = c.x + tx * sc, my = c.y + ty * sc;
-      const ax = tx * (BAR / 2), ay = ty * (BAR / 2);   // half-thickness along road
-      const bx = px * half, by = py * half;             // half-width across road
+    const tx = c.tx, ty = c.ty;                     // road tangent (travel) — stripes run ALONG this
+    const px = -ty, py = tx;                        // across-road perpendicular — stripes tile along this
+    const half = (c.w || 6) / 2;                    // kerb-to-kerb (no overhang → never spills past the road)
+    const ax = tx * (DEPTH / 2), ay = ty * (DEPTH / 2);   // half-length along the road
+    for (let o0 = -half; o0 < half - 1e-6; o0 += STRIPE + GAP) {
+      const oc = Math.min(o0 + STRIPE / 2, half - STRIPE / 2);  // stripe centre across the road
+      const mx = c.x + px * oc, my = c.y + py * oc;
+      const bx = px * (STRIPE / 2), by = py * (STRIPE / 2);     // half-width across road
       const pts = [[mx + ax + bx, my + ay + by], [mx + ax - bx, my + ay - by],
                    [mx - ax - bx, my - ay - by], [mx - ax + bx, my - ay + by]];
       ctx.beginPath();
@@ -1030,14 +1037,26 @@ function junctionHulls(view, vis, junctions) {
     }
     if (inc.length < 3) continue;                       // only real intersections splay into gaps
     const rad = Math.min(20, maxHalf + 4);
+    const centerPad = maxHalf + 1;                       // each arm overruns the centre so arms overlap
+    // Fill the carriageway as the UNION of each incident road's own-width quad (from `rad` back along the
+    // arm to a bit past the centre) plus a centre disc. Each quad is exactly the road's width, so unlike
+    // a convex hull it can never bulge past the road edges into the corners (no overshoot), while the
+    // overlapping quads + disc leave no dark splay between arms (no gap). (msg 3022 → rewritten)
+    const arms = [];
     const pts = [[j.x, j.y]];
     for (const d of inc) {
       const wp = walkAlong(d.e.geom, d.atStart, Math.min(rad, edgeLen(d.e) * 0.5));
       pts.push([wp.x, wp.y]);
+      let dx = wp.x - j.x, dy = wp.y - j.y; const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+      const half = (d.e.width || 4) / 2, px = -dy * half, py = dx * half;
+      const fx = j.x - dx * centerPad, fy = j.y - dy * centerPad;   // a touch past the centre
+      arms.push([[wp.x + px, wp.y + py], [wp.x - px, wp.y - py], [fx - px, fy - py], [fx + px, fy + py]]);
     }
-    const core = convexHull(pts);
+    const disc = [];                                    // centre disc (radius = widest half) seals any wedge
+    for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; disc.push([j.x + Math.cos(a) * maxHalf, j.y + Math.sin(a) * maxHalf]); }
+    const core = convexHull(pts);                       // kept only for sign in-junction culling
     if (core.length < 3) continue;
-    out.push({ core, hull: expandPoly(core, 1.5), lv: lvN ? Math.round(lvSum / lvN) : 0 });
+    out.push({ arms, disc, core, lv: lvN ? Math.round(lvSum / lvN) : 0 });
   }
   return out;
 }
@@ -1053,14 +1072,6 @@ function convexHull(pts) {
   for (let i = p.length - 1; i >= 0; i--) { const pt = p[i]; while (hi.length >= 2 && cross(hi[hi.length - 2], hi[hi.length - 1], pt) <= 0) hi.pop(); hi.push(pt); }
   lo.pop(); hi.pop();
   return lo.concat(hi);
-}
-
-// Push every vertex `d` metres outward from the polygon centroid (so a fill overlaps adjoining strokes).
-function expandPoly(poly, d) {
-  let cx = 0, cy = 0;
-  for (const p of poly) { cx += p[0]; cy += p[1]; }
-  cx /= poly.length; cy /= poly.length;
-  return poly.map((p) => { const dx = p[0] - cx, dy = p[1] - cy, L = Math.hypot(dx, dy) || 1; return [p[0] + (dx / L) * d, p[1] + (dy / L) * d]; });
 }
 
 // Even-odd point-in-polygon (ray cast). poly = [[x,y]…] in world coords.

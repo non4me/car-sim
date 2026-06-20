@@ -3,6 +3,10 @@
 // teleports the map (streaming the destination tiles, then snapping onto the nearest road).
 import { T } from "../i18n.js";
 
+// Fold for matching: strip diacritics + lowercase, so "vaclavske namesti" finds "Václavské náměstí"
+// (NFD splits "č"→"c"+combining-caron etc.; we drop the combining marks U+0300–U+036F). (msg 3024)
+const fold = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
 // dropdown kind label per result kind (Czech fallback; HUD strings localise later)
 const KIND_LABEL = {
   district: ["k_district", "čtvrť"], street: ["k_street", "ulice"],
@@ -23,7 +27,7 @@ export async function loadSearchIndex(base) {
     for (const l of idx.landmarks || []) {
       if (l.name && !seen.has(l.name.toLowerCase())) { items.push({ name: l.name, x: l.x, y: l.y, kind: l.kind }); seen.add(l.name.toLowerCase()); }
     }
-    for (const it of items) it.q = it.name.toLowerCase();
+    for (const it of items) it.q = fold(it.name);
     // places keep their OSM place-kind (city/town/suburb/quarter/…) for City/Trasa minimap ranking;
     // landmarks = the major city-wide objects (station/castle/…) baked into search.json (msg 2784).
     const places = (idx.places || []).map((p) => ({ name: p.name, x: p.x, y: p.y, kind: p.kind }));
@@ -40,7 +44,7 @@ export async function loadSearchIndex(base) {
 
 // rank matches: prefix hits first, then substring; districts before streets; shorter names first.
 function rank(items, text, limit) {
-  const q = text.trim().toLowerCase();
+  const q = fold(text.trim());
   if (q.length < 2) return [];
   const pref = [], sub = [];
   for (const it of items) {
