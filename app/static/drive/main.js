@@ -23,6 +23,14 @@ const FOLLOW_LOOKAHEAD = 14;    // metres ahead on the route the auto-pilot aims
 // stop/give-way signs + the destination, and keeps the right (RHT) lane.
 const A_LAT = 2.6;              // m/s² — comfortable lateral accel → corner speed = sqrt(A_LAT·radius)
 const A_BRK = 3.0;             // m/s² — comfortable deceleration used to brake EARLY (sqrt speed profile)
+// Lane bias through turns (Vlad: on outer turns take a LARGER radius so the car doesn't cross into oncoming).
+const LANE_TURN_MIN = 0.15;    // rad of net LEFT turn ahead before the car widens out to the outer lane
+const LANE_TURN_WIDEN = 1.3;   // extra metres of right-bias added through a sharp left → larger radius
+const LANE_TURN_SHARP = 1.2;   // rad of left turn at which the widen saturates
+const LANE_EDGE_MARGIN = 1.0;  // keep the aim point ≥ this far inside the right kerb
+const LOOK_BEND_SCALE = 1.3;   // shorten the pure-pursuit look-ahead through bends (anti corner-cut)
+const LOOK_BEND_MINFAC = 0.5;  // … but never below this fraction of the speed-scaled look-ahead
+const LOOK_BEND_FLOOR = 3.5;   // m — absolute minimum look-ahead even in the sharpest turn
 
 function pickSpawn(map) {
   const b = map.meta.bounds;
@@ -315,20 +323,22 @@ async function boot() {
     });
   }
 
-  // Total |heading change| (rad) over the next `maxd` m of the route from segment bi @ bt — used to fade
-  // the lane offset through bends (msg 3165).
-  function routeBendAhead(bi, bt, maxd) {
+  // Heading change over the next `maxd` m of the route from segment bi @ bt. Returns BOTH the SIGNED net
+  // turn (+ = left, − = right, in the y-up world frame) — which tells us if the car's RHT lane is the outer
+  // (left turn) or inner (right turn) arc — and the absolute total curvature (for shortening the look-ahead).
+  function routeTurnAhead(bi, bt, maxd) {
     const R = routeLine;
-    if (!R || bi >= R.length - 2) return 0;
+    if (!R || bi >= R.length - 2) return { signed: 0, abs: 0 };
     let px = R[bi][0] + (R[bi + 1][0] - R[bi][0]) * bt, py = R[bi][1] + (R[bi + 1][1] - R[bi][1]) * bt;
     let pdx = R[bi + 1][0] - px, pdy = R[bi + 1][1] - py; const pl = Math.hypot(pdx, pdy) || 1; pdx /= pl; pdy /= pl;
-    let acc = 0, total = 0;
+    let acc = 0, signed = 0, abs = 0;
     for (let j = bi + 1; j < R.length - 1 && acc < maxd; j++) {
       let ndx = R[j + 1][0] - R[j][0], ndy = R[j + 1][1] - R[j][1]; const nl = Math.hypot(ndx, ndy) || 1; ndx /= nl; ndy /= nl;
-      total += Math.abs(Math.atan2(pdx * ndy - pdy * ndx, pdx * ndx + pdy * ndy));
+      const a = Math.atan2(pdx * ndy - pdy * ndx, pdx * ndx + pdy * ndy);   // signed per-vertex turn (+ left)
+      signed += a; abs += Math.abs(a);
       acc += nl; pdx = ndx; pdy = ndy;
     }
-    return total;
+    return { signed, abs };
   }
 
   // Remaining route distance (m) from the car's live progress to the end — for the autopilot ETA (msg 3174).
@@ -368,10 +378,18 @@ async function boot() {
     // of cutting across them at a fixed long distance — was overshooting bends off the road (msg 3165).
     let look = Math.max(4.0, Math.min(13, 2.5 + Math.abs(car.v) * 0.85)), i = bi;
     let px = R[i][0] + (R[i + 1][0] - R[i][0]) * bt, py = R[i][1] + (R[i + 1][1] - R[i][1]) * bt;
-    // keep the RIGHT lane (RHT) on straights, but FADE the offset to the centreline through a bend
-    // (a fixed right offset on a curve pushes the aim point off the carriageway).
-    const bend = routeBendAhead(bi, bt, 12);
-    const laneOff = Math.min(1.6, (rules && rules.width ? rules.width : 7) / 4) * Math.max(0, 1 - bend / 0.5);
+    // Lane bias through a turn. The route polyline is the road CENTRELINE, so on a LEFT turn the car's (RHT)
+    // lane is the OUTER arc: HOLD — and on sharper turns WIDEN — the right offset so the car takes a LARGER
+    // radius and never cuts left over the centreline into oncoming (Vlad: "на внешних поворотах брать больший
+    // радиус"). On a RIGHT turn / straight, fade the offset toward the centreline so a fixed right offset
+    // doesn't push the aim point over the inner kerb on a sharp right (msg 3165). Also shorten the look-ahead
+    // through ANY bend so the aim point doesn't reach past the corner and chord-cut across it.
+    const turn = routeTurnAhead(bi, bt, 14), w = (rules && rules.width ? rules.width : 7);
+    const baseOff = Math.min(1.6, w / 4);
+    const laneOff = turn.signed > LANE_TURN_MIN
+      ? Math.min(w / 2 - LANE_EDGE_MARGIN, baseOff + LANE_TURN_WIDEN * Math.min(1, turn.abs / LANE_TURN_SHARP))
+      : baseOff * Math.max(0, 1 - turn.abs / 0.5);
+    look = Math.max(LOOK_BEND_FLOOR, look * Math.max(LOOK_BEND_MINFAC, 1 - turn.abs / LOOK_BEND_SCALE));
     while (i < R.length - 1) {
       const bx = R[i + 1][0], by = R[i + 1][1], seg = Math.hypot(bx - px, by - py);
       if (seg >= look) {
