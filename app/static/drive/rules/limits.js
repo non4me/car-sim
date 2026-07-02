@@ -7,7 +7,16 @@ export function evalRules(map, car) {
   const M = 25; // metres of slack past the baked bounds before "no road"
   const inBounds = b && car.x > b.minx - M && car.x < b.maxx + M &&
                         car.y > b.miny - M && car.y < b.maxy + M;
-  const ne = map.nearestEdge(car.x, car.y, car.layer ?? null);   // prefer the car's carriageway level (msg 2980)
+  let ne = map.nearestEdge(car.x, car.y, car.layer ?? null);   // prefer the car's carriageway level (msg 2980)
+  // Carriageway-level transition: if our current-level road is now off to the side (>½ width) but a road on
+  // ANOTHER level sits right under us, we've driven onto a ramp/bridge span baked at a different lv while
+  // car.layer hasn't caught up. Without this the layer penalty keeps the old-level segment "winning" at
+  // >½ width for ~22 m → a false "off road" (Mimo vozovku) across the whole bridge approach. Only switches
+  // when the same-level road is genuinely off-surface, so msg 2980 (don't snap to an overpass above/below) holds.
+  if (ne.edge && ne.dist > ne.edge.width / 2 + 1.2) {
+    const raw = map.nearestEdge(car.x, car.y, null);
+    if (raw.edge && raw.dist < ne.dist - 2) ne = raw;   // a clearly-closer other-level road → we're on it
+  }
   const edge = ne.edge, dist = ne.dist;
   const onSurface = edge ? dist <= edge.width / 2 + 1.2 : false;
   const kmh = Math.round(Math.abs(car.v) * 3.6);
