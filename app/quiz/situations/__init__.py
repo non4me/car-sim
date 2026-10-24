@@ -102,7 +102,7 @@ def _sim_i18n(s: dict) -> dict:
 def home(request: Request):
     lang = _ui.resolve_lang(request)
     s = _ui.app_strings(lang)
-    return templates.TemplateResponse("index.html", {
+    return templates.TemplateResponse(request, "index.html", {
         "request": request,
         "base": request.scope.get("root_path", ""),   # mount prefix (/quiz/situations) for template URLs
         "lang": lang, "t": s, "user": auth.current_user(request),  # shared header (msg 2837)

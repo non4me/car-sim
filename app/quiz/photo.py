@@ -258,7 +258,7 @@ def home(request: Request, lang: str | None = None, carsim_lang: str | None = Co
     # carsim_lang is the app-wide cookie set by the shared header (msg 2837); prefer it over the legacy ui_lang
     chosen = detect_lang(lang, carsim_lang or ui_lang, accept_language)
     counts = {k: len(topic_pool(k)) for k in TOPIC_TYPES}
-    resp = templates.TemplateResponse("index.html", ctx(request, chosen, count=len(QUESTIONS), counts=counts))
+    resp = templates.TemplateResponse(request, "index.html", ctx(request, chosen, count=len(QUESTIONS), counts=counts))
     resp.set_cookie("carsim_lang", chosen, max_age=60 * 60 * 24 * 365, samesite="lax")
     resp.set_cookie("ui_lang", chosen, max_age=60 * 60 * 24 * 365, samesite="lax")
     return resp
@@ -270,11 +270,11 @@ def start(request: Request, mode: str = Form("quick"), topic: str = Form("all"),
           accept_language: str | None = Header(default=None)):
     lang = detect_lang(None, carsim_lang or ui_lang, accept_language)
     if not QUESTIONS:
-        return templates.TemplateResponse("index.html", ctx(request, lang, count=0, counts={}))
+        return templates.TemplateResponse(request, "index.html", ctx(request, lang, count=0, counts={}))
     sid = new_session(lang, "survival", topic)   # one game type: lives, no timer (msg 2827)
     s = SESSIONS[sid]
     q = serve_next(s)
-    resp = templates.TemplateResponse("game.html", ctx(request, lang, q=q, hud=hud(s)))
+    resp = templates.TemplateResponse(request, "game.html", ctx(request, lang, q=q, hud=hud(s)))
     resp.set_cookie("sid", sid, max_age=60 * 60 * 6, samesite="lax", httponly=True)
     return resp
 
@@ -287,8 +287,7 @@ def answer(request: Request, choice: int = Form(...), sid: str | None = Cookie(d
     lang = s["lang"]
     q = localized(QUESTION_BY_ID[s["cur_qid"]], lang)
     if s["answered"]:  # ignore double submits
-        return templates.TemplateResponse(
-            "_feedback.html",
+        return templates.TemplateResponse(request, "_feedback.html",
             ctx(request, lang, q=q, hud=hud(s), chosen=choice,
                 is_correct=(choice == q["correct_index"]), timed_out=False,
                 points=0, time_bonus=0, mult=1.0, level_up=False, over=is_over(s)))
@@ -319,8 +318,7 @@ def answer(request: Request, choice: int = Form(...), sid: str | None = Cookie(d
             s["lives"] = max(0, s["lives"] - 1)
 
     level_up = rank_info(s["xp"], lang)["level"] > prev_level
-    return templates.TemplateResponse(
-        "_feedback.html",
+    return templates.TemplateResponse(request, "_feedback.html",
         ctx(request, lang, q=q, hud=hud(s), chosen=choice, is_correct=is_correct,
             timed_out=timed_out, points=points, time_bonus=time_bonus, mult=mult,
             level_up=level_up, over=is_over(s)))
@@ -334,7 +332,7 @@ def next_q(request: Request, sid: str | None = Cookie(default=None)):
     if is_over(s):
         return _render_result(request, s)
     q = serve_next(s)
-    return templates.TemplateResponse("_question.html", ctx(request, s["lang"], q=q, hud=hud(s)))
+    return templates.TemplateResponse(request, "_question.html", ctx(request, s["lang"], q=q, hud=hud(s)))
 
 
 def _render_result(request: Request, s: dict):
@@ -355,7 +353,7 @@ def _render_result(request: Request, s: dict):
         T = strings(lang)
         data["msg"] = (T["result_great"] if pct >= 80
                        else T["result_good"] if pct >= 50 else T["result_meh"])
-    return templates.TemplateResponse("_result.html", ctx(request, lang, r=data))
+    return templates.TemplateResponse(request, "_result.html", ctx(request, lang, r=data))
 
 
 # ---- survival leaderboard ----
@@ -388,4 +386,4 @@ def submit_score(request: Request, name: str = Form(""), sid: str | None = Cooki
         my_ts = ts
     else:
         my_ts = None
-    return templates.TemplateResponse("_leaderboard.html", ctx(request, lang, board=_board_view(my_ts), submitted=True))
+    return templates.TemplateResponse(request, "_leaderboard.html", ctx(request, lang, board=_board_view(my_ts), submitted=True))
